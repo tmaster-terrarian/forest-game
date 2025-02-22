@@ -9,11 +9,18 @@
 
 matrix WorldViewProjection;
 matrix WorldMatrix;
+matrix ViewMatrix;
 matrix InverseWorldMatrix;
 float3 ViewDir;
 float Shininess;
 float SpecularIntensity;
 float Metallic;
+float MatcapIntensity;
+Texture2D MatcapTex;
+sampler2D MatcapSampler = sampler_state
+{
+    Texture = <MatcapTex>;
+};
 
 struct VertexShaderInput
 {
@@ -77,14 +84,17 @@ float4 MainPS(VertexShaderOutput input) : COLOR
     float3 r = normalize(2 * dot(light, normal) * normal - light);
     float3 v = normalize(mul(normalize(ViewDir), WorldMatrix));
 
-    float dotProduct = saturate(dot(r, v));
+    float2 matcapUv = mul((float3x3)ViewMatrix, wn).xy * 0.5 + 0.5;
+    float4 matcapColor = float4(tex2D(MatcapSampler, matcapUv).rgb, 1);
+    float4 matcapAdjusted = lerp(float4(1, 1, 1, 1), matcapColor, Metallic * MatcapIntensity);
 
+    float dotProduct = saturate(dot(r, v));
     float specular = max(pow(dotProduct, 200 * pow(Shininess, 2)), 0) * SpecularIntensity;
 
-    float4 lighting = float4((directionalLight + ambient).rgb, 1);
+    float4 lighting = float4((directionalLight + ambient).rgb, 1) * (matcapAdjusted);
 
     float4 rim = step(0.7, 1 - saturate(dot(wn.xyz, -normalize(ViewDir)))) * 0.5 * HueShift(diff.rgb, -0.1);
-
+    
     return floor((((diff * lighting) + (lighting * 0.3 * (1 - Metallic))) + (ambient * fresnel) + specular + rim) * 8) / 8;
 }
 

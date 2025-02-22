@@ -25,6 +25,8 @@ public static class RenderPipeline
 
     private static int _resolutionScale = 4;
 
+    private static Texture2D _matCap;
+
     public static void LoadContent()
     {
         SpriteBatch = new SpriteBatch(GraphicsDevice);
@@ -41,6 +43,8 @@ public static class RenderPipeline
             Rotation = Quaternion.CreateFromAxisAngle(Vector3.Up, MathHelper.PiOver4),
             Position = new(0, -0.5f, 0),
         };
+
+        _matCap = ContentLoader.Load<Texture2D>("matcaps/Matcap_Metal_04.jpeg")!;
 
         _rt = new(GraphicsDevice, 240, 135, false, SurfaceFormat.Color, DepthFormat.Depth16);
 
@@ -68,6 +72,8 @@ public static class RenderPipeline
         _testEffect = Game1.ContentManager.Load<Effect>("fx/depth");
         _param = _testEffect.Parameters["WorldViewProjection"];
         _param2 = _testEffect.Parameters["WorldMatrix"];
+        _testEffect.Parameters["MatcapTex"]?.SetValue(_matCap);
+        _testEffect.Parameters["MatcapIntensity"]?.SetValue(1f);
     }
 
     public static void Draw(GameTime gameTime)
@@ -106,14 +112,14 @@ public static class RenderPipeline
         //     time / 60 * MathHelper.Pi
         // );
 
-        _testEffect.Parameters["ViewDir"].SetValue(-Vector3.Normalize(new Vector3(
+        _testEffect.Parameters["ViewDir"]?.SetValue(-Vector3.Normalize(new Vector3(
             2.5f * MathF.Cos(time * 0.01f),
             2.5f * MathF.Sin(time * 0.01f),
             2.5f * MathF.Sin(time * 0.01f)
         )));
         _testEffect.Parameters["Shininess"]?.SetValue(0.2f);
         _testEffect.Parameters["SpecularIntensity"]?.SetValue(0.5f);
-        _testEffect.Parameters["Metallic"]?.SetValue(0.5f);
+        _testEffect.Parameters["Metallic"]?.SetValue(1.0f);
 
         foreach (EffectPass pass in _testEffect.CurrentTechnique.Passes)
         {
@@ -126,6 +132,7 @@ public static class RenderPipeline
             _param.SetValue(_cube2.Transform * ViewMatrix * ProjectionMatrix);
             _param2.SetValue(_cube2.Transform);
             _testEffect.Parameters["InverseWorldMatrix"]?.SetValue(Matrix.Invert(_cube2.Transform));
+            _testEffect.Parameters["ViewMatrix"]?.SetValue(Matrix.Invert(ViewMatrix));
             pass.Apply();
             _cube2.Draw(GraphicsDevice);
         }
