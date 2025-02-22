@@ -20,19 +20,19 @@ public static class ContentLoader
             if(_missingPaths.Contains(path))
                 return default;
 
-        // try
-        // {
+        try
+        {
             return LoadInternal<T>(filePath);
-        // }
-        // catch(Exception e)
-        // {
-        //     Console.Error.WriteLine($"data file {path} could not be loaded: {e}");
+        }
+        catch(Exception e)
+        {
+            Console.Error.WriteLine($"data file {path} could not be loaded: {e}");
 
-        //     lock(_missingPaths)
-        //         _missingPaths.Add(path);
+            lock(_missingPaths)
+                _missingPaths.Add(path);
 
-        //     return default;
-        // }
+            return default;
+        }
     }
 
     private static T? LoadInternal<T>(string path) where T : class
