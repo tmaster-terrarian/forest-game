@@ -36,7 +36,7 @@ public static class RenderPipeline
         // _cube2.Transform = Transform.CreateFromMatrix(Matrix.CreateRotationY(MathHelper.PiOver4) * Matrix.CreateTranslation(0.5f, 0, 1));
         _cube2.Transform = new() {
             Rotation = Quaternion.CreateFromAxisAngle(Vector3.Up, MathHelper.PiOver4),
-            Position = new(0.5f, 0, 1),
+            Position = new(0, -0.5f, 0),
         };
 
         _rt = new(GraphicsDevice, 240, 135, false, SurfaceFormat.Color, DepthFormat.Depth16);
@@ -101,24 +101,27 @@ public static class RenderPipeline
         //     time / 60 * MathHelper.Pi
         // );
 
-        _param.SetValue(_cube2.Transform * ViewMatrix * ProjectionMatrix);
-        _param2.SetValue(_cube2.Transform);
         _testEffect.Parameters["ViewDir"].SetValue(-Vector3.Normalize(new Vector3(
             2.5f * MathF.Cos(time * 0.01f),
             2.5f * MathF.Sin(time * 0.01f),
             2.5f * MathF.Sin(time * 0.01f)
         )));
-        _testEffect.Parameters["InverseWorldMatrix"]?.SetValue(Matrix.Invert(_cube2.Transform));
+        _testEffect.Parameters["Shininess"]?.SetValue(0.2f);
+        _testEffect.Parameters["SpecularIntensity"]?.SetValue(0.5f);
+        _testEffect.Parameters["Metallic"]?.SetValue(0.5f);
 
         foreach (EffectPass pass in _testEffect.CurrentTechnique.Passes)
         {
-            // _effect.World = _cube.Transform;
+            // _param.SetValue(_cube.Transform * ViewMatrix * ProjectionMatrix);
+            // _param2.SetValue(_cube.Transform);
+            // _testEffect.Parameters["InverseWorldMatrix"]?.SetValue(Matrix.Invert(_cube.Transform));
             // pass.Apply();
-
             // _cube.Draw(GraphicsDevice);
 
+            _param.SetValue(_cube2.Transform * ViewMatrix * ProjectionMatrix);
+            _param2.SetValue(_cube2.Transform);
+            _testEffect.Parameters["InverseWorldMatrix"]?.SetValue(Matrix.Invert(_cube2.Transform));
             pass.Apply();
-
             _cube2.Draw(GraphicsDevice);
         }
 
