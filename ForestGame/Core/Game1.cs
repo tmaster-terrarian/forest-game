@@ -1,4 +1,5 @@
 ﻿using ForestGame.Core.Graphics;
+using ForestGame.Core.Input;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
@@ -23,7 +24,7 @@ public class Game1 : Game
         ContentManager = Content;
         Content.RootDirectory = "shaders";
 
-        IsMouseVisible = true;
+        IsMouseVisible = false;
     }
 
     protected override void Initialize()
@@ -52,7 +53,13 @@ public class Game1 : Game
 
     protected override void Update(GameTime gameTime)
     {
-        if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
+        InputManager.InputDisabled = !IsActive;
+        InputManager.RefreshKeyboardState();
+        InputManager.RefreshMouseState();
+        InputManager.RefreshGamePadState();
+        InputManager.UpdateTypingInput(gameTime);
+
+        if (InputManager.GetPressed(Buttons.Back) || InputManager.GetPressed(Keys.Escape))
             Exit();
 
         // TODO: Add your update logic here

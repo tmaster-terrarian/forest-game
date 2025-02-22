@@ -1,3 +1,4 @@
+using ForestGame.Core.Input;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
@@ -20,6 +21,8 @@ public static class RenderPipeline
     private static EffectParameter _param;
     private static EffectParameter _param2;
 
+    private static Texture2D? _cursorTex;
+
     private static int _resolutionScale = 4;
 
     public static void LoadContent()
@@ -40,6 +43,8 @@ public static class RenderPipeline
         };
 
         _rt = new(GraphicsDevice, 240, 135, false, SurfaceFormat.Color, DepthFormat.Depth16);
+
+        _cursorTex = ContentLoader.Load<Texture2D>("textures/cursor.png");
 
         ProjectionMatrix = Matrix.CreatePerspectiveFieldOfView(
             MathHelper.ToRadians(95),
@@ -129,6 +134,19 @@ public static class RenderPipeline
 
         CustomDraw.DrawGrid(GraphicsDevice, 16, 1, Matrix.CreateTranslation(new(-8, -8, 0)) * Matrix.CreateRotationX(MathHelper.PiOver2));
 
+        SpriteBatch.Begin(samplerState: SamplerState.PointClamp);
+        {
+            if(_cursorTex is not null)
+            {
+                SpriteBatch.Draw(
+                    _cursorTex,
+                    new Vector2(InputManager.MousePosition.X / _resolutionScale, InputManager.MousePosition.Y / _resolutionScale),
+                    Color.White
+                );
+            }
+        }
+        SpriteBatch.End();
+
         GraphicsDevice.Reset();
 
         SpriteBatch.Begin(samplerState: SamplerState.PointClamp);
@@ -154,11 +172,5 @@ public static class RenderPipeline
             GraphicsDevice.Viewport.AspectRatio,
             0.01f, 300.0f
         );
-    }
-
-    static Vector3 ApplyRotationOnly(Vector3 v, Matrix matrix)
-    {
-        matrix.Decompose(out _, out Quaternion rotationQuat, out _);
-        return Vector3.Transform(v, rotationQuat);
     }
 }
