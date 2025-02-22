@@ -49,7 +49,7 @@ float4 MainPS(VertexShaderOutput input) : COLOR
 
     float4 wn = mul(float4(input.Normal, 0), WorldMatrix);
 
-	return input.Color * float4(float3(1, 1, 0) * dot(wn.xyz, -ViewDir), 1);
+	return input.Color * float4((wn.xyz + 1)/2 * dot(wn.xyz, -ViewDir), 1);
 }
 
 technique BasicColorDrawing

@@ -27,11 +27,17 @@ public static class RenderPipeline
         SpriteBatch = new SpriteBatch(GraphicsDevice);
 
         _cube = ContentLoader.Load<SimpleModel>("cube.obj")!;
-        _cube.Transform = Matrix.CreateTranslation(Vector3.One * -0.5f);
+        _cube.Transform = new() {
+            Position = Vector3.One * -0.5f,
+        };
 
         _cube2 = ContentLoader.Load<SimpleModel>("teapot.obj")!;
         // _cube2.Transform = Matrix.CreateTranslation(Vector3.One * -0.5f) * Matrix.CreateScale(0.5f) * Matrix.CreateTranslation(Vector3.Left * 0.5f);
-        _cube2.Transform = Matrix.CreateRotationY(MathHelper.PiOver4) * Matrix.CreateTranslation(0.5f, 0, 1);
+        // _cube2.Transform = Transform.CreateFromMatrix(Matrix.CreateRotationY(MathHelper.PiOver4) * Matrix.CreateTranslation(0.5f, 0, 1));
+        _cube2.Transform = new() {
+            Rotation = Quaternion.CreateFromAxisAngle(Vector3.Up, MathHelper.PiOver4),
+            Position = new(0.5f, 0, 1),
+        };
 
         _rt = new(GraphicsDevice, 240, 135, false, SurfaceFormat.Color, DepthFormat.Depth16);
 
@@ -87,6 +93,11 @@ public static class RenderPipeline
 
         GraphicsDevice.DepthStencilState = DepthStencilState.Default;
         GraphicsDevice.BlendState = BlendState.Opaque;
+
+        _cube2.Transform.Rotation = Quaternion.CreateFromAxisAngle(
+            Vector3.Up,
+            time / 60 * MathHelper.Pi
+        );
 
         _param.SetValue(_cube2.Transform * ViewMatrix * ProjectionMatrix);
         _param2.SetValue(_cube2.Transform);
