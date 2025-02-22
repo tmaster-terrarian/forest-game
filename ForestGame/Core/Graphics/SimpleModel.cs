@@ -76,13 +76,25 @@ public class SimpleModel
 
             if(line.StartsWith("v "))
             {
-                var split = line.Split(' ', 4, StringSplitOptions.RemoveEmptyEntries);
+                var split = line.Split(' ', 8, StringSplitOptions.RemoveEmptyEntries);
                 // Console.WriteLine($"{line}, {split[1]}, {split[2]}, {split[3]}");
                 v.Add(new Vector3(
                     float.Parse(split[1]),
                     float.Parse(split[2]),
                     float.Parse(split[3])
                 ));
+
+                if(split.Length > 4)
+                {
+                    vc.Add(new Color(
+                        float.Parse(split[4]),
+                        float.Parse(split[5]),
+                        float.Parse(split[6]),
+                        split.Length > 7
+                            ? float.Parse(split[7])
+                            : 1f
+                    ));
+                }
             }
             else if(line.StartsWith("vn "))
             {

@@ -72,6 +72,8 @@ public static class RenderPipeline
         GraphicsDevice.SetRenderTarget(_rt);
         GraphicsDevice.Clear(Color.Black);
 
+        GraphicsDevice.SamplerStates[0] = SamplerState.PointClamp;
+
         var time = (float)gameTime.TotalGameTime.TotalSeconds * 60;
         ViewMatrix = Matrix.CreateLookAt(
             new Vector3(
@@ -94,10 +96,10 @@ public static class RenderPipeline
         GraphicsDevice.DepthStencilState = DepthStencilState.Default;
         GraphicsDevice.BlendState = BlendState.Opaque;
 
-        _cube2.Transform.Rotation = Quaternion.CreateFromAxisAngle(
-            Vector3.Up,
-            time / 60 * MathHelper.Pi
-        );
+        // _cube2.Transform.Rotation = Quaternion.CreateFromAxisAngle(
+        //     Vector3.Up,
+        //     time / 60 * MathHelper.Pi
+        // );
 
         _param.SetValue(_cube2.Transform * ViewMatrix * ProjectionMatrix);
         _param2.SetValue(_cube2.Transform);
