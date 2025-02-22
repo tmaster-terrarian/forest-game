@@ -5,7 +5,7 @@ namespace ForestGame;
 
 public static class ContentLoader
 {
-    private static readonly string _dataPath = Path.Join(
+    private static readonly string _dataPath = Path.Combine(
         AppDomain.CurrentDomain.BaseDirectory,
         "data"
     );
@@ -14,7 +14,7 @@ public static class ContentLoader
 
     public static T? Load<T>(string path) where T : class
     {
-        string filePath = Path.Join(_dataPath, path);
+        string filePath = Path.Combine(_dataPath, path);
 
         lock(_missingPaths)
             if(_missingPaths.Contains(path))

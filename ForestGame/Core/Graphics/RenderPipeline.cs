@@ -31,6 +31,8 @@ public static class RenderPipeline
     {
         SpriteBatch = new SpriteBatch(GraphicsDevice);
 
+        var testModel = GltfModel.Load(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "data/models/untitled.glb"));
+
         _cube = ContentLoader.Load<ObjModel>("cube.obj")!;
         _cube.Transform = new() {
             Position = Vector3.One * -0.5f,
