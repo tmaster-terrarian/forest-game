@@ -12,8 +12,8 @@ public static class RenderPipeline
     public static GraphicsDevice GraphicsDevice { get; set; }
     public static SpriteBatch SpriteBatch { get; private set; }
 
-    private static SimpleModel _cube;
-    private static SimpleModel _cube2;
+    private static ObjModel _cube;
+    private static ObjModel _cube2;
     private static BasicEffect _effect;
     private static RenderTarget2D _rt;
 
@@ -31,12 +31,12 @@ public static class RenderPipeline
     {
         SpriteBatch = new SpriteBatch(GraphicsDevice);
 
-        _cube = ContentLoader.Load<SimpleModel>("cube.obj")!;
+        _cube = ContentLoader.Load<ObjModel>("cube.obj")!;
         _cube.Transform = new() {
             Position = Vector3.One * -0.5f,
         };
 
-        _cube2 = ContentLoader.Load<SimpleModel>("teapot.obj")!;
+        _cube2 = ContentLoader.Load<ObjModel>("teapot.obj")!;
         // _cube2.Transform = Matrix.CreateTranslation(Vector3.One * -0.5f) * Matrix.CreateScale(0.5f) * Matrix.CreateTranslation(Vector3.Left * 0.5f);
         // _cube2.Transform = Transform.CreateFromMatrix(Matrix.CreateRotationY(MathHelper.PiOver4) * Matrix.CreateTranslation(0.5f, 0, 1));
         _cube2.Transform = new() {

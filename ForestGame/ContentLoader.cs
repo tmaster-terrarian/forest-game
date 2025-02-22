@@ -46,9 +46,9 @@ public static class ContentLoader
         {
             return Texture2D.FromFile(Global.GetGraphics(), path) as T;
         }
-        if(typeof(T).IsAssignableTo(typeof(SimpleModel)))
+        if(typeof(T).IsAssignableTo(typeof(Core.Graphics.ObjModel)))
         {
-            return SimpleModel.Load(path) as T;
+            return Core.Graphics.ObjModel.Load(path) as T;
         }
 
         throw new Exception($"the target type {typeof(T).FullName} is not loadable from a file");

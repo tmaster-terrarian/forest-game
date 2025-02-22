@@ -3,7 +3,7 @@ using Microsoft.Xna.Framework.Graphics;
 
 namespace ForestGame.Core.Graphics;
 
-public class SimpleModel
+public class ObjModel
 {
     private int _faceCount;
 
@@ -13,7 +13,7 @@ public class SimpleModel
 
     private VertexPositionColorNormalTexture[] _buffer = [];
 
-    private SimpleModel() { }
+    private ObjModel() { }
 
     public void Build()
     {
@@ -49,7 +49,7 @@ public class SimpleModel
         );
     }
 
-    public static SimpleModel Load(string objPath)
+    public static ObjModel Load(string objPath)
     {
         string path = objPath.EndsWith(".obj") ? objPath : objPath + ".obj";
 
@@ -158,7 +158,7 @@ public class SimpleModel
         m.Faces = [..f];
         m.VertexColors = [..vc];
 
-        SimpleModel mdl = new() {
+        ObjModel mdl = new() {
             Mesh = m,
         };
         mdl.Build();
