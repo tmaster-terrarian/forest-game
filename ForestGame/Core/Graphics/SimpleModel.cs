@@ -72,10 +72,19 @@ public class SimpleModel
             if(line is null)
                 continue;
 
-            if(line.StartsWith("g "))
+            if(line.StartsWith("# ") || line.StartsWith("mtllib ") || line.StartsWith("usemtl "))
+                continue;
+
+            if(line.StartsWith("o "))
             {
                 if(currentMesh is not null)
                 {
+                    if(vc.Count == 0)
+                    {
+                        for(int i = 0; i < v.Count; i++)
+                            vc.Add(Color.White);
+                    }
+
                     currentMesh.Vertices = [..v]; v = [];
                     currentMesh.Normals = [..vn]; vn = [];
                     currentMesh.TexCoords = [..vt]; vt = [];
@@ -89,7 +98,7 @@ public class SimpleModel
             else if(line.StartsWith("v "))
             {
                 var split = line.Split(' ', 4, StringSplitOptions.RemoveEmptyEntries);
-                // Console.WriteLine($"{line}, {split[1]}, {split[2]}, {split[3]}");
+                Console.WriteLine($"{line}, {split[1]}, {split[2]}, {split[3]}");
                 v.Add(new Vector3(
                     float.Parse(split[1]),
                     float.Parse(split[2]),
@@ -99,7 +108,7 @@ public class SimpleModel
             else if(line.StartsWith("vn "))
             {
                 var split = line.Split(' ', 4, StringSplitOptions.RemoveEmptyEntries);
-                // Console.WriteLine($"{line}, {split[1]}, {split[2]}, {split[3]}");
+                Console.WriteLine($"{line}, {split[1]}, {split[2]}, {split[3]}");
                 vn.Add(new Vector3(
                     float.Parse(split[1]),
                     float.Parse(split[2]),
@@ -109,7 +118,7 @@ public class SimpleModel
             else if(line.StartsWith("vc ")) // custom vertex color implementation
             {
                 var split = line.Split(' ', 4, StringSplitOptions.RemoveEmptyEntries);
-                // Console.WriteLine($"{line}, {split[1]}, {split[2]}, {split[3]}");
+                Console.WriteLine($"{line}, {split[1]}, {split[2]}, {split[3]}");
                 vc.Add(new Color(
                     float.Parse(split[1]),
                     float.Parse(split[2]),
@@ -120,7 +129,7 @@ public class SimpleModel
             else if(line.StartsWith("vt "))
             {
                 var split = line.Split(' ', 3, StringSplitOptions.RemoveEmptyEntries);
-                // Console.WriteLine($"{line}, {split[1]}, {split[2]}");
+                Console.WriteLine($"{line}, {split[1]}, {split[2]}");
                 vt.Add(new Vector2(
                     float.Parse(split[1]),
                     float.Parse(split[2])
@@ -129,14 +138,16 @@ public class SimpleModel
             else if(line.StartsWith("f "))
             {
                 var split = line.Split(' ', 4);
-                // Console.WriteLine($"{line}, {split[1]}, {split[2]}, {split[3]}");
+                Console.WriteLine($"{line}, {split[1]}, {split[2]}, {split[3]}");
                 List<int[]> ind = [];
                 for(int i = 1; i < 4; i++)
                 {
                     var split2 = split[i].Split('/', 3);
                     ind.Add([
                         int.Parse(split2[0]) - 1,
-                        split2[1].Length > 0 ? int.Parse(split2[1]) - 1 : -1,
+                        split2[1].Length > 0
+                            ? int.Parse(split2[1]) - 1
+                            : -1,
                         int.Parse(split2[2]) - 1,
                     ]);
                 }
@@ -146,6 +157,12 @@ public class SimpleModel
 
         if(currentMesh != null)
         {
+            if(vc.Count == 0)
+            {
+                for(int i = 0; i < v.Count; i++)
+                    vc.Add(Color.White);
+            }
+
             currentMesh.Vertices = [..v];
             currentMesh.Normals = [..vn];
             currentMesh.TexCoords = [..vt];

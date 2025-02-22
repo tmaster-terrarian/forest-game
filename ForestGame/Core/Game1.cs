@@ -15,11 +15,12 @@ public class Game1 : Game
     private SimpleModel? _cube;
     private SimpleModel? _cube2;
     private BasicEffect _effect;
-    private BasicEffect _effect2;
     private RenderTarget2D _rt;
     private Matrix worldMatrix, worldMatrix2, viewMatrix, projectionMatrix;
 
-    private int Frame = 0;
+    private float Frame = 0;
+
+    private int _resolutionScale = 4;
 
     public Game1()
     {
@@ -31,7 +32,8 @@ public class Game1 : Game
 
     protected override void Initialize()
     {
-        // TODO: Add your initialization logic here
+        Window.AllowUserResizing = true;
+        Window.ClientSizeChanged += OnWindowResize;
 
         base.Initialize();
     }
@@ -46,19 +48,19 @@ public class Game1 : Game
         _spriteBatch = new SpriteBatch(GraphicsDevice);
 
         _cube = ContentLoader.Load<SimpleModel>("cube.obj");
-        _cube2 = ContentLoader.Load<SimpleModel>("cube.obj");
+        _cube2 = ContentLoader.Load<SimpleModel>("cube2.obj");
 
         _rt = new(GraphicsDevice, 240, 135, false, SurfaceFormat.Color, DepthFormat.Depth16);
 
-        worldMatrix = Matrix.CreateTranslation(Vector3.One * -0.5f) * Matrix.CreateScale(10);
-        worldMatrix2 = Matrix.CreateTranslation(Vector3.One * -0.5f) * Matrix.CreateScale(5) * Matrix.CreateTranslation(Vector3.Left * 5);
+        worldMatrix = Matrix.CreateTranslation(Vector3.One * -0.5f);
+        worldMatrix2 = Matrix.CreateTranslation(Vector3.One * -0.5f) * Matrix.CreateScale(0.5f) * Matrix.CreateTranslation(Vector3.Left * 0.5f);
 
         viewMatrix = Matrix.CreateLookAt(new Vector3(0, 0, 50), Vector3.Zero, Vector3.Up);
 
         projectionMatrix = Matrix.CreatePerspectiveFieldOfView(
-            MathHelper.PiOver4,
+            MathHelper.ToRadians(95),
             GraphicsDevice.Viewport.AspectRatio,
-            1.0f, 300.0f
+            0.1f, 300.0f
         );
 
         _effect = new(GraphicsDevice)
@@ -74,20 +76,25 @@ public class Game1 : Game
             VertexColorEnabled = true
         };
 
-        _effect2 = new(GraphicsDevice)
-        {
-            // primitive color
-            AmbientLightColor = new Vector3(0.1f, 0.1f, 0.1f),
-            DiffuseColor = new Vector3(1.0f, 1.0f, 1.0f),
-            SpecularColor = new Vector3(0.25f, 0.25f, 0.25f),
-            SpecularPower = 5.0f,
-            Alpha = 1.0f,
-
-            // The following MUST be enabled if you want to color your vertices
-            VertexColorEnabled = true
-        };
-
         // TODO: use this.Content to load your game content here
+    }
+
+    private void OnWindowResize(object? sender, EventArgs e)
+    {
+        _rt = new(
+            GraphicsDevice,
+            Window.ClientBounds.Width / _resolutionScale,
+            Window.ClientBounds.Height / _resolutionScale,
+            false,
+            SurfaceFormat.Color,
+            DepthFormat.Depth16
+        );
+
+        projectionMatrix = Matrix.CreatePerspectiveFieldOfView(
+            MathHelper.ToRadians(95),
+            GraphicsDevice.Viewport.AspectRatio,
+            1.0f, 300.0f
+        );
     }
 
     protected override void Update(GameTime gameTime)
@@ -107,13 +114,11 @@ public class Game1 : Game
         GraphicsDevice.SetRenderTarget(_rt);
         GraphicsDevice.Clear(Color.Black);
 
-        _spriteBatch.Begin();
-
         viewMatrix = Matrix.CreateLookAt(
             new Vector3(
-                50 * MathF.Cos(Frame * 0.05f),
-                50 * MathF.Sin(Frame * 0.05f),
-                50 * MathF.Sin(Frame * 0.05f)
+                2.5f * MathF.Cos(Frame * 0.05f),
+                2.5f * MathF.Sin(Frame * 0.05f),
+                2.5f * MathF.Sin(Frame * 0.05f)
             ),
             Vector3.Zero,
             Vector3.Up
@@ -144,18 +149,16 @@ public class Game1 : Game
             _cube2?.Draw(GraphicsDevice);
         }
 
-        _spriteBatch.End();
-
         GraphicsDevice.Reset();
 
         _spriteBatch.Begin(samplerState: SamplerState.PointClamp);
         {
-            _spriteBatch.Draw(_rt, Window.ClientBounds with {X = 0, Y = 0}, Color.White);
+            _spriteBatch.Draw(_rt, Vector2.Zero, null, Color.White, 0, Vector2.Zero, _resolutionScale, SpriteEffects.None, 0);
         }
         _spriteBatch.End();
 
         base.Draw(gameTime);
 
-        Frame++;
+        Frame = (float)gameTime.TotalGameTime.TotalSeconds * 60;
     }
 }
