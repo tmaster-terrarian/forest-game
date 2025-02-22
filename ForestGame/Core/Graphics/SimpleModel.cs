@@ -7,7 +7,9 @@ public class SimpleModel
 {
     private int _faceCount;
 
-    public Mesh[] Meshes { get; private set; } = [];
+    public Mesh Mesh { get; private set; }
+
+    public Matrix Transform { get; set; }
 
     private VertexPositionColorNormalTexture[] _buffer = [];
 
@@ -18,23 +20,20 @@ public class SimpleModel
         _faceCount = 0;
         List<VertexPositionColorNormalTexture> buff = [];
 
-        for(int g = 0; g < Meshes.Length; g++)
+        for(int f = 0; f < Mesh.Faces.Length; f++)
         {
-            for(int f = 0; f < Meshes[g].Faces.Length; f++)
+            for(int v = 0; v < Mesh.Faces[f].Length; v++)
             {
-                for(int v = 0; v < Meshes[g].Faces[f].Length; v++)
-                {
-                    // v1/vt1/vn1
-                    var i = Meshes[g].Faces[f][v];
-                    buff.Add(new(
-                        Meshes[g].Vertices[i[0]],
-                        Meshes[g].VertexColors[i[0]],
-                        Meshes[g].Normals[i[2]],
-                        i[1] != -1 ? Meshes[g].TexCoords[i[1]] : Vector2.Zero
-                    ));
-                }
-                _faceCount++;
+                // v1/vt1/vn1
+                var i = Mesh.Faces[f][v];
+                buff.Add(new(
+                    Mesh.Vertices[i[0]],
+                    Mesh.VertexColors[i[0]],
+                    Mesh.Normals[i[2]],
+                    i[1] != -1 ? Mesh.TexCoords[i[1]] : Vector2.Zero
+                ));
             }
+            _faceCount++;
         }
         _buffer = [..buff];
     }
@@ -63,7 +62,7 @@ public class SimpleModel
         List<Color> vc = [];
         List<Mesh> g = [];
 
-        Mesh? currentMesh = null;
+        Mesh m = new();
 
         while(!reader.EndOfStream)
         {
@@ -75,30 +74,10 @@ public class SimpleModel
             if(line.StartsWith("# ") || line.StartsWith("mtllib ") || line.StartsWith("usemtl "))
                 continue;
 
-            if(line.StartsWith("o "))
-            {
-                if(currentMesh is not null)
-                {
-                    if(vc.Count == 0)
-                    {
-                        for(int i = 0; i < v.Count; i++)
-                            vc.Add(Color.White);
-                    }
-
-                    currentMesh.Vertices = [..v]; v = [];
-                    currentMesh.Normals = [..vn]; vn = [];
-                    currentMesh.TexCoords = [..vt]; vt = [];
-                    currentMesh.Faces = [..f]; f = [];
-                    currentMesh.VertexColors = [..vc]; vc = [];
-                }
-
-                currentMesh = new();
-                g.Add(currentMesh);
-            }
-            else if(line.StartsWith("v "))
+            if(line.StartsWith("v "))
             {
                 var split = line.Split(' ', 4, StringSplitOptions.RemoveEmptyEntries);
-                Console.WriteLine($"{line}, {split[1]}, {split[2]}, {split[3]}");
+                // Console.WriteLine($"{line}, {split[1]}, {split[2]}, {split[3]}");
                 v.Add(new Vector3(
                     float.Parse(split[1]),
                     float.Parse(split[2]),
@@ -108,7 +87,7 @@ public class SimpleModel
             else if(line.StartsWith("vn "))
             {
                 var split = line.Split(' ', 4, StringSplitOptions.RemoveEmptyEntries);
-                Console.WriteLine($"{line}, {split[1]}, {split[2]}, {split[3]}");
+                // Console.WriteLine($"{line}, {split[1]}, {split[2]}, {split[3]}");
                 vn.Add(new Vector3(
                     float.Parse(split[1]),
                     float.Parse(split[2]),
@@ -118,7 +97,7 @@ public class SimpleModel
             else if(line.StartsWith("vc ")) // custom vertex color implementation
             {
                 var split = line.Split(' ', 4, StringSplitOptions.RemoveEmptyEntries);
-                Console.WriteLine($"{line}, {split[1]}, {split[2]}, {split[3]}");
+                // Console.WriteLine($"{line}, {split[1]}, {split[2]}, {split[3]}");
                 vc.Add(new Color(
                     float.Parse(split[1]),
                     float.Parse(split[2]),
@@ -129,7 +108,7 @@ public class SimpleModel
             else if(line.StartsWith("vt "))
             {
                 var split = line.Split(' ', 3, StringSplitOptions.RemoveEmptyEntries);
-                Console.WriteLine($"{line}, {split[1]}, {split[2]}");
+                // Console.WriteLine($"{line}, {split[1]}, {split[2]}");
                 vt.Add(new Vector2(
                     float.Parse(split[1]),
                     float.Parse(split[2])
@@ -138,7 +117,7 @@ public class SimpleModel
             else if(line.StartsWith("f "))
             {
                 var split = line.Split(' ', 4);
-                Console.WriteLine($"{line}, {split[1]}, {split[2]}, {split[3]}");
+                // Console.WriteLine($"{line}, {split[1]}, {split[2]}, {split[3]}");
                 List<int[]> ind = [];
                 for(int i = 1; i < 4; i++)
                 {
@@ -155,35 +134,32 @@ public class SimpleModel
             }
         }
 
-        if(currentMesh != null)
+        if(vc.Count < v.Count)
         {
-            if(vc.Count == 0)
-            {
-                for(int i = 0; i < v.Count; i++)
-                    vc.Add(Color.White);
-            }
-
-            currentMesh.Vertices = [..v];
-            currentMesh.Normals = [..vn];
-            currentMesh.TexCoords = [..vt];
-            currentMesh.Faces = [..f];
-            currentMesh.VertexColors = [..vc];
+            while(vc.Count < v.Count)
+                vc.Add(Color.White);
         }
 
+        m.Vertices = [..v];
+        m.Normals = [..vn];
+        m.TexCoords = [..vt];
+        m.Faces = [..f];
+        m.VertexColors = [..vc];
+
         SimpleModel mdl = new() {
-            Meshes = [..g],
+            Mesh = m,
         };
         mdl.Build();
 
         return mdl;
     }
+}
 
-    public class Mesh
-    {
-        public Vector3[] Vertices { get; set; } = [];
-        public Vector3[] Normals { get; set; } = [];
-        public Vector2[] TexCoords { get; set; } = [];
-        public int[][][] Faces { get; set; } = [];
-        public Color[] VertexColors { get; set; } = [];
-    }
+public class Mesh
+{
+    public Vector3[] Vertices { get; set; } = [];
+    public Vector3[] Normals { get; set; } = [];
+    public Vector2[] TexCoords { get; set; } = [];
+    public int[][][] Faces { get; set; } = [];
+    public Color[] VertexColors { get; set; } = [];
 }
