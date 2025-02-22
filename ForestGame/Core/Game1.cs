@@ -1,5 +1,6 @@
 ﻿using ForestGame.Core.Graphics;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 
@@ -10,7 +11,8 @@ public class Game1 : Game
     private static readonly object _graphicsLock = new();
 
     private GraphicsDeviceManager _graphics;
-    private SpriteBatch _spriteBatch;
+
+    public static ContentManager ContentManager { get; private set; }
 
     private float Frame = 0;
 
@@ -18,7 +20,9 @@ public class Game1 : Game
     {
         _graphics = new GraphicsDeviceManager(this);
 
-        Content.RootDirectory = "data";
+        ContentManager = Content;
+        Content.RootDirectory = "shaders";
+
         IsMouseVisible = true;
     }
 

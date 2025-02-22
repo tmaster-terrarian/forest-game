@@ -16,6 +16,10 @@ public static class RenderPipeline
     private static BasicEffect _effect;
     private static RenderTarget2D _rt;
 
+    private static Effect _testEffect;
+    private static EffectParameter _param;
+    private static EffectParameter _param2;
+
     private static int _resolutionScale = 4;
 
     public static void LoadContent()
@@ -26,7 +30,8 @@ public static class RenderPipeline
         _cube.Transform = Matrix.CreateTranslation(Vector3.One * -0.5f);
 
         _cube2 = ContentLoader.Load<SimpleModel>("teapot.obj")!;
-        _cube2.Transform = Matrix.CreateTranslation(Vector3.One * -0.5f) * Matrix.CreateScale(0.5f) * Matrix.CreateTranslation(Vector3.Left * 0.5f);
+        // _cube2.Transform = Matrix.CreateTranslation(Vector3.One * -0.5f) * Matrix.CreateScale(0.5f) * Matrix.CreateTranslation(Vector3.Left * 0.5f);
+        _cube2.Transform = Matrix.CreateRotationY(MathHelper.PiOver4) * Matrix.CreateTranslation(0.5f, 0, 1);
 
         _rt = new(GraphicsDevice, 240, 135, false, SurfaceFormat.Color, DepthFormat.Depth16);
 
@@ -48,6 +53,10 @@ public static class RenderPipeline
             // The following MUST be enabled if you want to color your vertices
             VertexColorEnabled = true
         };
+
+        _testEffect = Game1.ContentManager.Load<Effect>("fx/depth");
+        _param = _testEffect.Parameters["WorldViewProjection"];
+        _param2 = _testEffect.Parameters["WorldMatrix"];
     }
 
     public static void Draw(GameTime gameTime)
@@ -79,22 +88,30 @@ public static class RenderPipeline
         GraphicsDevice.DepthStencilState = DepthStencilState.Default;
         GraphicsDevice.BlendState = BlendState.Opaque;
 
-        // foreach (EffectPass pass in _effect.CurrentTechnique.Passes)
-        // {
-        //     _effect.World = _cube.Transform;
-        //     pass.Apply();
+        _param.SetValue(_cube2.Transform * ViewMatrix * ProjectionMatrix);
+        _param2.SetValue(_cube2.Transform);
+        _testEffect.Parameters["ViewDir"].SetValue(-Vector3.Normalize(new Vector3(
+            2.5f * MathF.Cos(time * 0.01f),
+            2.5f * MathF.Sin(time * 0.01f),
+            2.5f * MathF.Sin(time * 0.01f)
+        )));
+        _testEffect.Parameters["InverseWorldMatrix"]?.SetValue(Matrix.Invert(_cube2.Transform));
 
-        //     _cube.Draw(GraphicsDevice);
+        foreach (EffectPass pass in _testEffect.CurrentTechnique.Passes)
+        {
+            // _effect.World = _cube.Transform;
+            // pass.Apply();
 
-        //     _effect.World = _cube2.Transform;
-        //     pass.Apply();
+            // _cube.Draw(GraphicsDevice);
 
-        //     _cube2.Draw(GraphicsDevice);
-        // }
+            pass.Apply();
+
+            _cube2.Draw(GraphicsDevice);
+        }
 
         CustomDraw.DrawGizmo(GraphicsDevice, Vector3.Zero);
 
-        CustomDraw.DrawGrid(GraphicsDevice, 16, 1, Matrix.CreateTranslation(Vector3.One * -0.5f) * Matrix.CreateTranslation(new(-8, -8, 0)));
+        CustomDraw.DrawGrid(GraphicsDevice, 16, 1, Matrix.CreateTranslation(new(-8, -8, 0)) * Matrix.CreateRotationX(MathHelper.PiOver2));
 
         GraphicsDevice.Reset();
 
@@ -121,5 +138,11 @@ public static class RenderPipeline
             GraphicsDevice.Viewport.AspectRatio,
             0.01f, 300.0f
         );
+    }
+
+    static Vector3 ApplyRotationOnly(Vector3 v, Matrix matrix)
+    {
+        matrix.Decompose(out _, out Quaternion rotationQuat, out _);
+        return Vector3.Transform(v, rotationQuat);
     }
 }

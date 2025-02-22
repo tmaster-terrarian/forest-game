@@ -1,0 +1,20 @@
+{
+    "references": [],
+    "content": {
+        "effects": {
+            "path": "fx/*.fx",
+            "recursive": "True",
+            "action": "build",
+            "importer": "EffectImporter",
+            "processor": "EffectProcessor",
+            "processorParam": {
+                "Debug": "Auto"
+            }
+        },
+        "hlsl": {
+            "path": "fx/*.hlsl",
+            "recursive": "True",
+            "action": "copy"
+        }
+    }
+}

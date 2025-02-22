@@ -9,7 +9,7 @@ public class SimpleModel
 
     public Mesh Mesh { get; private set; }
 
-    public Matrix Transform { get; set; }
+    public Matrix Transform { get; set; } = Matrix.Identity;
 
     private VertexPositionColorNormalTexture[] _buffer = [];
 
