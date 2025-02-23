@@ -166,12 +166,3 @@ public class ObjModel
         return mdl;
     }
 }
-
-public class Mesh
-{
-    public Vector3[] Vertices { get; set; } = [];
-    public Vector3[] Normals { get; set; } = [];
-    public Vector2[] TexCoords { get; set; } = [];
-    public int[][][] Faces { get; set; } = [];
-    public Color[] VertexColors { get; set; } = [];
-}

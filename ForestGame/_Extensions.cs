@@ -23,4 +23,29 @@ public static class _Extensions
             matrix4X4.M41, matrix4X4.M42, matrix4X4.M43, matrix4X4.M44
         );
     }
+
+    public static Color ToXna(this Assimp.Color4D color)
+    {
+        return new(color.R, color.G, color.B, color.A);
+    }
+
+    public static Color ToXna(this Assimp.Color3D color)
+    {
+        return new(color.R, color.G, color.B, 1f);
+    }
+
+    public static Vector3 ToXna(this Assimp.Vector3D vector)
+    {
+        return new(vector.X, vector.Y, vector.Z);
+    }
+
+    public static Assimp.Vector2D Truncate(this Assimp.Vector3D vector)
+    {
+        return new(vector.X, vector.Y);
+    }
+
+    public static Vector2 ToXna(this Assimp.Vector2D vector)
+    {
+        return new(vector.X, vector.Y);
+    }
 }

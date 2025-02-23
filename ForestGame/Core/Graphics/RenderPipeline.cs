@@ -14,12 +14,15 @@ public static class RenderPipeline
 
     private static ObjModel _cube;
     private static ObjModel _cube2;
+    private static GltfModel _gltfCube;
     private static BasicEffect _effect;
     private static RenderTarget2D _rt;
 
     private static Effect _testEffect;
-    private static EffectParameter _param;
-    private static EffectParameter _param2;
+    private static EffectParameter _worldParam;
+    private static EffectParameter _viewParam;
+    private static EffectParameter _projectionParam;
+    private static EffectParameter _inverseViewParam;
 
     private static Texture2D? _cursorTex;
 
@@ -31,7 +34,7 @@ public static class RenderPipeline
     {
         SpriteBatch = new SpriteBatch(GraphicsDevice);
 
-        var testModel = GltfModel.Load(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "data/models/untitled.glb"));
+        _gltfCube = GltfModel.Load(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "data/models/fucking-teapot.glb"));
 
         _cube = ContentLoader.Load<ObjModel>("cube.obj")!;
         _cube.Transform = new() {
@@ -72,8 +75,10 @@ public static class RenderPipeline
         };
 
         _testEffect = Game1.ContentManager.Load<Effect>("fx/depth");
-        _param = _testEffect.Parameters["WorldViewProjection"];
-        _param2 = _testEffect.Parameters["WorldMatrix"];
+        _worldParam = _testEffect.Parameters["WorldMatrix"];
+        _viewParam = _testEffect.Parameters["ViewMatrix"];
+        _projectionParam = _testEffect.Parameters["ProjectionMatrix"];
+        _inverseViewParam = _testEffect.Parameters["InverseViewMatrix"];
         _testEffect.Parameters["MatcapTex"]?.SetValue(_matCap);
         _testEffect.Parameters["MatcapIntensity"]?.SetValue(1f);
     }
@@ -131,13 +136,22 @@ public static class RenderPipeline
             // pass.Apply();
             // _cube.Draw(GraphicsDevice);
 
-            _param.SetValue(_cube2.Transform * ViewMatrix * ProjectionMatrix);
-            _param2.SetValue(_cube2.Transform);
-            _testEffect.Parameters["InverseWorldMatrix"]?.SetValue(Matrix.Invert(_cube2.Transform));
-            _testEffect.Parameters["ViewMatrix"]?.SetValue(Matrix.Invert(ViewMatrix));
+            _worldParam.SetValue(_cube2.Transform);
+            _viewParam.SetValue(ViewMatrix);
+            _projectionParam.SetValue(ProjectionMatrix);
+
+            _inverseViewParam.SetValue(Matrix.Invert(ViewMatrix));
+            // _testEffect.Parameters["WorldViewProjection"]?.SetValue(_cube2.Transform * ViewMatrix * ProjectionMatrix);
+
             pass.Apply();
-            _cube2.Draw(GraphicsDevice);
+            // _cube2.Draw(GraphicsDevice);
         }
+
+        _viewParam?.SetValue(ViewMatrix);
+        _projectionParam?.SetValue(ProjectionMatrix);
+        _inverseViewParam.SetValue(Matrix.Invert(ViewMatrix));
+
+        _gltfCube.Draw(GraphicsDevice, Matrix.Identity, _testEffect);
 
         CustomDraw.DrawGizmo(GraphicsDevice, Vector3.Zero);
 

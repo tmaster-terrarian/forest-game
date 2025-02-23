@@ -7,10 +7,11 @@
     #define PS_SHADERMODEL ps_4_0_level_9_1
 #endif
 
-matrix WorldViewProjection;
 matrix WorldMatrix;
 matrix ViewMatrix;
-matrix InverseWorldMatrix;
+matrix InverseViewMatrix;
+matrix ProjectionMatrix;
+matrix WorldViewProjection;
 float3 ViewDir;
 float Shininess;
 float SpecularIntensity;
@@ -32,7 +33,7 @@ struct VertexShaderInput
 
 struct VertexShaderOutput
 {
-    float4 Position : SV_POSITION;
+    float4 Position : POSITION0;
     float4 WorldPosition : TEXCOORD1;
     float4 Color : COLOR0;
     float3 Normal : TEXCOORD2;
@@ -44,7 +45,7 @@ VertexShaderOutput MainVS(in VertexShaderInput input)
     VertexShaderOutput output = (VertexShaderOutput)0;
 
     // output.Position = mul(input.Position, WorldViewProjection);
-    output.Position = mul(input.Position, WorldViewProjection);
+    output.Position = mul(mul(mul(input.Position, WorldMatrix), ViewMatrix), ProjectionMatrix);
     output.WorldPosition = mul(input.Position, WorldMatrix);
     output.Color = input.Color;
     output.Normal = input.Normal;
@@ -84,7 +85,7 @@ float4 MainPS(VertexShaderOutput input) : COLOR
     float3 r = normalize(2 * dot(light, normal) * normal - light);
     float3 v = normalize(mul(normalize(ViewDir), WorldMatrix));
 
-    float2 matcapUv = mul((float3x3)ViewMatrix, wn).xy * 0.5 + 0.5;
+    float2 matcapUv = mul((float3x3)InverseViewMatrix, wn).xy * 0.5 + 0.5;
     float4 matcapColor = float4(tex2D(MatcapSampler, matcapUv).rgb, 1);
     float4 matcapAdjusted = lerp(float4(1, 1, 1, 1), matcapColor, Metallic * MatcapIntensity);
 
