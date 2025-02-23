@@ -7,10 +7,10 @@ public static class _Extensions
     public static Matrix ToXna(this Assimp.Matrix4x4 matrix4X4)
     {
         return new(
-            matrix4X4.A1, matrix4X4.A2, matrix4X4.A3, matrix4X4.A4,
-            matrix4X4.B1, matrix4X4.B2, matrix4X4.B3, matrix4X4.B4,
-            matrix4X4.C1, matrix4X4.C2, matrix4X4.C3, matrix4X4.C4,
-            matrix4X4.D1, matrix4X4.D2, matrix4X4.D3, matrix4X4.D4
+            matrix4X4.A1, matrix4X4.B1, matrix4X4.C1, matrix4X4.D1,
+            matrix4X4.A2, matrix4X4.B2, matrix4X4.C2, matrix4X4.D2,
+            matrix4X4.A3, matrix4X4.B3, matrix4X4.C3, matrix4X4.D3,
+            matrix4X4.A4, matrix4X4.B4, matrix4X4.C4, matrix4X4.D4
         );
     }
 

@@ -180,10 +180,10 @@ public class GltfModel
     private static Matrix GetNodeTransform(Node node)
     {
         var matrix = node.Transform.ToXna();
-        // if(node.Parent is not null)
-        // {
-        //     matrix = matrix * GetNodeTransform(node.Parent);
-        // }
+        if(node.Parent is not null)
+        {
+            matrix *= GetNodeTransform(node.Parent);
+        }
         return matrix;
     }
 
