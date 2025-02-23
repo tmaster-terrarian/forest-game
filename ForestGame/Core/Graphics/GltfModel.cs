@@ -159,17 +159,10 @@ public class GltfModel
         {
             foreach(var pass in effect.CurrentTechnique.Passes)
             {
-                GetNodeTransform(mesh.Node).Decompose(out var scale, out var rot, out var pos);
-                Transform transform = new() {
-                    Scale = scale,
-                    Rotation = rot,
-                    Position = pos,
-                };
-
-                wParam?.SetValue(Transform.Matrix * GetNodeTransform(mesh.Node));
+                wParam?.SetValue(GetNodeTransform(mesh.Node) * Transform.Matrix * world);
                 pass.Apply();
 
-                graphicsDevice.DrawUserPrimitives<VertexPositionColorNormalTexture>(
+                graphicsDevice.DrawUserPrimitives(
                     Microsoft.Xna.Framework.Graphics.PrimitiveType.TriangleList,
                     mesh.Buffer,
                     0,

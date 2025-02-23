@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Input;
 
-namespace ForestGame.Core.Input;
+namespace ForestGame.Core;
 
-public static class InputManager
+public static class Input
 {
     private static KeyboardState currentKeyboardState;
     private static KeyboardState previousKeyboardState;
@@ -20,10 +20,11 @@ public static class InputManager
 
     public static KeyboardState KeyboardState => currentKeyboardState;
 
-    public static Point MousePosition => new(
-        Mouse.GetState().X,
-        Mouse.GetState().Y
-    );
+    private static Point _oldMousePos;
+
+    public static Point MousePosition => InputDisabled
+        ? _oldMousePos
+        : Mouse.GetState().Position;
 
     public static KeyboardState RefreshKeyboardState()
     {
@@ -70,6 +71,11 @@ public static class InputManager
     {
         previousMouseState = currentMouseState;
         currentMouseState = Mouse.GetState();
+
+        if(!InputDisabled)
+        {
+            _oldMousePos = currentMouseState.Position;
+        }
 
         return currentMouseState;
     }

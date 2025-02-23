@@ -4,7 +4,7 @@ using System.Linq;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Input;
 
-namespace ForestGame.Core.Input;
+namespace ForestGame.Core;
 
 public abstract class MappedInput
 {
@@ -18,11 +18,11 @@ public abstract class MappedInput
     {
         public Keys Key => key;
 
-        public override bool IsDown => InputManager.GetDown(key);
+        public override bool IsDown => Input.GetDown(key);
 
-        public override bool Pressed => InputManager.GetPressed(key);
+        public override bool Pressed => Input.GetPressed(key);
 
-        public override bool Released => InputManager.GetReleased(key);
+        public override bool Released => Input.GetReleased(key);
 
         public override string ToString()
         {
@@ -34,11 +34,11 @@ public abstract class MappedInput
     {
         public Buttons Button => button;
 
-        public override bool IsDown => InputManager.GetDown(button, playerIndex);
+        public override bool IsDown => Input.GetDown(button, playerIndex);
 
-        public override bool Pressed => InputManager.GetPressed(button, playerIndex);
+        public override bool Pressed => Input.GetPressed(button, playerIndex);
 
-        public override bool Released => InputManager.GetReleased(button, playerIndex);
+        public override bool Released => Input.GetReleased(button, playerIndex);
 
         public override string ToString()
         {
@@ -50,11 +50,11 @@ public abstract class MappedInput
     {
         public MouseButtons MouseButton => mouseButton;
 
-        public override bool IsDown => InputManager.GetDown(mouseButton);
+        public override bool IsDown => Input.GetDown(mouseButton);
 
-        public override bool Pressed => InputManager.GetPressed(mouseButton);
+        public override bool Pressed => Input.GetPressed(mouseButton);
 
-        public override bool Released => InputManager.GetReleased(mouseButton);
+        public override bool Released => Input.GetReleased(mouseButton);
 
         public override string ToString()
         {

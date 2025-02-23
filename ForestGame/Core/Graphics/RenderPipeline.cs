@@ -1,4 +1,3 @@
-using ForestGame.Core.Input;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
@@ -34,7 +33,7 @@ public static class RenderPipeline
     {
         SpriteBatch = new SpriteBatch(GraphicsDevice);
 
-        _gltfCube = GltfModel.Load(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "data/models/fucking-teapot.glb"));
+        _gltfCube = ContentLoader.Load<GltfModel>("models/fucking-teapot.glb")!;
 
         _cube = ContentLoader.Load<ObjModel>("cube.obj")!;
         _cube.Transform = new() {
@@ -74,7 +73,7 @@ public static class RenderPipeline
             VertexColorEnabled = true
         };
 
-        _testEffect = Game1.ContentManager.Load<Effect>("fx/depth");
+        _testEffect = ContentLoader.Load<Effect>("fx/depth")!;
         _worldParam = _testEffect.Parameters["WorldMatrix"];
         _viewParam = _testEffect.Parameters["ViewMatrix"];
         _projectionParam = _testEffect.Parameters["ProjectionMatrix"];
@@ -153,9 +152,9 @@ public static class RenderPipeline
 
         _gltfCube.Draw(GraphicsDevice, Matrix.Identity, _testEffect);
 
-        CustomDraw.DrawGizmo(GraphicsDevice, Vector3.Zero);
+        GraphicsUtil.DrawGizmo(GraphicsDevice, Vector3.Zero);
 
-        CustomDraw.DrawGrid(GraphicsDevice, 16, 1, Matrix.CreateTranslation(new(-8, -8, 0)) * Matrix.CreateRotationX(MathHelper.PiOver2));
+        GraphicsUtil.DrawGrid(GraphicsDevice, 16, 1, Matrix.CreateTranslation(new(-8, -8, 0)) * Matrix.CreateRotationX(MathHelper.PiOver2));
 
         SpriteBatch.Begin(samplerState: SamplerState.PointClamp);
         {
@@ -163,7 +162,7 @@ public static class RenderPipeline
             {
                 SpriteBatch.Draw(
                     _cursorTex,
-                    new Vector2(InputManager.MousePosition.X / _resolutionScale, InputManager.MousePosition.Y / _resolutionScale),
+                    new Vector2(Input.MousePosition.X / _resolutionScale, Input.MousePosition.Y / _resolutionScale),
                     Color.White
                 );
             }

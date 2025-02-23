@@ -1,8 +1,5 @@
 ﻿using ForestGame.Core.Graphics;
-using ForestGame.Core.Input;
 using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Content;
-using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 
 namespace ForestGame.Core;
@@ -13,15 +10,11 @@ public class Game1 : Game
 
     private GraphicsDeviceManager _graphics;
 
-    public static ContentManager ContentManager { get; private set; }
-
     private float Frame = 0;
 
     public Game1()
     {
         _graphics = new GraphicsDeviceManager(this);
-
-        ContentManager = Content;
         Content.RootDirectory = "shaders";
 
         IsMouseVisible = false;
@@ -29,40 +22,40 @@ public class Game1 : Game
 
     protected override void Initialize()
     {
+        ContentLoader.Initialize(Content, GraphicsDevice);
+
+        Window.ClientSizeChanged += (object? sender, EventArgs e) => {
+            RenderPipeline.OnWindowResize(Window);
+        };
         Window.AllowUserResizing = true;
-        Window.ClientSizeChanged += OnWindowResize;
+
+        Locale.Configure(new() {
+            RelativeDataPath = "data/lang",
+            SearchRecursively = false,
+        });
+        Locale.CurrentLanguage = "en-us";
+
+        // StageManager.Initialize();
 
         base.Initialize();
     }
 
     protected override void LoadContent()
     {
-        Global.SetGraphicsDelegate(() => {
-            lock(_graphicsLock)
-                return this.GraphicsDevice;
-        });
-
         RenderPipeline.GraphicsDevice = GraphicsDevice;
         RenderPipeline.LoadContent();
     }
 
-    private void OnWindowResize(object? sender, EventArgs e)
-    {
-        RenderPipeline.OnWindowResize(Window);
-    }
-
     protected override void Update(GameTime gameTime)
     {
-        InputManager.InputDisabled = !IsActive;
-        InputManager.RefreshKeyboardState();
-        InputManager.RefreshMouseState();
-        InputManager.RefreshGamePadState();
-        InputManager.UpdateTypingInput(gameTime);
+        Input.InputDisabled = !IsActive;
+        Input.RefreshKeyboardState();
+        Input.RefreshMouseState();
+        Input.RefreshGamePadState();
+        Input.UpdateTypingInput(gameTime);
 
-        if (InputManager.GetPressed(Buttons.Back) || InputManager.GetPressed(Keys.Escape))
+        if (Input.GetPressed(Buttons.Back) || Input.GetPressed(Keys.Escape))
             Exit();
-
-        // TODO: Add your update logic here
 
         base.Update(gameTime);
     }

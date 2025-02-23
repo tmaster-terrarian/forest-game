@@ -3,13 +3,13 @@ using Microsoft.Xna.Framework.Graphics;
 
 namespace ForestGame.Core.Graphics;
 
-public static class CustomDraw
+public static class GraphicsUtil
 {
     private static BasicEffect _basicEffect;
     private static VertexPositionColor[] _gridVertices;
     private static bool _isInitialized = false;
 
-    static CustomDraw()
+    static GraphicsUtil()
     {
         _basicEffect = new(RenderPipeline.GraphicsDevice)
         {
