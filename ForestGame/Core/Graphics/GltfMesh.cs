@@ -6,7 +6,7 @@ namespace ForestGame.Core.Graphics;
 
 public class GltfMesh
 {
-    public List<VertexPositionColorNormalTexture> Buffer { get; } = [];
+    public VertexPositionColorNormalTexture[] Buffer { get; set; } = [];
 
     public Node Node { get; set; }
 }

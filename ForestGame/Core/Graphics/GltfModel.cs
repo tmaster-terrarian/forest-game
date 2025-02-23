@@ -109,11 +109,14 @@ public class GltfModel
                 GltfMesh m = new();
                 _meshes.Add(m);
 
+                m.Buffer = new VertexPositionColorNormalTexture[node.MeshIndices.Sum(i =>
+                    Scene.Meshes[i].GetIndices().Length)];
+
+                int i = 0;
+
                 foreach(var meshIndex in node.MeshIndices)
                 {
                     var mesh = Scene.Meshes[meshIndex];
-
-                    List<VertexPositionColorNormalTexture> buff = [];
 
                     foreach(var vert in mesh.GetIndices() ?? [])
                     {
@@ -129,15 +132,15 @@ public class GltfModel
                             color = mesh.VertexColorChannels[0][vert].ToXna();
                         }
 
-                        buff.Add(new(
+                        m.Buffer[i] = new(
                             mesh.Vertices[vert].ToXna(),
                             color ?? Color.Black,
                             Vector3.Normalize(mesh.Normals[vert].ToXna()),
                             texcoord ?? Vector2.Zero
-                        ));
+                        );
+                        i++;
                     }
 
-                    m.Buffer.AddRange(buff);
                     m.Node = node;
                 }
             }
@@ -166,11 +169,11 @@ public class GltfModel
                 wParam?.SetValue(Transform.Matrix * GetNodeTransform(mesh.Node));
                 pass.Apply();
 
-                graphicsDevice.DrawUserPrimitives(
+                graphicsDevice.DrawUserPrimitives<VertexPositionColorNormalTexture>(
                     Microsoft.Xna.Framework.Graphics.PrimitiveType.TriangleList,
-                    [..mesh.Buffer],
+                    mesh.Buffer,
                     0,
-                    mesh.Buffer.Count / 3,
+                    mesh.Buffer.Length / 3,
                     VertexPositionColorNormalTexture.VertexDeclaration
                 );
             }
