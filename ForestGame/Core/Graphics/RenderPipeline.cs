@@ -50,7 +50,7 @@ public static class RenderPipeline
 
         _matCap = ContentLoader.Load<Texture2D>("matcaps/Matcap_Metal_04.jpeg")!;
 
-        _rt = new(GraphicsDevice, 240, 135, false, SurfaceFormat.Color, DepthFormat.Depth16);
+        _rt = new(GraphicsDevice, 240, 135, false, SurfaceFormat.Color, DepthFormat.Depth24Stencil8);
 
         _cursorTex = ContentLoader.Load<Texture2D>("textures/cursor.png");
 
@@ -186,7 +186,7 @@ public static class RenderPipeline
             window.ClientBounds.Height / _resolutionScale,
             false,
             SurfaceFormat.Color,
-            DepthFormat.Depth16
+            DepthFormat.Depth24Stencil8
         );
 
         ProjectionMatrix = Matrix.CreatePerspectiveFieldOfView(

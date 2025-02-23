@@ -72,7 +72,8 @@ float4 MainPS(VertexShaderOutput input) : COLOR
     float4 wn = mul(float4(input.Normal, 0), WorldMatrix);
 
     // float4 ambient = float4(0.25, 0.25, 0.35, 0);
-    float4 ambient = lerp(float4(0.1, 0.1, 0.12, 0), float4(0.25, 0.25, 0.35, 0), (wn.y + 1)/2);
+    float4 ambientColor = float4(0.25, 0.25, 0.35, 0);
+    float4 ambient = lerp(ambientColor * 0.4, ambientColor, (wn.y + 1)/2);
 
     float3 lightDir = float3(1, -1, 1);
 
@@ -85,18 +86,20 @@ float4 MainPS(VertexShaderOutput input) : COLOR
     float3 r = normalize(2 * dot(light, normal) * normal - light);
     float3 v = normalize(mul(normalize(ViewDir), WorldMatrix));
 
+    float specularDotProduct = saturate(dot(r, v));
+    float inverseSpecularDotProduct = saturate(-dot(r, v));
+    float specular = max(pow(specularDotProduct, 200 * pow(Shininess, 2)), 0) * SpecularIntensity;
+    float4 backLight = (max(pow(inverseSpecularDotProduct, 80 * pow(Shininess, 2)), 0) * SpecularIntensity * Metallic) * ambientColor;
+
     float2 matcapUv = mul((float3x3)InverseViewMatrix, wn).xy * 0.5 + 0.5;
     float4 matcapColor = float4(tex2D(MatcapSampler, matcapUv).rgb, 1);
     float4 matcapAdjusted = lerp(float4(1, 1, 1, 1), matcapColor, Metallic * MatcapIntensity);
 
-    float dotProduct = saturate(dot(r, v));
-    float specular = max(pow(dotProduct, 200 * pow(Shininess, 2)), 0) * SpecularIntensity;
-
     float4 lighting = float4((directionalLight + ambient).rgb, 1) * (matcapAdjusted);
 
     float4 rim = step(0.7, 1 - saturate(dot(wn.xyz, -normalize(ViewDir)))) * 0.5 * HueShift(diff.rgb, -0.1);
-    
-    return floor((((diff * lighting) + (lighting * 0.3 * (1 - Metallic))) + (ambient * fresnel) + specular + rim) * 8) / 8;
+
+    return floor((((diff * lighting) + (lighting * 0.3 * (1 - Metallic))) + (ambient * fresnel) + specular + backLight + rim) * 8) / 8;
 }
 
 technique BasicColorDrawing
