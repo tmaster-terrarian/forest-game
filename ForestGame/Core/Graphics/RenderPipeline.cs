@@ -49,6 +49,7 @@ public static class RenderPipeline
         };
 
         _matCap = ContentLoader.Load<Texture2D>("matcaps/Matcap_Metal_04.jpeg")!;
+        // _matCap = ContentLoader.Load<Texture2D>("matcaps/Matcap_Metal_02.png")!;
 
         _rt = new(GraphicsDevice, 240, 135, false, SurfaceFormat.Color, DepthFormat.Depth24Stencil8);
 
@@ -80,6 +81,7 @@ public static class RenderPipeline
         _inverseViewParam = _testEffect.Parameters["InverseViewMatrix"];
         _testEffect.Parameters["MatcapTex"]?.SetValue(_matCap);
         _testEffect.Parameters["MatcapIntensity"]?.SetValue(1f);
+        _testEffect.Parameters["MatcapPower"]?.SetValue(2f);
     }
 
     public static void Draw(GameTime gameTime)
@@ -123,9 +125,8 @@ public static class RenderPipeline
             2.5f * MathF.Sin(time * 0.01f),
             2.5f * MathF.Sin(time * 0.01f)
         )));
-        _testEffect.Parameters["Shininess"]?.SetValue(0.2f);
-        _testEffect.Parameters["SpecularIntensity"]?.SetValue(0.5f);
-        _testEffect.Parameters["Metallic"]?.SetValue(1.0f);
+        _testEffect.Parameters["Shininess"]?.SetValue(0.35f);
+        _testEffect.Parameters["Metallic"]?.SetValue(1f);
 
         foreach (EffectPass pass in _testEffect.CurrentTechnique.Passes)
         {
@@ -139,7 +140,7 @@ public static class RenderPipeline
             _viewParam.SetValue(ViewMatrix);
             _projectionParam.SetValue(ProjectionMatrix);
 
-            _inverseViewParam.SetValue(Matrix.Invert(ViewMatrix));
+            _inverseViewParam?.SetValue(Matrix.Invert(ViewMatrix));
             // _testEffect.Parameters["WorldViewProjection"]?.SetValue(_cube2.Transform * ViewMatrix * ProjectionMatrix);
 
             pass.Apply();
@@ -148,7 +149,7 @@ public static class RenderPipeline
 
         _viewParam?.SetValue(ViewMatrix);
         _projectionParam?.SetValue(ProjectionMatrix);
-        _inverseViewParam.SetValue(Matrix.Invert(ViewMatrix));
+        _inverseViewParam?.SetValue(Matrix.Invert(ViewMatrix));
 
         _gltfCube.Draw(GraphicsDevice, Matrix.Identity, _testEffect);
 
