@@ -46,4 +46,8 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>
+
+  <ItemGroup>
+    <ClCompile Include="shaders\fx\metallicsmoothness.fx" />
+  </ItemGroup>
 </Project>
