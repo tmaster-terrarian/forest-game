@@ -1,4 +1,5 @@
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 
 namespace ForestGame.Core.Graphics;
@@ -19,6 +20,14 @@ public class Camera
     private float _sensitivity = 0.5f;
     private float _speed = 2f;
     private Vector3 _localVelocity;
+
+    private float[][] floats = [
+        [0.1f, 0.3f, 0.7f, 0.7f, 0.3f],
+        [0.3f, 0.7f, 0.9f, 0.9f, 0.7f],
+        [0.7f, 0.9f, 1.0f, 1.0f, 0.9f],
+        [0.3f, 0.7f, 0.9f, 1.0f, 0.9f],
+        [0.1f, 0.3f, 0.7f, 0.9f, 0.7f]
+    ];
 
     public Camera()
     {
@@ -47,6 +56,19 @@ public class Camera
         //     -MathHelper.WrapAngle(pitch),
         //     0
         // );
+
+        int tz = MathHelper.Clamp(MathUtil.FloorToInt(Transform.Position.Z - 0.5f), 0, 4);
+        int tx = MathHelper.Clamp(MathUtil.FloorToInt(Transform.Position.X - 0.5f), 0, 4);
+        int ntz = MathHelper.Clamp(MathUtil.FloorToInt(Transform.Position.Z - 0.5f + 1), 0, 4);
+        int ntx = MathHelper.Clamp(MathUtil.FloorToInt(Transform.Position.X - 0.5f + 1), 0, 4);
+        float fz = MathUtil.SmoothCos((Transform.Position.Z - 0.5f) % 1f, 0.9f);
+        float fx = MathUtil.SmoothCos((Transform.Position.X - 0.5f) % 1f, 0.9f);
+
+        float hz1 = MathHelper.Lerp(floats[tz][tx], floats[ntz][tx], fz);
+        float hz2 = MathHelper.Lerp(floats[tz][ntx], floats[ntz][ntx], fz);
+        float height = MathHelper.Lerp(hz1, hz2, fx);
+
+        // float height = floats[tz][tx] + floats[ntz][tx] * fz + floats[tz][ntx] * fx + floats[ntz][ntx] * fz * fx;
 
         if(Input.MousePosition != _lastMousePos)
         {
@@ -77,5 +99,25 @@ public class Camera
         }
 
         Transform.Position += Vector3.Transform(_localVelocity * 60 * gameTime.Delta(), Quaternion.CreateFromYawPitchRoll(_yaw, 0, 0));
+
+        Transform.Position = Transform.Position with { Y = 1.3f + height };
+    }
+
+    public void Draw(GraphicsDevice graphicsDevice)
+    {
+        for(int z = 0; z < 5; z++)
+        {
+            for(int x = 0; x < 5; x++)
+            {
+                GraphicsUtil.DrawQuad(
+                    graphicsDevice,
+                    RenderPipeline.WhiteTexture,
+                    Color.Lerp(Color.Gray, Color.White, floats[z][x]),
+                    Matrix.CreateRotationX(MathHelper.PiOver2) * Matrix.CreateTranslation(new(x + 0.5f, floats[z][x], z + 0.5f)),
+                    1, 1,
+                    Vector2.Zero, Vector2.One
+                );
+            }
+        }
     }
 }

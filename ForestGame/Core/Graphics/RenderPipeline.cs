@@ -164,6 +164,8 @@ public static class RenderPipeline
 
         GraphicsUtil.DrawGrid(GraphicsDevice, 16, 1, Matrix.CreateTranslation(new(-8, -8, 0)) * Matrix.CreateRotationX(MathHelper.PiOver2));
 
+        Camera.Draw(GraphicsDevice);
+
         GraphicsDevice.Reset();
 
         GraphicsDevice.SetRenderTarget(_rtUi);

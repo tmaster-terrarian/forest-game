@@ -44,6 +44,11 @@ public static class MathUtil
         return value*value;
     }
 
+    public static float Sqrt(float value)
+    {
+        return MathF.Sqrt(value);
+    }
+
     public static int Sqr(int value)
     {
         return value*value;
@@ -208,5 +213,15 @@ public static class MathUtil
     public static bool Approximately(float a, float b, float threshold)
     {
         return MathF.Abs(a - b) < threshold;
+    }
+
+    public static float SmoothCos(float value, float exp)
+    {
+        return MathF.Pow(-0.5f * MathF.Cos(value * MathF.PI) + 0.5f, exp);
+    }
+
+    public static float SmoothCosClamp(float value, float exp)
+    {
+        return SmoothCos(Clamp01(value), exp);
     }
 }

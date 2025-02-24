@@ -53,20 +53,20 @@ public static class GraphicsUtil
         }
     }
 
-    public static void DrawQuad(GraphicsDevice graphicsDevice, Texture2D texture, Matrix worldMatrix, float width, float height, Vector2 pixelTopLeft, Vector2 pixelBottomRight)
+    public static void DrawQuad(GraphicsDevice graphicsDevice, Texture2D texture, Color color, Matrix worldMatrix, float width, float height, Vector2 pixelTopLeft, Vector2 pixelBottomRight)
     {
         Vector2 uvTopLeft = pixelTopLeft / texture.Bounds.Size.ToVector2();
         Vector2 uvBottomRight = pixelBottomRight / texture.Bounds.Size.ToVector2();
         // Define the vertices of the quad
-        VertexPositionTexture[] vertices = [
-            new(new Vector3(-width / 2, -height / 2, 0), uvTopLeft),
-            new(new Vector3(-width / 2, height / 2, 0), new Vector2(uvTopLeft.X, uvBottomRight.Y)),
-            new(new Vector3(width / 2, -height / 2, 0), new Vector2(uvBottomRight.X, uvTopLeft.Y)),
-            new(new Vector3(width / 2, height / 2, 0), uvBottomRight)
+        VertexPositionColorTexture[] vertices = [
+            new(new Vector3(-width / 2, -height / 2, 0), color, uvTopLeft),
+            new(new Vector3(-width / 2, height / 2, 0), color, new Vector2(uvTopLeft.X, uvBottomRight.Y)),
+            new(new Vector3(width / 2, -height / 2, 0), color, new Vector2(uvBottomRight.X, uvTopLeft.Y)),
+            new(new Vector3(width / 2, height / 2, 0), color, uvBottomRight)
         ];
 
         // Create the vertex buffer
-        VertexBuffer vertexBuffer = new(graphicsDevice, typeof(VertexPositionTexture), vertices.Length, BufferUsage.WriteOnly);
+        VertexBuffer vertexBuffer = new(graphicsDevice, typeof(VertexPositionColorTexture), vertices.Length, BufferUsage.WriteOnly);
         vertexBuffer.SetData(vertices);
 
         // Set the vertex buffer and primitive type
@@ -78,6 +78,7 @@ public static class GraphicsUtil
         {
             TextureEnabled = true,
             Texture = texture,
+            VertexColorEnabled = true,
             World = worldMatrix,
             View = RenderPipeline.ViewMatrix,
             Projection = RenderPipeline.ProjectionMatrix
