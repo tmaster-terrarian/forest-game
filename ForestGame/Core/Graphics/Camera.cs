@@ -17,6 +17,7 @@ public class Camera
     private float _pitch = 0;
     private float _yaw = 0;
     private float _sensitivity = 0.5f;
+    private float _speed = 1.6f;
 
     public Camera()
     {
@@ -66,7 +67,7 @@ public class Camera
             inputDir = Vector2.Normalize(inputDir);
 
             Transform.Position += Vector3.Transform(
-                (inputDir.X * Vector3.UnitX * gameTime.Delta()) + (inputDir.Y * Vector3.UnitZ * gameTime.Delta()),
+                (inputDir.X * Vector3.UnitX * gameTime.Delta() * _speed) + (inputDir.Y * Vector3.UnitZ * gameTime.Delta() * _speed),
                 Quaternion.CreateFromYawPitchRoll(_yaw, 0, 0)
             );
         }
