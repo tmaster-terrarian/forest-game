@@ -81,7 +81,7 @@ VertexShaderOutput MainVS(in VertexShaderInput input)
 
 float4 MainPS(VertexShaderOutput input) : COLOR
 {
-    float4 wn = mul(float4(input.Normal, 0), WorldMatrix);
+    float4 wn = normalize(mul(float4(input.Normal, 0), WorldMatrix));
 
     float3 lightColor = float3(1, 0.9, 0.8) * 0.9;
     float3 ambientColor = float3(0.2, 0.25, 0.35) * 0.8;
@@ -94,17 +94,18 @@ float4 MainPS(VertexShaderOutput input) : COLOR
     float fresnel = pow(saturate(dot(wn.xyz, ViewDir)), 4) * 0.5;
     float3 directionalLight = lightColor * max(0.1, smoothstep(-0.3, -0.1, dot(wn.xyz, -normalize(lightDir) * 2)));
 
-    float3 light = normalize(-lightDir);
-    float3 normal = normalize(wn.xyz);
-    float3 r = normalize(2 * dot(light, normal) * normal - light);
-    float3 v = normalize(mul(normalize(ViewDir), WorldMatrix));
+    // float3 light = normalize(-lightDir);
+    // float3 normal = normalize(wn.xyz);
+    // float3 r = normalize(2 * dot(light, normal) * normal - light);
+    // float3 v = normalize(mul(normalize(ViewDir), WorldMatrix));
 
     float2 matcapUv = mul((float3x3)InverseViewMatrix, wn).xy * 0.5 + 0.5;
     float3 matcapColor = tex2D(MatcapSampler, matcapUv).rgb;
     float3 matcapAdjusted = pow(lerp(0, matcapColor, pow(Shininess, 0.5) * MatcapIntensity), MatcapPower);
 
-    float specularDotProduct = saturate(dot(r, v));
-    float inverseSpecularDotProduct = saturate(-dot(r, v));
+    float3 halfVector = normalize(lightDir + ViewDir);
+    float specularDotProduct = saturate(dot(halfVector, wn.xyz));
+    float inverseSpecularDotProduct = saturate(-dot(halfVector, wn.xyz));
     float3 specularTint = lerp(lightColor, albedo, Metallic * 0.5);
     float oneMinusReflectivity = 1 - Metallic;
     float3 metallicAlbedo = albedo * oneMinusReflectivity;

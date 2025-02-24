@@ -146,8 +146,8 @@ public static class RenderPipeline
         // );
 
         _testEffect.Parameters["ViewDir"]?.SetValue(Camera.Forward);
-        _testEffect.Parameters["Shininess"]?.SetValue(0.35f);
-        _testEffect.Parameters["Metallic"]?.SetValue(1f);
+        _testEffect.Parameters["Shininess"]?.SetValue(1f);
+        _testEffect.Parameters["Metallic"]?.SetValue(0f);
 
         _viewParam?.SetValue(ViewMatrix);
         _projectionParam?.SetValue(ProjectionMatrix);
