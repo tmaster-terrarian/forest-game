@@ -82,14 +82,14 @@ float4 MainPS(VertexShaderOutput input) : COLOR
     float3 ambientColor = float3(0.2, 0.25, 0.35) * 0.8;
     float3 ambient = lerp(ambientColor * 0.4, ambientColor, (wn.y + 1)/2);
 
-    float3 lightDir = float3(1, -1, 1);
+    float3 lightDir = float3(-1, -1, -1);
 
     float3 albedo = pow(input.Color.rgb, 2.2);
 
-    float fresnel = pow(saturate(1 - dot(wn.xyz, -ViewDir)), 4) * 0.5;
+    float fresnel = pow(saturate(dot(wn.xyz, ViewDir)), 4) * 0.5;
     float3 directionalLight = lightColor * max(0.1, smoothstep(-0.3, -0.1, dot(wn.xyz, -normalize(lightDir) * 2)));
 
-    float3 light = normalize(lightDir);
+    float3 light = normalize(-lightDir);
     float3 normal = normalize(wn.xyz);
     float3 r = normalize(2 * dot(light, normal) * normal - light);
     float3 v = normalize(mul(normalize(ViewDir), WorldMatrix));
