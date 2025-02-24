@@ -30,6 +30,8 @@ public static class RenderPipeline
     private static EffectParameter _projectionParam;
     private static EffectParameter _inverseViewParam;
 
+    private static Effect _screenEffect;
+
     private static Texture2D? _cursorTex;
 
     private static int _resolutionScale = 4;
@@ -44,8 +46,8 @@ public static class RenderPipeline
         WhiteTexture = new(GraphicsDevice, 1, 1);
         WhiteTexture.SetData([Color.White]);
 
-        // _gltfCube = ContentLoader.Load<GltfModel>("models/fucking-teapot.glb")!;
-        _gltfCube = ContentLoader.Load<GltfModel>("models/sphere.glb")!;
+        _gltfCube = ContentLoader.Load<GltfModel>("models/fucking-teapot.glb")!;
+        // _gltfCube = ContentLoader.Load<GltfModel>("models/sphere.glb")!;
         // _gltfCube.Transform = new() {
         //     Rotation = Quaternion.CreateFromYawPitchRoll(MathF.PI, 0, 0),
         // };
@@ -105,6 +107,8 @@ public static class RenderPipeline
         _testEffect.Parameters["MainTex"]?.SetValue(WhiteTexture);
         _testEffect.Parameters["MatcapIntensity"]?.SetValue(1f);
         _testEffect.Parameters["MatcapPower"]?.SetValue(2f);
+
+        _screenEffect = ContentLoader.Load<Effect>("fx/screen")!;
     }
 
     public static void Draw(GameTime gameTime)
@@ -146,8 +150,8 @@ public static class RenderPipeline
         // );
 
         _testEffect.Parameters["ViewDir"]?.SetValue(Camera.Forward);
-        _testEffect.Parameters["Shininess"]?.SetValue(1f);
-        _testEffect.Parameters["Metallic"]?.SetValue(0f);
+        _testEffect.Parameters["Shininess"]?.SetValue(0.5f);
+        _testEffect.Parameters["Metallic"]?.SetValue(1f);
 
         _viewParam?.SetValue(ViewMatrix);
         _projectionParam?.SetValue(ProjectionMatrix);
@@ -155,7 +159,7 @@ public static class RenderPipeline
         _testEffect.Parameters["InverseWorldMatrix"]?.SetValue(Matrix.Invert(WorldMatrix));
         _testEffect.Parameters["WorldSpaceCameraPos"]?.SetValue(Camera.Transform.Position);
 
-        _gltfCube.Transform.Rotation *= Quaternion.CreateFromAxisAngle(Vector3.UnitZ, 0.01f);
+        // _gltfCube.Transform.Rotation *= Quaternion.CreateFromAxisAngle(Vector3.UnitZ, 0.01f);
         _gltfCube.Draw(GraphicsDevice, Matrix.Identity, _testEffect);
 
         GraphicsUtil.DrawGrid(GraphicsDevice, 16, 1, Matrix.CreateTranslation(new(-8, -8, 0)) * Matrix.CreateRotationX(MathHelper.PiOver2));
@@ -193,14 +197,16 @@ public static class RenderPipeline
 
         GraphicsDevice.Reset();
 
-        SpriteBatch.Begin(samplerState: SamplerState.PointClamp);
+        SpriteBatch.Begin(samplerState: SamplerState.PointClamp, effect: _screenEffect);
         {
+            _screenEffect.Parameters["ScreenResolution"]?.SetValue(new Vector2(_rt.Width, _rt.Height));
             SpriteBatch.Draw(_rt, Vector2.Zero, null, Color.White, 0, Vector2.Zero, _resolutionScale, SpriteEffects.None, 0);
         }
         SpriteBatch.End();
 
-        SpriteBatch.Begin(samplerState: SamplerState.PointClamp);
+        SpriteBatch.Begin(samplerState: SamplerState.PointClamp, effect: _screenEffect);
         {
+            _screenEffect.Parameters["ScreenResolution"]?.SetValue(new Vector2(_rtUi.Width, _rtUi.Height));
             SpriteBatch.Draw(_rtUi, Vector2.Zero, null, Color.White, 0, Vector2.Zero, _resolutionScale, SpriteEffects.None, 0);
         }
         SpriteBatch.End();

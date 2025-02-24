@@ -109,7 +109,7 @@ float4 MainPS(VertexShaderOutput input) : COLOR
 
     float3 viewDir = normalize(WorldSpaceCameraPos.xyz - input.WorldPosition.xyz);
 
-    float3 lightColor = float3(1, 0.9, 0.8) * 0.9;
+    float3 lightColor = float3(1, 0.9, 0.8) * 0.7;
     float3 ambientColor = float3(0.2, 0.25, 0.35) * 0.8;
     float3 ambient = lerp(ambientColor * 0.4, ambientColor, (wn.y + 1)/2);
 

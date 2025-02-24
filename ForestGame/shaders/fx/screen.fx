@@ -7,8 +7,6 @@
 	#define PS_SHADERMODEL ps_4_0_level_9_1
 #endif
 
-float GameTime;
-float4 BackBufferResolution;
 float4 ScreenResolution;
 
 Texture2D SpriteTexture;
@@ -27,9 +25,20 @@ struct VertexShaderOutput
 float4 MainPS(VertexShaderOutput input) : COLOR
 {
     float2 uv = input.TextureCoordinates;
-    float4 col = tex2D(SpriteTextureSampler, uv);
+    float4 col = tex2D(SpriteTextureSampler, uv) * input.Color;
 
-	return input.Color * col;
+    float4x4 ditherMatrix = float4x4(
+        0,  8,  2, 10,
+        12, 4, 14,  6,
+        3, 11,  1,  9,
+        15, 7,  13, 5
+    );
+
+    float2 pos = uv * ScreenResolution;
+
+    float ditherValue = (ditherMatrix[pos.x % 4][pos.y % 4]) / 16;
+
+    return floor(float4(col.rgb + ditherValue * 0.05, col.a) * 8) / 8;
 }
 
 technique BasicColorDrawing
