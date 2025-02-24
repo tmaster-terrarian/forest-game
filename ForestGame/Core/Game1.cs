@@ -57,6 +57,8 @@ public class Game1 : Game
         if (Input.GetPressed(Buttons.Back) || Input.GetPressed(Keys.Escape))
             Exit();
 
+        RenderPipeline.Camera.Update(gameTime);
+
         base.Update(gameTime);
     }
 

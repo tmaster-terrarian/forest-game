@@ -5,11 +5,14 @@ namespace ForestGame.Core.Graphics;
 
 public static class RenderPipeline
 {
+    public static Matrix WorldMatrix { get; set; } = Matrix.CreateWorld(Vector3.Zero, Vector3.UnitZ, Vector3.UnitY);
     public static Matrix ViewMatrix { get; set; }
     public static Matrix ProjectionMatrix { get; set; }
 
     public static GraphicsDevice GraphicsDevice { get; set; }
     public static SpriteBatch SpriteBatch { get; private set; }
+
+    public static Camera Camera { get; set; }
 
     private static ObjModel _cube;
     private static ObjModel _cube2;
@@ -34,6 +37,9 @@ public static class RenderPipeline
         SpriteBatch = new SpriteBatch(GraphicsDevice);
 
         _gltfCube = ContentLoader.Load<GltfModel>("models/fucking-teapot.glb")!;
+        _gltfCube.Transform = new() {
+            Position = new(3, -0.5f, -3),
+        };
 
         _cube = ContentLoader.Load<ObjModel>("cube.obj")!;
         _cube.Transform = new() {
@@ -52,6 +58,8 @@ public static class RenderPipeline
         // _matCap = ContentLoader.Load<Texture2D>("matcaps/Matcap_Metal_02.png")!;
 
         _rt = new(GraphicsDevice, 240, 135, false, SurfaceFormat.Color, DepthFormat.Depth24Stencil8);
+
+        Camera = new();
 
         _cursorTex = ContentLoader.Load<Texture2D>("textures/cursor.png");
 
@@ -93,17 +101,13 @@ public static class RenderPipeline
 
         GraphicsDevice.SamplerStates[0] = SamplerState.PointClamp;
 
-        var time = (float)gameTime.TotalGameTime.TotalSeconds * 60;
         ViewMatrix = Matrix.CreateLookAt(
-            new Vector3(
-                2.5f * MathF.Cos(time * 0.01f),
-                2.5f * MathF.Sin(time * 0.01f),
-                2.5f * MathF.Sin(time * 0.01f)
-            ),
-            Vector3.Zero,
+            Camera.Transform.Position,
+            Camera.Transform.Position + Camera.Forward,
             Vector3.Up
         );
 
+        _effect.World = WorldMatrix;
         _effect.View = ViewMatrix;
         _effect.Projection = ProjectionMatrix;
 
@@ -120,11 +124,7 @@ public static class RenderPipeline
         //     time / 60 * MathHelper.Pi
         // );
 
-        _testEffect.Parameters["ViewDir"]?.SetValue(-Vector3.Normalize(new Vector3(
-            2.5f * MathF.Cos(time * 0.01f),
-            2.5f * MathF.Sin(time * 0.01f),
-            2.5f * MathF.Sin(time * 0.01f)
-        )));
+        _testEffect.Parameters["ViewDir"]?.SetValue(Camera.Forward);
         _testEffect.Parameters["Shininess"]?.SetValue(0.35f);
         _testEffect.Parameters["Metallic"]?.SetValue(1f);
 
@@ -153,7 +153,7 @@ public static class RenderPipeline
 
         _gltfCube.Draw(GraphicsDevice, Matrix.Identity, _testEffect);
 
-        GraphicsUtil.DrawGizmo(GraphicsDevice, Vector3.Zero);
+        GraphicsUtil.DrawGizmo(GraphicsDevice, Vector3.Zero, Matrix.CreateScale(0.02f) * Matrix.CreateTranslation(Camera.Forward * 0.1f) * Matrix.CreateTranslation(Camera.Transform.Position));
 
         GraphicsUtil.DrawGrid(GraphicsDevice, 16, 1, Matrix.CreateTranslation(new(-8, -8, 0)) * Matrix.CreateRotationX(MathHelper.PiOver2));
 

@@ -93,10 +93,11 @@ public static class GraphicsUtil
         }
     }
 
-    private static void DrawArrow(GraphicsDevice graphicsDevice, Vector3 origin, Vector3 direction, Color color)
+    private static void DrawArrow(GraphicsDevice graphicsDevice, Vector3 origin, Vector3 direction, Color color, float length = 1)
     {
         // Normalize the direction vector to get the arrow direction
         direction.Normalize();
+        direction *= length;
 
         // Draw the arrow body (line)
         VertexPositionColor[] vertices = [
@@ -107,9 +108,9 @@ public static class GraphicsUtil
         graphicsDevice.DrawUserPrimitives(PrimitiveType.LineList, vertices, 0, 1);
     }
 
-    public static void DrawGizmo(GraphicsDevice graphicsDevice, Vector3 origin)
+    public static void DrawGizmo(GraphicsDevice graphicsDevice, Vector3 origin, Matrix world)
     {
-        _basicEffect.World = Matrix.CreateTranslation(origin);
+        _basicEffect.World = Matrix.CreateTranslation(origin) * world;
         _basicEffect.View = RenderPipeline.ViewMatrix;
         _basicEffect.Projection = RenderPipeline.ProjectionMatrix;
 
@@ -120,5 +121,6 @@ public static class GraphicsUtil
         DrawArrow(graphicsDevice, Vector3.Zero, Vector3.UnitX, Color.Red);    // X-axis arrow
         DrawArrow(graphicsDevice, Vector3.Zero, Vector3.UnitY, Color.Lime);   // Y-axis arrow
         DrawArrow(graphicsDevice, Vector3.Zero, Vector3.UnitZ, Color.Blue);   // Z-axis arrow
+        DrawArrow(graphicsDevice, Vector3.Forward * 0.5f, Vector3.Forward, Color.Blue, 0.5f);   // forward arrow
     }
 }
