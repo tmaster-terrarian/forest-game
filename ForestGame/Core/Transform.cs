@@ -9,9 +9,11 @@ public struct Transform()
     public Vector3 Scale { get; set; } = Vector3.One;
     public Quaternion Rotation { get; set; } = Quaternion.Identity;
     public Vector3 Position { get; set; } = Vector3.Zero;
+    public Vector3 Origin { get; set; } = Vector3.Zero;
 
     public readonly Matrix Matrix
-        => Matrix.CreateScale(Scale)
+        => Matrix.CreateTranslation(Origin)
+         * Matrix.CreateScale(Scale)
          * Matrix.CreateFromQuaternion(Rotation)
          * Matrix.CreateWorld(Position, Vector3.UnitZ, Vector3.Up);
 

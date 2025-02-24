@@ -53,44 +53,46 @@ public static class GraphicsUtil
         }
     }
 
-    public static void DrawQuad(GraphicsDevice graphicsDevice, Texture2D texture, Color color, Matrix worldMatrix, float width, float height, Vector2 pixelTopLeft, Vector2 pixelBottomRight)
+    public static void DrawQuad(GraphicsDevice graphicsDevice, Texture2D texture, Color color, Matrix worldMatrix, Effect effect, float width, float height, Vector2 pixelTopLeft, Vector2 pixelBottomRight)
     {
         Vector2 uvTopLeft = pixelTopLeft / texture.Bounds.Size.ToVector2();
         Vector2 uvBottomRight = pixelBottomRight / texture.Bounds.Size.ToVector2();
+
+        Vector3 normal = Vector3.UnitX;
+
         // Define the vertices of the quad
-        VertexPositionColorTexture[] vertices = [
-            new(new Vector3(-width / 2, -height / 2, 0), color, uvTopLeft),
-            new(new Vector3(-width / 2, height / 2, 0), color, new Vector2(uvTopLeft.X, uvBottomRight.Y)),
-            new(new Vector3(width / 2, -height / 2, 0), color, new Vector2(uvBottomRight.X, uvTopLeft.Y)),
-            new(new Vector3(width / 2, height / 2, 0), color, uvBottomRight)
+        VertexPositionColorNormalTexture[] vertices = [
+            new(new Vector3(-width / 2, -height / 2, 0), color, normal, uvTopLeft),
+            new(new Vector3(-width / 2, height / 2, 0), color, normal, new Vector2(uvTopLeft.X, uvBottomRight.Y)),
+            new(new Vector3(width / 2, -height / 2, 0), color, normal, new Vector2(uvBottomRight.X, uvTopLeft.Y)),
+            new(new Vector3(width / 2, height / 2, 0), color, normal, uvBottomRight)
         ];
 
-        // Create the vertex buffer
-        VertexBuffer vertexBuffer = new(graphicsDevice, typeof(VertexPositionColorTexture), vertices.Length, BufferUsage.WriteOnly);
-        vertexBuffer.SetData(vertices);
-
-        // Set the vertex buffer and primitive type
-        graphicsDevice.SetVertexBuffer(vertexBuffer);
-        graphicsDevice.SamplerStates[0] = SamplerState.LinearClamp;
-
         // Set up basic effect parameters
-        BasicEffect basicEffect = new(graphicsDevice)
-        {
-            TextureEnabled = true,
-            Texture = texture,
-            VertexColorEnabled = true,
-            World = worldMatrix,
-            View = RenderPipeline.ViewMatrix,
-            Projection = RenderPipeline.ProjectionMatrix
-        };
+        // BasicEffect basicEffect = new(graphicsDevice)
+        // {
+        //     TextureEnabled = true,
+        //     Texture = texture,
+        //     VertexColorEnabled = true,
+        //     World = worldMatrix,
+        //     View = RenderPipeline.ViewMatrix,
+        //     Projection = RenderPipeline.ProjectionMatrix
+        // };
+
+        effect.Parameters["WorldMatrix"]?.SetValue(worldMatrix);
 
         // Apply the basic effect
-        foreach (EffectPass pass in basicEffect.CurrentTechnique.Passes)
+        foreach (EffectPass pass in effect.CurrentTechnique.Passes)
         {
             pass.Apply();
 
             // Draw the quad
-            graphicsDevice.DrawPrimitives(PrimitiveType.TriangleStrip, 0, 2);
+            graphicsDevice.DrawUserPrimitives(
+                PrimitiveType.TriangleStrip,
+                vertices,
+                0, 2,
+                VertexPositionColorNormalTexture.VertexDeclaration
+            );
         }
     }
 

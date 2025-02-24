@@ -39,6 +39,7 @@ float Metallic;
 float MatcapIntensity;
 float MatcapPower;
 float3 WorldSpaceCameraPos;
+float2 ScreenResolution;
 Texture2D MatcapTex;
 sampler2D MatcapSampler = sampler_state
 {
@@ -90,7 +91,8 @@ VertexShaderOutput MainVS(in VertexShaderInput input)
     VertexShaderOutput output = (VertexShaderOutput)0;
 
     float4 wvp = mul(mul(mul(input.Position, WorldMatrix), ViewMatrix), ProjectionMatrix);
-    output.Position = wvp;
+    float3 snap = float3(ScreenResolution.xy / wvp.w, 1/wvp.z);
+    output.Position = float4(floor(wvp.xyz * snap) / snap, wvp.w);
     output.WorldPosition = mul(input.Position, WorldMatrix);
     output.Color = input.Color;
     output.Normal = input.Normal;

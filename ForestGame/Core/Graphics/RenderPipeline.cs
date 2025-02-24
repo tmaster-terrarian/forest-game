@@ -20,15 +20,11 @@ public static class RenderPipeline
     private static ObjModel _cube;
     private static ObjModel _cube2;
     private static GltfModel _gltfCube;
-    private static BasicEffect _effect;
+    private static Effect _effect;
     private static RenderTarget2D _rt;
     private static RenderTarget2D _rtUi;
 
     private static Effect _testEffect;
-    private static EffectParameter _worldParam;
-    private static EffectParameter _viewParam;
-    private static EffectParameter _projectionParam;
-    private static EffectParameter _inverseViewParam;
 
     private static Effect _screenEffect;
 
@@ -38,6 +34,9 @@ public static class RenderPipeline
 
     private static Texture2D _matCap;
     private static Texture2D _gltfCubeTex;
+
+    public static Effect EffectLit => _testEffect;
+    public static Effect EffectBasicDiffuse => _effect;
 
     public static void LoadContent()
     {
@@ -55,9 +54,8 @@ public static class RenderPipeline
         _gltfCubeTex = ContentLoader.Load<Texture2D>("textures/checkerboard.png")!;
 
         _cube = ContentLoader.Load<ObjModel>("cube.obj")!;
-        _cube.Transform = new() {
-            Position = Vector3.One * -0.5f,
-        };
+        _cube.Transform.Origin = -Vector3.One * 0.5f;
+        _cube.Transform.Position = new(-3.5f, 0.5f, -3.5f);
 
         _cube2 = ContentLoader.Load<ObjModel>("teapot.obj")!;
         // _cube2.Transform = Matrix.CreateTranslation(Vector3.One * -0.5f) * Matrix.CreateScale(0.5f) * Matrix.CreateTranslation(Vector3.Left * 0.5f);
@@ -85,28 +83,17 @@ public static class RenderPipeline
 
         _cursorTex = ContentLoader.Load<Texture2D>("textures/cursor.png");
 
-        _effect = new(GraphicsDevice)
-        {
-            // primitive color
-            AmbientLightColor = new Vector3(0.1f, 0.1f, 0.1f),
-            DiffuseColor = new Vector3(1.0f, 1.0f, 1.0f),
-            SpecularColor = new Vector3(0.25f, 0.25f, 0.25f),
-            SpecularPower = 5.0f,
-            Alpha = 1.0f,
-
-            // The following MUST be enabled if you want to color your vertices
-            VertexColorEnabled = true
-        };
-
         _testEffect = ContentLoader.Load<Effect>("fx/depth")!;
-        _worldParam = _testEffect.Parameters["WorldMatrix"];
-        _viewParam = _testEffect.Parameters["ViewMatrix"];
-        _projectionParam = _testEffect.Parameters["ProjectionMatrix"];
-        _inverseViewParam = _testEffect.Parameters["InverseViewMatrix"];
         _testEffect.Parameters["MatcapTex"]?.SetValue(_matCap);
         _testEffect.Parameters["MainTex"]?.SetValue(WhiteTexture);
         _testEffect.Parameters["MatcapIntensity"]?.SetValue(1f);
         _testEffect.Parameters["MatcapPower"]?.SetValue(2f);
+        _testEffect.Parameters["Shininess"]?.SetValue(0.5f);
+        _testEffect.Parameters["Metallic"]?.SetValue(1f);
+
+        _effect = ContentLoader.Load<Effect>("fx/default")!;
+        _effect.Parameters["MainTex"]?.SetValue(WhiteTexture);
+        _effect.Parameters["LightIntensity"]?.SetValue(0);
 
         _screenEffect = ContentLoader.Load<Effect>("fx/screen")!;
     }
@@ -132,10 +119,6 @@ public static class RenderPipeline
             0.01f, 300.0f
         );
 
-        _effect.World = WorldMatrix;
-        _effect.View = ViewMatrix;
-        _effect.Projection = ProjectionMatrix;
-
         GraphicsDevice.RasterizerState = new()
         {
             CullMode = CullMode.CullClockwiseFace
@@ -144,18 +127,28 @@ public static class RenderPipeline
         GraphicsDevice.DepthStencilState = DepthStencilState.Default;
         GraphicsDevice.BlendState = BlendState.Opaque;
 
-        // _cube2.Transform.Rotation = Quaternion.CreateFromAxisAngle(
-        //     Vector3.Up,
-        //     time / 60 * MathHelper.Pi
-        // );
+        _cube.Transform.Rotation = Quaternion.CreateFromAxisAngle(
+            Vector3.UnitY,
+            (float)gameTime.TotalGameTime.TotalSeconds / 30f * MathHelper.Pi
+        );
+
+        _effect.Parameters["WorldMatrix"]?.SetValue(_cube.Transform);
+        _effect.Parameters["ViewMatrix"]?.SetValue(ViewMatrix);
+        _effect.Parameters["ProjectionMatrix"]?.SetValue(ProjectionMatrix);
+        foreach(var pass in _effect.CurrentTechnique.Passes)
+        {
+            pass.Apply();
+            _cube.Draw(GraphicsDevice);
+        }
+
+        _effect.Parameters["ViewMatrix"]?.SetValue(ViewMatrix);
+        _effect.Parameters["ProjectionMatrix"]?.SetValue(ProjectionMatrix);
+        Camera.Draw(GraphicsDevice);
 
         _testEffect.Parameters["ViewDir"]?.SetValue(Camera.Forward);
-        _testEffect.Parameters["Shininess"]?.SetValue(0.5f);
-        _testEffect.Parameters["Metallic"]?.SetValue(1f);
-
-        _viewParam?.SetValue(ViewMatrix);
-        _projectionParam?.SetValue(ProjectionMatrix);
-        _inverseViewParam?.SetValue(Matrix.Invert(ViewMatrix));
+        _testEffect.Parameters["ViewMatrix"]?.SetValue(ViewMatrix);
+        _testEffect.Parameters["ProjectionMatrix"]?.SetValue(ProjectionMatrix);
+        _testEffect.Parameters["InverseViewMatrix"]?.SetValue(Matrix.Invert(ViewMatrix));
         _testEffect.Parameters["InverseWorldMatrix"]?.SetValue(Matrix.Invert(WorldMatrix));
         _testEffect.Parameters["WorldSpaceCameraPos"]?.SetValue(Camera.Transform.Position);
 
@@ -163,8 +156,6 @@ public static class RenderPipeline
         _gltfCube.Draw(GraphicsDevice, Matrix.Identity, _testEffect);
 
         GraphicsUtil.DrawGrid(GraphicsDevice, 16, 1, Matrix.CreateTranslation(new(-8, -8, 0)) * Matrix.CreateRotationX(MathHelper.PiOver2));
-
-        Camera.Draw(GraphicsDevice);
 
         GraphicsDevice.Reset();
 
@@ -232,5 +223,12 @@ public static class RenderPipeline
             SurfaceFormat.Color,
             DepthFormat.Depth24Stencil8
         );
+
+        // for whatever reason, the snap vector must be divided by 2 to make the effect visible
+        // but it works, so don't touch this!!!!
+        Vector2 vertexSnapRes = Vector2.Floor(Window.ClientBounds.Size.ToVector2() / _resolutionScale / 2);
+
+        _effect.Parameters["ScreenResolution"]?.SetValue(vertexSnapRes);
+        _testEffect.Parameters["ScreenResolution"]?.SetValue(vertexSnapRes);
     }
 }
