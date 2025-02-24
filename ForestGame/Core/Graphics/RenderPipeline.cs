@@ -12,6 +12,7 @@ public static class RenderPipeline
     public static Texture2D WhiteTexture { get; private set; }
 
     public static GraphicsDevice GraphicsDevice { get; set; }
+    public static GameWindow Window { get; set; }
     public static SpriteBatch SpriteBatch { get; private set; }
 
     public static Camera Camera { get; set; }
@@ -75,7 +76,7 @@ public static class RenderPipeline
         {
             Transform = new()
             {
-                Position = new Vector3(0, 2, 2),
+                Position = new Vector3(0, 1.3f, 2),
                 Rotation = Quaternion.CreateFromYawPitchRoll(0, -MathHelper.PiOver4, 0)
             }
         };
@@ -148,25 +149,6 @@ public static class RenderPipeline
         _testEffect.Parameters["Shininess"]?.SetValue(0.35f);
         _testEffect.Parameters["Metallic"]?.SetValue(1f);
 
-        foreach (EffectPass pass in _testEffect.CurrentTechnique.Passes)
-        {
-            // _param.SetValue(_cube.Transform * ViewMatrix * ProjectionMatrix);
-            // _param2.SetValue(_cube.Transform);
-            // _testEffect.Parameters["InverseWorldMatrix"]?.SetValue(Matrix.Invert(_cube.Transform));
-            // pass.Apply();
-            // _cube.Draw(GraphicsDevice);
-
-            _worldParam.SetValue(_cube2.Transform);
-            _viewParam.SetValue(ViewMatrix);
-            _projectionParam.SetValue(ProjectionMatrix);
-
-            _inverseViewParam?.SetValue(Matrix.Invert(ViewMatrix));
-            // _testEffect.Parameters["WorldViewProjection"]?.SetValue(_cube2.Transform * ViewMatrix * ProjectionMatrix);
-
-            pass.Apply();
-            // _cube2.Draw(GraphicsDevice);
-        }
-
         _viewParam?.SetValue(ViewMatrix);
         _projectionParam?.SetValue(ProjectionMatrix);
         _inverseViewParam?.SetValue(Matrix.Invert(ViewMatrix));
@@ -175,19 +157,6 @@ public static class RenderPipeline
         _gltfCube.Draw(GraphicsDevice, Matrix.Identity, _testEffect);
 
         GraphicsUtil.DrawGrid(GraphicsDevice, 16, 1, Matrix.CreateTranslation(new(-8, -8, 0)) * Matrix.CreateRotationX(MathHelper.PiOver2));
-
-        SpriteBatch.Begin(samplerState: SamplerState.PointClamp);
-        {
-            if(_cursorTex is not null)
-            {
-                SpriteBatch.Draw(
-                    _cursorTex,
-                    new Vector2(Input.MousePosition.X / _resolutionScale, Input.MousePosition.Y / _resolutionScale),
-                    Color.White
-                );
-            }
-        }
-        SpriteBatch.End();
 
         GraphicsDevice.Reset();
 
@@ -206,6 +175,19 @@ public static class RenderPipeline
             Matrix.CreateScale(0.02f)
             * Matrix.CreateTranslation(Camera.Transform.Position + Camera.Forward)
         );
+
+        SpriteBatch.Begin(samplerState: SamplerState.PointClamp);
+        {
+            if(_cursorTex is not null)
+            {
+                SpriteBatch.Draw(
+                    _cursorTex,
+                    new Vector2(Input.MousePosition.X / _resolutionScale, Input.MousePosition.Y / _resolutionScale),
+                    Color.White
+                );
+            }
+        }
+        SpriteBatch.End();
 
         GraphicsDevice.Reset();
 

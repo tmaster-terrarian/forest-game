@@ -44,6 +44,7 @@ public class Game1 : Game
 
     protected override void LoadContent()
     {
+        RenderPipeline.Window = Window;
         RenderPipeline.GraphicsDevice = GraphicsDevice;
         RenderPipeline.LoadContent();
     }

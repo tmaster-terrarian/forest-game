@@ -24,7 +24,7 @@ public static class Input
 
     public static Point MousePosition => InputDisabled
         ? _oldMousePos
-        : Mouse.GetState().Position;
+        : currentMouseState.Position;
 
     public static KeyboardState RefreshKeyboardState()
     {
