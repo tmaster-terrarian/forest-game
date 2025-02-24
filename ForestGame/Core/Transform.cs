@@ -13,7 +13,7 @@ public struct Transform()
     public readonly Matrix Matrix
         => Matrix.CreateScale(Scale)
          * Matrix.CreateFromQuaternion(Rotation)
-         * Matrix.CreateTranslation(Position);
+         * Matrix.CreateWorld(Position, Vector3.UnitZ, Vector3.Up);
 
     public static implicit operator Matrix(Transform transform)
     {

@@ -12,7 +12,7 @@ public class Camera
 
     public Camera()
     {
-        // Transform.Position = new(0, 1, 2);
+        // Transform.Position = new(0, 0, 0);
     }
 
     public void Update(GameTime gameTime)

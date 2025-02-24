@@ -38,7 +38,7 @@ public static class RenderPipeline
 
         _gltfCube = ContentLoader.Load<GltfModel>("models/fucking-teapot.glb")!;
         _gltfCube.Transform = new() {
-            Position = new(3, -0.5f, -3),
+            Position = new(3, -0.5f, 3),
         };
 
         _cube = ContentLoader.Load<ObjModel>("cube.obj")!;
