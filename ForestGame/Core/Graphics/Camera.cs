@@ -18,7 +18,7 @@ public class Camera
     private float _pitch = 0;
     private float _yaw = 0;
     private float _sensitivity = 0.5f;
-    private float _speed = 2f;
+    private float _speed = 0.02f;
     private Vector3 _localVelocity;
 
     private float[][] floats = [
@@ -73,8 +73,8 @@ public class Camera
         if(Input.MousePosition != _lastMousePos)
         {
             var difference = Input.MousePosition - _lastMousePos;
-            _yaw -= difference.X * gameTime.Delta() * _sensitivity;
-            _pitch -= difference.Y * gameTime.Delta() * _sensitivity;
+            _yaw -= difference.X * (1f/144f) * _sensitivity;
+            _pitch -= difference.Y * (1f/144f) * _sensitivity;
             _pitch = MathHelper.Clamp(_pitch, -MathHelper.ToRadians(89.99f), MathHelper.ToRadians(89.99f));
             Transform.Rotation = Quaternion.CreateFromYawPitchRoll(_yaw, _pitch, 0);
             _lastMousePos = new(RenderPipeline.Window.ClientBounds.Width / 2, RenderPipeline.Window.ClientBounds.Height / 2);
@@ -89,13 +89,13 @@ public class Camera
         {
             inputDir = Vector2.Normalize(inputDir);
 
-            _localVelocity.X = MathUtil.Approach(_localVelocity.X, inputDir.X * gameTime.Delta() * _speed, 0.08f * gameTime.Delta());
-            _localVelocity.Z = MathUtil.Approach(_localVelocity.Z, inputDir.Y * gameTime.Delta() * _speed, 0.08f * gameTime.Delta());
+            _localVelocity.X = MathUtil.Approach(_localVelocity.X, inputDir.X * _speed, 0.1f * gameTime.Delta());
+            _localVelocity.Z = MathUtil.Approach(_localVelocity.Z, inputDir.Y * _speed, 0.1f * gameTime.Delta());
         }
         else
         {
-            _localVelocity.X = MathUtil.Approach(_localVelocity.X, 0, 0.05f * gameTime.Delta());
-            _localVelocity.Z = MathUtil.Approach(_localVelocity.Z, 0, 0.05f * gameTime.Delta());
+            _localVelocity.X = MathUtil.Approach(_localVelocity.X, 0, 0.08f * gameTime.Delta());
+            _localVelocity.Z = MathUtil.Approach(_localVelocity.Z, 0, 0.08f * gameTime.Delta());
         }
 
         Transform.Position += Vector3.Transform(_localVelocity * 60 * gameTime.Delta(), Quaternion.CreateFromYawPitchRoll(_yaw, 0, 0));

@@ -207,7 +207,7 @@ public static class MathUtil
 
     public static int Sign(float a)
     {
-        return (int) MathF.Sign(a);
+        return MathF.Sign(a);
     }
 
     public static bool Approximately(float a, float b, float threshold)
