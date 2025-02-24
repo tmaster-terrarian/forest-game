@@ -17,7 +17,8 @@ public class Camera
     private float _pitch = 0;
     private float _yaw = 0;
     private float _sensitivity = 0.5f;
-    private float _speed = 1.6f;
+    private float _speed = 2f;
+    private Vector3 _localVelocity;
 
     public Camera()
     {
@@ -66,10 +67,15 @@ public class Camera
         {
             inputDir = Vector2.Normalize(inputDir);
 
-            Transform.Position += Vector3.Transform(
-                (inputDir.X * Vector3.UnitX * gameTime.Delta() * _speed) + (inputDir.Y * Vector3.UnitZ * gameTime.Delta() * _speed),
-                Quaternion.CreateFromYawPitchRoll(_yaw, 0, 0)
-            );
+            _localVelocity.X = MathUtil.Approach(_localVelocity.X, inputDir.X * gameTime.Delta() * _speed, 0.08f * gameTime.Delta());
+            _localVelocity.Z = MathUtil.Approach(_localVelocity.Z, inputDir.Y * gameTime.Delta() * _speed, 0.08f * gameTime.Delta());
         }
+        else
+        {
+            _localVelocity.X = MathUtil.Approach(_localVelocity.X, 0, 0.05f * gameTime.Delta());
+            _localVelocity.Z = MathUtil.Approach(_localVelocity.Z, 0, 0.05f * gameTime.Delta());
+        }
+
+        Transform.Position += Vector3.Transform(_localVelocity * 60 * gameTime.Delta(), Quaternion.CreateFromYawPitchRoll(_yaw, 0, 0));
     }
 }
