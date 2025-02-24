@@ -18,6 +18,8 @@ public class Game1 : Game
         Content.RootDirectory = "shaders";
 
         IsMouseVisible = false;
+
+        IsFixedTimeStep = false;
     }
 
     protected override void Initialize()
