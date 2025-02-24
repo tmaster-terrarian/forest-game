@@ -42,6 +42,11 @@ sampler2D MatcapSampler = sampler_state
 {
     Texture = <MatcapTex>;
 };
+Texture2D MainTex;
+sampler2D MainTexSampler = sampler_state
+{
+    Texture = <MainTex>;
+};
 
 struct VertexShaderInput
 {
@@ -84,7 +89,7 @@ float4 MainPS(VertexShaderOutput input) : COLOR
 
     float3 lightDir = float3(-1, -1, -1);
 
-    float3 albedo = pow(input.Color.rgb, 2.2);
+    float3 albedo = pow(input.Color.rgb, 2.2) * tex2D(MainTexSampler, input.UV).rgb;
 
     float fresnel = pow(saturate(dot(wn.xyz, ViewDir)), 4) * 0.5;
     float3 directionalLight = lightColor * max(0.1, smoothstep(-0.3, -0.1, dot(wn.xyz, -normalize(lightDir) * 2)));

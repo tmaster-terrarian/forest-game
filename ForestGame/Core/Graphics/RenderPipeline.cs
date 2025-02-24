@@ -9,6 +9,8 @@ public static class RenderPipeline
     public static Matrix ViewMatrix { get; set; }
     public static Matrix ProjectionMatrix { get; set; }
 
+    public static Texture2D WhiteTexture { get; private set; }
+
     public static GraphicsDevice GraphicsDevice { get; set; }
     public static SpriteBatch SpriteBatch { get; private set; }
 
@@ -38,7 +40,11 @@ public static class RenderPipeline
     {
         SpriteBatch = new SpriteBatch(GraphicsDevice);
 
-        _gltfCube = ContentLoader.Load<GltfModel>("models/fucking-teapot.glb")!;
+        WhiteTexture = new(GraphicsDevice, 1, 1);
+        WhiteTexture.SetData([Color.White]);
+
+        // _gltfCube = ContentLoader.Load<GltfModel>("models/fucking-teapot.glb")!;
+        _gltfCube = ContentLoader.Load<GltfModel>("models/sphere.glb")!;
         // _gltfCube.Transform = new() {
         //     Rotation = Quaternion.CreateFromYawPitchRoll(MathF.PI, 0, 0),
         // };
@@ -58,8 +64,9 @@ public static class RenderPipeline
             Position = new(0, -0.5f, 0),
         };
 
-        _matCap = ContentLoader.Load<Texture2D>("matcaps/Matcap_Metal_04.jpeg")!;
+        // _matCap = ContentLoader.Load<Texture2D>("matcaps/Matcap_Metal_04.jpeg")!;
         // _matCap = ContentLoader.Load<Texture2D>("matcaps/Matcap_Metal_02.png")!;
+        _matCap = ContentLoader.Load<Texture2D>("matcaps/Matcap_Metal_03.png")!;
 
         _rt = new(GraphicsDevice, 240, 135, false, SurfaceFormat.Color, DepthFormat.Depth24Stencil8);
         _rtUi = new(GraphicsDevice, 240, 135, false, SurfaceFormat.Color, DepthFormat.Depth24Stencil8);
@@ -74,7 +81,6 @@ public static class RenderPipeline
         };
 
         _cursorTex = ContentLoader.Load<Texture2D>("textures/cursor.png");
-
 
         _effect = new(GraphicsDevice)
         {
@@ -95,8 +101,8 @@ public static class RenderPipeline
         _projectionParam = _testEffect.Parameters["ProjectionMatrix"];
         _inverseViewParam = _testEffect.Parameters["InverseViewMatrix"];
         _testEffect.Parameters["MatcapTex"]?.SetValue(_matCap);
+        _testEffect.Parameters["MainTex"]?.SetValue(WhiteTexture);
         _testEffect.Parameters["MatcapIntensity"]?.SetValue(1f);
-        _testEffect.Parameters["MainTex"]?.SetValue(_gltfCubeTex);
         _testEffect.Parameters["MatcapPower"]?.SetValue(2f);
     }
 
