@@ -118,9 +118,9 @@ public static class GraphicsUtil
         _basicEffect.CurrentTechnique.Passes[0].Apply();
 
         // Draw the arrows
+        DrawArrow(graphicsDevice, Vector3.Forward * 0.5f, Vector3.Forward, Color.Blue, 0.5f);   // forward arrow
         DrawArrow(graphicsDevice, Vector3.Zero, Vector3.UnitX, Color.Red);    // X-axis arrow
         DrawArrow(graphicsDevice, Vector3.Zero, Vector3.UnitY, Color.Lime);   // Y-axis arrow
         DrawArrow(graphicsDevice, Vector3.Zero, Vector3.UnitZ, Color.Blue);   // Z-axis arrow
-        DrawArrow(graphicsDevice, Vector3.Forward * 0.5f, Vector3.Forward, Color.Blue, 0.5f);   // forward arrow
     }
 }
