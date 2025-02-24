@@ -19,6 +19,7 @@ public static class RenderPipeline
     private static GltfModel _gltfCube;
     private static BasicEffect _effect;
     private static RenderTarget2D _rt;
+    private static RenderTarget2D _rtUi;
 
     private static Effect _testEffect;
     private static EffectParameter _worldParam;
@@ -31,6 +32,7 @@ public static class RenderPipeline
     private static int _resolutionScale = 4;
 
     private static Texture2D _matCap;
+    private static Texture2D _gltfCubeTex;
 
     public static void LoadContent()
     {
@@ -40,6 +42,8 @@ public static class RenderPipeline
         _gltfCube.Transform = new() {
             Position = new(3, -0.5f, 3),
         };
+
+        _gltfCubeTex = ContentLoader.Load<Texture2D>("textures/checkerboard.png")!;
 
         _cube = ContentLoader.Load<ObjModel>("cube.obj")!;
         _cube.Transform = new() {
@@ -58,16 +62,12 @@ public static class RenderPipeline
         // _matCap = ContentLoader.Load<Texture2D>("matcaps/Matcap_Metal_02.png")!;
 
         _rt = new(GraphicsDevice, 240, 135, false, SurfaceFormat.Color, DepthFormat.Depth24Stencil8);
+        _rtUi = new(GraphicsDevice, 240, 135, false, SurfaceFormat.Color, DepthFormat.Depth24Stencil8);
 
         Camera = new();
 
         _cursorTex = ContentLoader.Load<Texture2D>("textures/cursor.png");
 
-        ProjectionMatrix = Matrix.CreatePerspectiveFieldOfView(
-            MathHelper.ToRadians(95),
-            GraphicsDevice.Viewport.AspectRatio,
-            0.01f, 300.0f
-        );
 
         _effect = new(GraphicsDevice)
         {
@@ -89,6 +89,7 @@ public static class RenderPipeline
         _inverseViewParam = _testEffect.Parameters["InverseViewMatrix"];
         _testEffect.Parameters["MatcapTex"]?.SetValue(_matCap);
         _testEffect.Parameters["MatcapIntensity"]?.SetValue(1f);
+        _testEffect.Parameters["MainTex"]?.SetValue(_gltfCubeTex);
         _testEffect.Parameters["MatcapPower"]?.SetValue(2f);
     }
 
@@ -105,6 +106,12 @@ public static class RenderPipeline
             Camera.Transform.Position,
             Camera.Transform.Position + Camera.Forward,
             Vector3.Up
+        );
+
+        ProjectionMatrix = Matrix.CreatePerspectiveFieldOfView(
+            MathHelper.ToRadians(95),
+            GraphicsDevice.Viewport.AspectRatio,
+            0.01f, 300.0f
         );
 
         _effect.World = WorldMatrix;
@@ -153,8 +160,6 @@ public static class RenderPipeline
 
         _gltfCube.Draw(GraphicsDevice, Matrix.Identity, _testEffect);
 
-        GraphicsUtil.DrawGizmo(GraphicsDevice, Vector3.Zero, Matrix.CreateScale(0.02f) * Matrix.CreateTranslation(Camera.Forward * 0.1f) * Matrix.CreateTranslation(Camera.Transform.Position));
-
         GraphicsUtil.DrawGrid(GraphicsDevice, 16, 1, Matrix.CreateTranslation(new(-8, -8, 0)) * Matrix.CreateRotationX(MathHelper.PiOver2));
 
         SpriteBatch.Begin(samplerState: SamplerState.PointClamp);
@@ -172,9 +177,33 @@ public static class RenderPipeline
 
         GraphicsDevice.Reset();
 
+        GraphicsDevice.SetRenderTarget(_rtUi);
+        GraphicsDevice.Clear(Color.Transparent);
+
+        ProjectionMatrix = Matrix.CreatePerspectiveFieldOfView(
+            MathHelper.ToRadians(30),
+            GraphicsDevice.Viewport.AspectRatio,
+            0.01f, 300.0f
+        );
+
+        GraphicsUtil.DrawGizmo(
+            GraphicsDevice,
+            Vector3.Zero,
+            Matrix.CreateScale(0.02f)
+            * Matrix.CreateTranslation(Camera.Transform.Position + Camera.Forward)
+        );
+
+        GraphicsDevice.Reset();
+
         SpriteBatch.Begin(samplerState: SamplerState.PointClamp);
         {
             SpriteBatch.Draw(_rt, Vector2.Zero, null, Color.White, 0, Vector2.Zero, _resolutionScale, SpriteEffects.None, 0);
+        }
+        SpriteBatch.End();
+
+        SpriteBatch.Begin(samplerState: SamplerState.PointClamp);
+        {
+            SpriteBatch.Draw(_rtUi, Vector2.Zero, null, Color.White, 0, Vector2.Zero, _resolutionScale, SpriteEffects.None, 0);
         }
         SpriteBatch.End();
     }
@@ -189,11 +218,13 @@ public static class RenderPipeline
             SurfaceFormat.Color,
             DepthFormat.Depth24Stencil8
         );
-
-        ProjectionMatrix = Matrix.CreatePerspectiveFieldOfView(
-            MathHelper.ToRadians(95),
-            GraphicsDevice.Viewport.AspectRatio,
-            0.01f, 300.0f
+        _rtUi = new(
+            GraphicsDevice,
+            window.ClientBounds.Width / _resolutionScale,
+            window.ClientBounds.Height / _resolutionScale,
+            false,
+            SurfaceFormat.Color,
+            DepthFormat.Depth24Stencil8
         );
     }
 }
