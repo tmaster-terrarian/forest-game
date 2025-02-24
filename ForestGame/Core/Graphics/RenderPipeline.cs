@@ -39,9 +39,9 @@ public static class RenderPipeline
         SpriteBatch = new SpriteBatch(GraphicsDevice);
 
         _gltfCube = ContentLoader.Load<GltfModel>("models/fucking-teapot.glb")!;
-        _gltfCube.Transform = new() {
-            Position = new(3, -0.5f, 3),
-        };
+        // _gltfCube.Transform = new() {
+        //     Rotation = Quaternion.CreateFromYawPitchRoll(MathF.PI, 0, 0),
+        // };
 
         _gltfCubeTex = ContentLoader.Load<Texture2D>("textures/checkerboard.png")!;
 
@@ -64,7 +64,14 @@ public static class RenderPipeline
         _rt = new(GraphicsDevice, 240, 135, false, SurfaceFormat.Color, DepthFormat.Depth24Stencil8);
         _rtUi = new(GraphicsDevice, 240, 135, false, SurfaceFormat.Color, DepthFormat.Depth24Stencil8);
 
-        Camera = new();
+        Camera = new()
+        {
+            Transform = new()
+            {
+                Position = new Vector3(0, 2, 2),
+                Rotation = Quaternion.CreateFromYawPitchRoll(0, -MathHelper.PiOver4, 0)
+            }
+        };
 
         _cursorTex = ContentLoader.Load<Texture2D>("textures/cursor.png");
 
@@ -158,6 +165,7 @@ public static class RenderPipeline
         _projectionParam?.SetValue(ProjectionMatrix);
         _inverseViewParam?.SetValue(Matrix.Invert(ViewMatrix));
 
+        _gltfCube.Transform.Rotation *= Quaternion.CreateFromAxisAngle(Vector3.UnitZ, 0.01f);
         _gltfCube.Draw(GraphicsDevice, Matrix.Identity, _testEffect);
 
         GraphicsUtil.DrawGrid(GraphicsDevice, 16, 1, Matrix.CreateTranslation(new(-8, -8, 0)) * Matrix.CreateRotationX(MathHelper.PiOver2));
