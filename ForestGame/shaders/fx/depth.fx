@@ -28,6 +28,7 @@ float3 Tonemap(float3 c)
 }
 
 matrix WorldMatrix;
+matrix InverseWorldMatrix;
 matrix ViewMatrix;
 matrix InverseViewMatrix;
 matrix ProjectionMatrix;
@@ -37,6 +38,7 @@ float Shininess;
 float Metallic;
 float MatcapIntensity;
 float MatcapPower;
+float3 WorldSpaceCameraPos;
 Texture2D MatcapTex;
 sampler2D MatcapSampler = sampler_state
 {
@@ -63,25 +65,49 @@ struct VertexShaderOutput
     float4 Color : COLOR0;
     float3 Normal : TEXCOORD2;
     float2 UV : TEXCOORD0;
+    float2 MatcapUV : TEXCOORD3;
 };
+
+float2 MatcapUv(float3 worldNorm, matrix viewMatrix, float4 pos, matrix modelViewMatrix)
+{
+    float3 viewNorm = normalize(mul( float4(worldNorm, 1), viewMatrix));
+
+    // get view space position of vertex
+    float3 viewPos = mul( pos.xyz, modelViewMatrix).xyz;
+    float3 viewDir = normalize(viewPos);
+
+    // get vector perpendicular to both view direction and view normal
+    float3 viewCross = cross(viewDir, viewNorm);
+
+    // swizzle perpendicular vector components to create a new perspective corrected view normal
+    viewNorm = float3(-viewCross.y, viewCross.x, 0.0);
+
+    return viewNorm.xy * 0.5 + 0.5;
+}
 
 VertexShaderOutput MainVS(in VertexShaderInput input)
 {
     VertexShaderOutput output = (VertexShaderOutput)0;
 
-    // output.Position = mul(input.Position, WorldViewProjection);
-    output.Position = mul(mul(mul(input.Position, WorldMatrix), ViewMatrix), ProjectionMatrix);
+    float4 wvp = mul(mul(mul(input.Position, WorldMatrix), ViewMatrix), ProjectionMatrix);
+    output.Position = wvp;
     output.WorldPosition = mul(input.Position, WorldMatrix);
     output.Color = input.Color;
     output.Normal = input.Normal;
     output.UV = input.UV;
+
+    float3 wn = normalize(mul( input.Normal, WorldMatrix ));
+    output.MatcapUV = MatcapUv(wn, ViewMatrix, input.Position, mul(WorldMatrix, ViewMatrix));
 
     return output;
 }
 
 float4 MainPS(VertexShaderOutput input) : COLOR
 {
-    float4 wn = normalize(mul(float4(input.Normal, 0), WorldMatrix));
+    float3 wn = normalize(mul( input.Normal, WorldMatrix ));
+    float3 vn = normalize(mul( wn, ViewMatrix));
+
+    float3 viewDir = normalize(WorldSpaceCameraPos.xyz - input.WorldPosition.xyz);
 
     float3 lightColor = float3(1, 0.9, 0.8) * 0.9;
     float3 ambientColor = float3(0.2, 0.25, 0.35) * 0.8;
@@ -91,35 +117,29 @@ float4 MainPS(VertexShaderOutput input) : COLOR
 
     float3 albedo = pow(input.Color.rgb, 2.2) * tex2D(MainTexSampler, input.UV).rgb;
 
-    float fresnel = pow(saturate(dot(wn.xyz, ViewDir)), 4) * 0.5;
+    float fresnel = pow(saturate(dot(wn.xyz, viewDir)), 4) * 0.5;
     float3 directionalLight = lightColor * max(0.1, smoothstep(-0.3, -0.1, dot(wn.xyz, -normalize(lightDir) * 2)));
 
-    // float3 light = normalize(-lightDir);
-    // float3 normal = normalize(wn.xyz);
-    // float3 r = normalize(2 * dot(light, normal) * normal - light);
-    // float3 v = normalize(mul(normalize(ViewDir), WorldMatrix));
-
-    float2 matcapUv = mul((float3x3)InverseViewMatrix, wn).xy * 0.5 + 0.5;
-    float3 matcapColor = tex2D(MatcapSampler, matcapUv).rgb;
+    float3 matcapColor = tex2D(MatcapSampler, input.MatcapUV).rgb;
     float3 matcapAdjusted = pow(lerp(0, matcapColor, pow(Shininess, 0.5) * MatcapIntensity), MatcapPower);
 
-    float3 halfVector = normalize(lightDir + ViewDir);
+    float3 halfVector = normalize(-lightDir + viewDir);
     float specularDotProduct = saturate(dot(halfVector, wn.xyz));
     float inverseSpecularDotProduct = saturate(-dot(halfVector, wn.xyz));
     float3 specularTint = lerp(lightColor, albedo, Metallic * 0.5);
     float oneMinusReflectivity = 1 - Metallic;
     float3 metallicAlbedo = albedo * oneMinusReflectivity;
-    float3 specular = max(pow(specularDotProduct, 100 * pow(Shininess, 2)), 0) * specularTint;
-    float3 backLight = (max(pow(inverseSpecularDotProduct, 50 * pow(Shininess, 2)), 0) * specularTint) * ambientColor;
+    float3 specular = max(pow(specularDotProduct, 100 * Shininess), 0) * specularTint;
+    float3 backLight = (max(pow(inverseSpecularDotProduct, 50 * Shininess), 0) * specularTint) * ambientColor;
 
     float3 lighting = directionalLight + (ambient * oneMinusReflectivity);
 
     float3 diffuse = albedo * lighting;
     float3 reflective = (matcapAdjusted) * lerp(0.5, albedo, Metallic);
-    float3 rim = step(0.7, 1 - saturate(dot(wn.xyz, -normalize(ViewDir)))) * 0.5 * HueShift(metallicAlbedo.rgb, -0.1);
+    float3 rim = step(0.7, 1 - saturate(dot(wn.xyz, -normalize(viewDir)))) * 0.5 * HueShift(metallicAlbedo.rgb, -0.1);
 
-    float3 finalColor = diffuse + specular + backLight + reflective + rim + fresnel;
-    return float4(Posterize(Tonemap(finalColor), 8), 1);
+    float3 finalColor = diffuse + specular + backLight + reflective + rim;
+    return float4(Posterize(Tonemap(finalColor), 100), 1);
 }
 
 technique BasicColorDrawing

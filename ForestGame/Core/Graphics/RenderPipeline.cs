@@ -65,9 +65,9 @@ public static class RenderPipeline
             Position = new(0, -0.5f, 0),
         };
 
-        // _matCap = ContentLoader.Load<Texture2D>("matcaps/Matcap_Metal_04.jpeg")!;
+        _matCap = ContentLoader.Load<Texture2D>("matcaps/Matcap_Metal_04.jpeg")!;
         // _matCap = ContentLoader.Load<Texture2D>("matcaps/Matcap_Metal_02.png")!;
-        _matCap = ContentLoader.Load<Texture2D>("matcaps/Matcap_Metal_03.png")!;
+        // _matCap = ContentLoader.Load<Texture2D>("matcaps/Matcap_Metal_03.png")!;
 
         _rt = new(GraphicsDevice, 240, 135, false, SurfaceFormat.Color, DepthFormat.Depth24Stencil8);
         _rtUi = new(GraphicsDevice, 240, 135, false, SurfaceFormat.Color, DepthFormat.Depth24Stencil8);
@@ -152,6 +152,8 @@ public static class RenderPipeline
         _viewParam?.SetValue(ViewMatrix);
         _projectionParam?.SetValue(ProjectionMatrix);
         _inverseViewParam?.SetValue(Matrix.Invert(ViewMatrix));
+        _testEffect.Parameters["InverseWorldMatrix"]?.SetValue(Matrix.Invert(WorldMatrix));
+        _testEffect.Parameters["WorldSpaceCameraPos"]?.SetValue(Camera.Transform.Position);
 
         _gltfCube.Transform.Rotation *= Quaternion.CreateFromAxisAngle(Vector3.UnitZ, 0.01f);
         _gltfCube.Draw(GraphicsDevice, Matrix.Identity, _testEffect);
