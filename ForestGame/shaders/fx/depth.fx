@@ -69,12 +69,12 @@ struct VertexShaderOutput
     float2 MatcapUV : TEXCOORD3;
 };
 
-float2 MatcapUv(float3 worldNorm, matrix viewMatrix, float4 pos, matrix modelViewMatrix)
+float2 MatcapUv(float3 worldNorm, matrix modelMatrix, matrix viewMatrix, float4 pos)
 {
-    float3 viewNorm = normalize(mul( float4(worldNorm, 1), viewMatrix));
+    float3 viewNorm = normalize(mul( float4(worldNorm, 0), viewMatrix));
 
     // get view space position of vertex
-    float3 viewPos = mul( pos.xyz, modelViewMatrix).xyz;
+    float3 viewPos = mul(mul( pos, modelMatrix), viewMatrix);
     float3 viewDir = normalize(viewPos);
 
     // get vector perpendicular to both view direction and view normal
@@ -92,22 +92,29 @@ VertexShaderOutput MainVS(in VertexShaderInput input)
 
     float4 wvp = mul(mul(mul(input.Position, WorldMatrix), ViewMatrix), ProjectionMatrix);
     float3 snap = float3(ScreenResolution.xy / wvp.w, 1/wvp.z);
-    output.Position = float4(floor(wvp.xyz * snap) / snap, wvp.w);
+    float4 pos = float4(floor(wvp.xyz * snap) / snap, wvp.w);
+    output.Position = pos;
     output.WorldPosition = mul(input.Position, WorldMatrix);
     output.Color = input.Color;
-    output.Normal = input.Normal;
+    output.Normal = normalize(input.Normal);
     output.UV = input.UV;
 
-    float3 wn = normalize(mul( input.Normal, WorldMatrix ));
-    output.MatcapUV = MatcapUv(wn, ViewMatrix, input.Position, mul(WorldMatrix, ViewMatrix));
+    float3 wn = normalize(mul( normalize(input.Normal), WorldMatrix ));
+    output.MatcapUV = MatcapUv(wn, WorldMatrix, ViewMatrix, input.Position);
 
     return output;
 }
 
 float4 MainPS(VertexShaderOutput input) : COLOR
 {
-    float3 wn = normalize(mul( input.Normal, WorldMatrix ));
-    float3 vn = normalize(mul( wn, ViewMatrix));
+    float3 wn = normalize(mul( normalize(input.Normal), WorldMatrix ));
+    float3 vn = normalize(mul( float4(wn, 0), ViewMatrix));
+
+    float3 worldNorm = normalize(mul( normalize(input.Normal), WorldMatrix ));
+    float3 viewNorm = normalize(mul( float4(worldNorm, 0), ViewMatrix));
+
+    // return float4(viewNorm, 1);
+
 
     float3 viewDir = normalize(WorldSpaceCameraPos.xyz - input.WorldPosition.xyz);
 
