@@ -3,7 +3,7 @@ using Microsoft.Xna.Framework.Graphics;
 
 namespace ForestGame.Core.Graphics;
 
-public class ObjModel
+public class ObjModel : IModel
 {
     private int _faceCount;
 
@@ -38,15 +38,21 @@ public class ObjModel
         _buffer = [..buff];
     }
 
-    public void Draw(GraphicsDevice graphicsDevice)
+    public void Draw(GraphicsDevice graphicsDevice, Matrix world, Effect effect)
     {
-        graphicsDevice.DrawUserPrimitives(
-            PrimitiveType.TriangleList,
-            _buffer,
-            0,
-            _faceCount,
-            VertexPositionColorNormalTexture.VertexDeclaration
-        );
+        effect.Parameters["WorldMatrix"]?.SetValue(Transform * world);
+
+        foreach(var pass in effect.CurrentTechnique.Passes)
+        {
+            pass.Apply();
+            graphicsDevice.DrawUserPrimitives(
+                PrimitiveType.TriangleList,
+                _buffer,
+                0,
+                _faceCount,
+                VertexPositionColorNormalTexture.VertexDeclaration
+            );
+        }
     }
 
     public static ObjModel Load(string objPath)
@@ -165,4 +171,6 @@ public class ObjModel
 
         return mdl;
     }
+
+    static IModel IModel.Load(string path) => Load(path);
 }

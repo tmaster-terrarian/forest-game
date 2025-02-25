@@ -1,3 +1,6 @@
+using System.Runtime.CompilerServices;
+using Arch.Core;
+using Arch.Core.Extensions;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
@@ -5,6 +8,14 @@ namespace ForestGame.Core.Graphics;
 
 public static class RenderPipeline
 {
+    public enum Pass
+    {
+        WorldBasicDiffuse,
+        WorldLit,
+        ScreenBasicDiffuse,
+        ScreenLit,
+    }
+
     public static Matrix WorldMatrix { get; set; } = Matrix.CreateWorld(Vector3.Zero, Vector3.UnitZ, Vector3.UnitY);
     public static Matrix ViewMatrix { get; set; }
     public static Matrix ProjectionMatrix { get; set; }
@@ -32,11 +43,15 @@ public static class RenderPipeline
 
     private static int _resolutionScale = 4;
 
+    public static int ResolutionScale => _resolutionScale;
+
     private static Texture2D _matCap;
     private static Texture2D _gltfCubeTex;
 
     public static Effect EffectLit => _testEffect;
     public static Effect EffectBasicDiffuse => _effect;
+
+    internal static readonly HashSet<(Pass Pass, Action<Components.IDrawModel> DrawAction)> toDraw = [];
 
     public static void LoadContent()
     {
@@ -91,9 +106,19 @@ public static class RenderPipeline
         _testEffect.Parameters["Shininess"]?.SetValue(0.5f);
         _testEffect.Parameters["Metallic"]?.SetValue(1f);
 
+        for(int i = 0; i < 5; i++)
+        EcsManager.world.Create(
+            new Components.Model<GltfModel>("models/fucking-teapot.glb"),
+            new Transform {
+                Position = -Vector3.UnitX * 3 * i
+            },
+            _testEffect,
+            new Components.Matcapped(_matCap, 1, 2)
+        );
+
         _effect = ContentLoader.Load<Effect>("fx/default")!;
         _effect.Parameters["MainTex"]?.SetValue(WhiteTexture);
-        _effect.Parameters["LightIntensity"]?.SetValue(0);
+        _effect.Parameters["LightIntensity"]?.SetValue(1);
 
         _screenEffect = ContentLoader.Load<Effect>("fx/screen")!;
     }
@@ -104,6 +129,8 @@ public static class RenderPipeline
 
         GraphicsDevice.SetRenderTarget(_rt);
         GraphicsDevice.Clear(Color.Black);
+
+        SpriteBatch.Begin(samplerState: SamplerState.PointClamp);
 
         GraphicsDevice.SamplerStates[0] = SamplerState.PointClamp;
 
@@ -132,35 +159,30 @@ public static class RenderPipeline
             (float)gameTime.TotalGameTime.TotalSeconds / 30f * MathHelper.Pi
         );
 
-        _effect.Parameters["WorldMatrix"]?.SetValue(_cube.Transform);
         _effect.Parameters["ViewMatrix"]?.SetValue(ViewMatrix);
         _effect.Parameters["ProjectionMatrix"]?.SetValue(ProjectionMatrix);
-        foreach(var pass in _effect.CurrentTechnique.Passes)
-        {
-            pass.Apply();
-            _cube.Draw(GraphicsDevice);
-        }
-
-        _effect.Parameters["ViewMatrix"]?.SetValue(ViewMatrix);
-        _effect.Parameters["ProjectionMatrix"]?.SetValue(ProjectionMatrix);
-        Camera.Draw(GraphicsDevice);
-
-        _testEffect.Parameters["ViewDir"]?.SetValue(Camera.Forward);
         _testEffect.Parameters["ViewMatrix"]?.SetValue(ViewMatrix);
         _testEffect.Parameters["ProjectionMatrix"]?.SetValue(ProjectionMatrix);
-        _testEffect.Parameters["InverseViewMatrix"]?.SetValue(Matrix.Invert(ViewMatrix));
-        _testEffect.Parameters["InverseWorldMatrix"]?.SetValue(Matrix.Invert(WorldMatrix));
-        _testEffect.Parameters["WorldSpaceCameraPos"]?.SetValue(Camera.Transform.Position);
+
+        Camera.Draw(GraphicsDevice);
+
+        _cube.Draw(GraphicsDevice, Matrix.Identity, _effect);
 
         // _gltfCube.Transform.Rotation *= Quaternion.CreateFromAxisAngle(Vector3.UnitZ, 0.01f);
-        _gltfCube.Draw(GraphicsDevice, Matrix.Identity, _testEffect);
+        // _gltfCube.Draw(GraphicsDevice, Matrix.Identity, _testEffect);
+
+        EcsManager.Draw(GraphicsDevice, gameTime);
 
         GraphicsUtil.DrawGrid(GraphicsDevice, 16, 1, Matrix.CreateTranslation(new(-8, -8, 0)) * Matrix.CreateRotationX(MathHelper.PiOver2));
+
+        SpriteBatch.End();
 
         GraphicsDevice.Reset();
 
         GraphicsDevice.SetRenderTarget(_rtUi);
         GraphicsDevice.Clear(Color.Transparent);
+
+        SpriteBatch.Begin(samplerState: SamplerState.PointClamp);
 
         ProjectionMatrix = Matrix.CreatePerspectiveFieldOfView(
             MathHelper.ToRadians(30),
@@ -175,20 +197,21 @@ public static class RenderPipeline
             * Matrix.CreateTranslation(Camera.Transform.Position + Camera.Forward)
         );
 
-        SpriteBatch.Begin(samplerState: SamplerState.PointClamp);
+        if(_cursorTex is not null)
         {
-            if(_cursorTex is not null)
-            {
-                SpriteBatch.Draw(
-                    _cursorTex,
-                    new Vector2(Input.MousePosition.X / _resolutionScale, Input.MousePosition.Y / _resolutionScale),
-                    Color.White
-                );
-            }
+            Vector2 cursorPos = new(Input.MousePosition.X / _resolutionScale, Input.MousePosition.Y / _resolutionScale);
+            SpriteBatch.Draw(
+                _cursorTex,
+                cursorPos,
+                Color.White
+            );
         }
+
         SpriteBatch.End();
 
         GraphicsDevice.Reset();
+
+        toDraw.Clear();
 
         SpriteBatch.Begin(samplerState: SamplerState.PointClamp, effect: _screenEffect);
         {

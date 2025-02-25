@@ -37,6 +37,8 @@ public class Game1 : Game
         });
         Locale.CurrentLanguage = "en-us";
 
+        EcsManager.Start();
+
         // StageManager.Initialize();
 
         base.Initialize();
@@ -59,6 +61,8 @@ public class Game1 : Game
 
         if (Input.GetPressed(Buttons.Back) || Input.GetPressed(Keys.Escape))
             Exit();
+
+        EcsManager.Update(gameTime);
 
         RenderPipeline.Camera.Update(gameTime);
 

@@ -6,6 +6,7 @@ namespace ForestGame.Core.Graphics;
 public static class GraphicsUtil
 {
     private static BasicEffect _basicEffect;
+    private static Effect _vertSnapEffect;
     private static VertexPositionColor[] _gridVertices;
     private static bool _isInitialized = false;
 
@@ -15,6 +16,12 @@ public static class GraphicsUtil
         {
             VertexColorEnabled = true
         };
+
+        _vertSnapEffect = ContentLoader.Load<Effect>("fx/vertsnap")!;
+        Vector2 vertexSnapRes = Vector2.Floor(RenderPipeline.Window.ClientBounds.Size.ToVector2() / RenderPipeline.ResolutionScale / 2);
+
+        _vertSnapEffect.Parameters["ScreenResolution"]?.SetValue(vertexSnapRes);
+        _vertSnapEffect.Parameters["MainTex"]?.SetValue(RenderPipeline.WhiteTexture);
     }
 
     public static void DrawGrid(GraphicsDevice graphicsDevice, int gridSize, float cellSize, Matrix world)

@@ -7,7 +7,7 @@ using System.Linq;
 
 namespace ForestGame.Core.Graphics;
 
-public class GltfModel
+public class GltfModel : IModel
 {
     public Scene Scene { get; private set; }
 
@@ -95,6 +95,8 @@ public class GltfModel
 
         return mdl;
     }
+
+    static IModel IModel.Load(string path) => Load(path);
 
     private void Build()
     {
