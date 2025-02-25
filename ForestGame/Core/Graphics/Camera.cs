@@ -22,11 +22,11 @@ public class Camera
     private Vector3 _localVelocity;
 
     private float[][] floats = [
-        [0.1f, 0.3f, 0.7f, 0.7f, 0.3f],
+        [0.0f, 0.3f, 0.7f, 0.7f, 0.3f],
         [0.3f, 0.7f, 0.9f, 0.9f, 0.7f],
         [0.7f, 0.9f, 1.0f, 1.0f, 0.9f],
         [0.3f, 0.7f, 0.9f, 1.0f, 0.9f],
-        [0.1f, 0.3f, 0.7f, 0.9f, 0.7f]
+        [0.0f, 0.3f, 0.7f, 0.9f, 0.7f]
     ];
 
     public Camera()
