@@ -224,4 +224,25 @@ public static class MathUtil
     {
         return SmoothCos(Clamp01(value), exp);
     }
+
+    public static float RandomRange(float min, float max)
+    {
+        return Random.Shared.NextSingle() * (max - min) + min;
+    }
+
+    public static Vector3 RandomInsideUnitSphere() {
+        var u = Random.Shared.NextSingle();
+        var v = Random.Shared.NextSingle();
+        var theta = u * 2.0f * MathF.PI;
+        var phi = MathF.Acos(2.0f * v - 1.0f);
+        var r = MathF.Cbrt(Random.Shared.NextSingle());
+        var sinTheta = MathF.Sin(theta);
+        var cosTheta = MathF.Cos(theta);
+        var sinPhi = MathF.Sin(phi);
+        var cosPhi = MathF.Cos(phi);
+        var x = r * sinPhi * cosTheta;
+        var y = r * sinPhi * sinTheta;
+        var z = r * cosPhi;
+        return new Vector3(x, y, z);
+    }
 }

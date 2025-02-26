@@ -106,15 +106,25 @@ public static class RenderPipeline
         _testEffect.Parameters["Shininess"]?.SetValue(0.5f);
         _testEffect.Parameters["Metallic"]?.SetValue(1f);
 
-        for(int i = 0; i < 5; i++)
-        EcsManager.world.Create(
-            new Components.Model<GltfModel>("models/fucking-teapot.glb"),
-            new Transform {
-                Position = -Vector3.UnitX * 3 * i
-            },
-            _testEffect,
-            new Components.Matcapped(_matCap, 1, 2)
-        );
+        for(int i = 0; i < 30; i++)
+            EcsManager.world.Create(
+                new Components.Model<GltfModel>("models/fucking-teapot.glb"),
+                new Transform {
+                    Position = MathUtil.RandomInsideUnitSphere() * 20,
+                    Rotation = Quaternion.CreateFromYawPitchRoll(
+                        Random.Shared.NextSingle() * MathHelper.TwoPi,
+                        Random.Shared.NextSingle() * MathHelper.TwoPi,
+                        Random.Shared.NextSingle() * MathHelper.TwoPi
+                    ),
+                    Scale = new Vector3(
+                        MathUtil.RandomRange(0.5f, 2f),
+                        MathUtil.RandomRange(0.5f, 2f),
+                        MathUtil.RandomRange(0.5f, 2f)
+                    )
+                },
+                _testEffect,
+                new Components.Matcapped(_matCap, 1, 2)
+            );
 
         _effect = ContentLoader.Load<Effect>("fx/default")!;
         _effect.Parameters["MainTex"]?.SetValue(WhiteTexture);
