@@ -12,8 +12,6 @@ public static class EcsManager
     private static bool _initialized;
 
     private static readonly QueryDescription _velocityQuery = new QueryDescription().WithAll<Velocity, Transform>();
-    private static readonly QueryDescription _drawModelQuery = new QueryDescription().WithAll<Model<GltfModel>, Transform, Effect>();
-    private static readonly QueryDescription _drawSpriteQuery = new QueryDescription().WithAll<IDrawSprite>();
 
     public static World world { get; private set; }
 
@@ -27,41 +25,42 @@ public static class EcsManager
 
     internal static void Draw(GraphicsDevice graphicsDevice, GameTime gameTime)
     {
-        world.Query(_drawModelQuery, (Entity entity, ref Model<GltfModel> drawer, ref Transform transform, ref Effect effect) =>
+        void drawModelType<T>() where T : class, IModel
         {
-            effect.Parameters["WorldMatrix"]?.SetValue(transform);
-            effect.Parameters["ViewMatrix"]?.SetValue(RenderPipeline.ViewMatrix);
-            effect.Parameters["ProjectionMatrix"]?.SetValue(RenderPipeline.ProjectionMatrix);
-            effect.Parameters["InverseWorldMatrix"]?.SetValue(Matrix.Invert(transform));
-            effect.Parameters["InverseViewMatrix"]?.SetValue(Matrix.Invert(RenderPipeline.ViewMatrix));
-            effect.Parameters["ViewDir"]?.SetValue(RenderPipeline.Camera.Forward);
-            effect.Parameters["WorldSpaceCameraPos"]?.SetValue(RenderPipeline.Camera.Transform.Position);
-
-            Vector2 vertexSnapRes = Vector2.Floor(RenderPipeline.Window.ClientBounds.Size.ToVector2() / RenderPipeline.ResolutionScale / 2);
-            effect.Parameters["ScreenResolution"]?.SetValue(vertexSnapRes);
-
-            if(entity.TryGet<Textured>(out var tex))
-                effect.Parameters["MainTex"]?.SetValue(tex);
-
-            if(entity.TryGet<Matcapped>(out var matcap))
+            world.Query(new QueryDescription().WithAll<Model<T>, Transform, Effect>(), (Entity entity, ref Model<T> drawer, ref Transform transform, ref Effect effect) =>
             {
-                effect.Parameters["MatcapTex"]?.SetValue(matcap);
-                effect.Parameters["MatcapIntensity"]?.SetValue(matcap.MatcapIntensity);
-                effect.Parameters["MatcapPower"]?.SetValue(matcap.MatcapPower);
-            }
-            else
-            {
-                effect.Parameters["MatcapTex"]?.SetValue(RenderPipeline.WhiteTexture);
-                effect.Parameters["MatcapIntensity"]?.SetValue(0);
-            }
+                effect.Parameters["WorldMatrix"]?.SetValue(transform);
+                effect.Parameters["ViewMatrix"]?.SetValue(RenderPipeline.ViewMatrix);
+                effect.Parameters["ProjectionMatrix"]?.SetValue(RenderPipeline.ProjectionMatrix);
+                effect.Parameters["InverseWorldMatrix"]?.SetValue(Matrix.Invert(transform));
+                effect.Parameters["InverseViewMatrix"]?.SetValue(Matrix.Invert(RenderPipeline.ViewMatrix));
+                effect.Parameters["ViewDir"]?.SetValue(RenderPipeline.Camera.Forward);
+                effect.Parameters["WorldSpaceCameraPos"]?.SetValue(RenderPipeline.Camera.Transform.Position);
 
-            drawer.Draw(entity, gameTime, graphicsDevice, transform, effect);
-        });
+                Vector2 vertexSnapRes = Vector2.Floor(RenderPipeline.Window.ClientBounds.Size.ToVector2() / RenderPipeline.ResolutionScale / 2);
+                effect.Parameters["ScreenResolution"]?.SetValue(vertexSnapRes);
 
-        world.Query(_drawSpriteQuery, (Entity entity, ref IDrawSprite drawer) =>
-        {
-            drawer.Draw(entity, gameTime);
-        });
+                if(entity.TryGet<Textured>(out var tex))
+                    effect.Parameters["MainTex"]?.SetValue(tex);
+
+                if(entity.TryGet<Matcapped>(out var matcap))
+                {
+                    effect.Parameters["MatcapTex"]?.SetValue(matcap);
+                    effect.Parameters["MatcapIntensity"]?.SetValue(matcap.MatcapIntensity);
+                    effect.Parameters["MatcapPower"]?.SetValue(matcap.MatcapPower);
+                }
+                else
+                {
+                    effect.Parameters["MatcapTex"]?.SetValue(RenderPipeline.WhiteTexture);
+                    effect.Parameters["MatcapIntensity"]?.SetValue(0);
+                }
+
+                drawer.Draw(entity, gameTime, graphicsDevice, transform, effect);
+            });
+        }
+
+        drawModelType<GltfModel>();
+        drawModelType<ObjModel>();
     }
 
     internal static void Start()
