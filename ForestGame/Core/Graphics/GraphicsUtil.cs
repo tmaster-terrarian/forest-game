@@ -24,11 +24,11 @@ public static class GraphicsUtil
         _vertSnapEffect.Parameters["MainTex"]?.SetValue(RenderPipeline.WhiteTexture);
     }
 
-    public static void DrawGrid(GraphicsDevice graphicsDevice, int gridSize, float cellSize, Matrix world)
+    public static void DrawGrid(GraphicsDevice graphicsDevice, int gridSize, float cellSize, Color color, Matrix world)
     {
         if (!_isInitialized)
         {
-            Color color = new Color(1f, 1f, 1f, 0.1f) * 0.1f;
+            // Color color = new Color(1f, 1f, 1f, 0.1f) * 0.1f;
 
             // Create grid vertices
             _gridVertices = new VertexPositionColor[(gridSize + 1) * 4];

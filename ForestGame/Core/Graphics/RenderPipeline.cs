@@ -201,7 +201,7 @@ public static class RenderPipeline
         DrawPass(_testEffect, EffectPass.Lit, RenderPass.World);
         DrawPass(_effect, EffectPass.BasicDiffuse, RenderPass.World);
 
-        GraphicsUtil.DrawGrid(GraphicsDevice, 16, 1, Matrix.CreateTranslation(new(-8, -8, 0)) * Matrix.CreateRotationX(MathHelper.PiOver2));
+        // GraphicsUtil.DrawGrid(GraphicsDevice, 16, 1, Color.White * 0.95f, Matrix.CreateTranslation(new(-8, -8, 0)) * Matrix.CreateRotationX(MathHelper.PiOver2));
 
         SpriteBatch.End();
 
