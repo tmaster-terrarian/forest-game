@@ -1,5 +1,5 @@
 using Microsoft.Xna.Framework;
 
-namespace ForestGame.Core.Components;
+namespace ForestGame.Components;
 
 public record struct Velocity(Vector3 Delta) : IRequiresTransform;

@@ -43,7 +43,8 @@ public class Game1 : Game
                         MathUtil.RandomRange(0.5f, 2f)
                     )
                 },
-                new Components.AspectIdentity(Registries.Aspects.Teapot)
+                new Components.AspectIdentity(Registries.Aspects.Teapot),
+                new Components.Bouncy(Random.Shared.NextSingle())
             );
         }
 

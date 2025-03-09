@@ -2,7 +2,7 @@ using Arch.Core;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
-namespace ForestGame.Core.Components;
+namespace ForestGame.Components;
 
 public interface IDrawModel : IRequiresTransform, IRequiresEffect
 {

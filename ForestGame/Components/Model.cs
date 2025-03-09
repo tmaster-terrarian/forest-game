@@ -3,7 +3,7 @@ using ForestGame.Core.Graphics;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
-namespace ForestGame.Core.Components;
+namespace ForestGame.Components;
 
 public record struct Model<M>(string ModelPath) : IDrawModel where M : class, IModel
 {

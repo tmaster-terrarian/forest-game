@@ -8,11 +8,13 @@ public static class ComponentSystems
     public const string Player = "player";
     public const string Physics = "physics";
     public const string ModelGraphics = "model_graphics";
+    public const string Bouncing = "bouncing";
 
     internal static void Initialize()
     {
         Registry.Register<IComponentSystem>(Player, new PlayerSystem());
         Registry.Register<IComponentSystem>(Physics, new PhysicsSystem());
         Registry.Register<IComponentSystem>(ModelGraphics, new ModelGraphicsSystem());
+        Registry.Register<IComponentSystem>(Bouncing, new BouncingSystem());
     }
 }

@@ -1,7 +1,7 @@
 using Arch.Core;
 using Arch.Core.Extensions;
+using ForestGame.Components;
 using ForestGame.Core;
-using ForestGame.Core.Components;
 using ForestGame.Core.Graphics;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;

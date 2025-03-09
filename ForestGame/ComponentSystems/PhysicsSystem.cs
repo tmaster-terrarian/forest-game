@@ -1,6 +1,6 @@
 using Arch.Core;
+using ForestGame.Components;
 using ForestGame.Core;
-using ForestGame.Core.Components;
 
 namespace ForestGame.ComponentSystems;
 

@@ -1,10 +1,11 @@
 using Arch.Core;
 using Arch.Core.Extensions;
+using ForestGame.Core;
 using ForestGame.Core.Graphics;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
-namespace ForestGame.Core.Components;
+namespace ForestGame.Components;
 
 public record struct Sprite(Texture2D Texture, Rectangle? SourceRect, Color Color, SpriteEffects Effects)
 {

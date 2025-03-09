@@ -1,3 +1,3 @@
-namespace ForestGame.Core.Components;
+namespace ForestGame.Components;
 
 public record struct AspectIdentity(string ID);
