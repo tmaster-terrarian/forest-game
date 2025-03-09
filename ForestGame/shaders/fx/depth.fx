@@ -92,7 +92,7 @@ VertexShaderOutput MainVS(in VertexShaderInput input)
 
     float4 wvp = mul(mul(mul(input.Position, WorldMatrix), ViewMatrix), ProjectionMatrix);
     float3 snap = float3(ScreenResolution.xy / wvp.w, 1/wvp.z);
-    float4 pos = float4(floor(wvp.xyz * snap) / snap, wvp.w);
+    float4 pos = float4(trunc(wvp.xyz * snap) / snap, wvp.w);
     output.Position = pos;
     output.WorldPosition = mul(input.Position, WorldMatrix);
     output.Color = input.Color;
