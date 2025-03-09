@@ -155,7 +155,7 @@ public static class RenderPipeline
         GraphicsDevice.Clear(Color.CornflowerBlue);
 
         GraphicsDevice.SetRenderTarget(_rt);
-        GraphicsDevice.Clear(Color.Black);
+        GraphicsDevice.Clear(Color.White);
 
         SpriteBatch.Begin(samplerState: SamplerState.PointClamp);
 

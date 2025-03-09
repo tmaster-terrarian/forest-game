@@ -108,13 +108,8 @@ VertexShaderOutput MainVS(in VertexShaderInput input)
 float4 MainPS(VertexShaderOutput input) : COLOR
 {
     float3 wn = normalize(mul( normalize(input.Normal), WorldMatrix ));
-    float3 vn = normalize(mul( float4(wn, 0), ViewMatrix));
-
-    float3 worldNorm = normalize(mul( normalize(input.Normal), WorldMatrix ));
-    float3 viewNorm = normalize(mul( float4(worldNorm, 0), ViewMatrix));
-
-    // return float4(viewNorm, 1);
-
+    float3 depthVector = WorldSpaceCameraPos - input.WorldPosition;
+    float depth = saturate((depthVector.x * depthVector.x + depthVector.y * depthVector.y + depthVector.z * depthVector.z) / (25 * 25));
 
     float3 viewDir = normalize(WorldSpaceCameraPos.xyz - input.WorldPosition.xyz);
 
@@ -148,7 +143,9 @@ float4 MainPS(VertexShaderOutput input) : COLOR
     float3 rim = step(0.7, 1 - saturate(dot(wn.xyz, -normalize(viewDir)))) * 0.5 * HueShift(metallicAlbedo.rgb, -0.1);
 
     float3 finalColor = diffuse + specular + backLight + reflective + rim;
-    return float4(Posterize(Tonemap(finalColor), 100), 1);
+
+    float3 foggyColor = lerp(finalColor, float3(1, 1, 1), pow(depth, 0.5));
+    return float4(Posterize(Tonemap(foggyColor), 100), 1);
 }
 
 technique BasicColorDrawing
