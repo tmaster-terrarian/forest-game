@@ -245,4 +245,17 @@ public static class MathUtil
         var z = r * cosPhi;
         return new Vector3(x, y, z);
     }
+
+    public static Vector3 Project(Vector3 vector, Vector3 onNormal)
+    {
+        float num = Vector3.Dot(onNormal, onNormal);
+        if (num < float.Epsilon)
+            return Vector3.Zero;
+        return onNormal * Vector3.Dot(vector, onNormal) / num;
+    }
+
+    public static Vector3 ProjectOnPlane(Vector3 vector, Vector3 planeNormal)
+    {
+        return vector - Project(vector, planeNormal);
+    }
 }
