@@ -64,6 +64,8 @@ public static class RenderPipeline
     private static readonly HashSet<string> _matcapTexturesToLoad = [];
     private static readonly Dictionary<string, Texture2D> _matcapTextureCache = [];
 
+    private static SkyboxRenderer _skyboxRenderer;
+
     internal static void Initialize(GameWindow window, GraphicsDevice graphicsDevice)
     {
         Window = window;
@@ -126,12 +128,16 @@ public static class RenderPipeline
         _testEffect.Parameters["MatcapPower"]?.SetValue(2f);
         _testEffect.Parameters["Shininess"]?.SetValue(0.5f);
         _testEffect.Parameters["Metallic"]?.SetValue(1f);
+        _testEffect.Parameters["SkyColor"]?.SetValue(Color.White.ToVector3());
+        _testEffect.Parameters["SkyTex"]?.SetValue(ContentLoader.Load<Texture2D>("textures/skybox_test_texture.png"));
 
         _effect = ContentLoader.Load<Effect>("fx/default")!;
         _effect.Parameters["MainTex"]?.SetValue(WhiteTexture);
         _effect.Parameters["LightIntensity"]?.SetValue(1);
 
         _screenEffect = ContentLoader.Load<Effect>("fx/screen")!;
+
+        _skyboxRenderer = new SkyboxRenderer("textures/skybox_test_texture.png", GraphicsDevice);
     }
 
     public static void Submit((Aspect aspect, Transform transform) tuple)
@@ -170,7 +176,7 @@ public static class RenderPipeline
         ProjectionMatrix = Matrix.CreatePerspectiveFieldOfView(
             MathHelper.ToRadians(95),
             GraphicsDevice.Viewport.AspectRatio,
-            0.01f, 300.0f
+            0.01f, 25.0f
         );
 
         GraphicsDevice.RasterizerState = new()
@@ -192,6 +198,8 @@ public static class RenderPipeline
         _testEffect.Parameters["ProjectionMatrix"]?.SetValue(ProjectionMatrix);
 
         Camera.Draw(GraphicsDevice);
+
+        _skyboxRenderer.Draw(Camera.Transform.Position, Quaternion.Identity);
 
         _cube.Draw(GraphicsDevice, Matrix.Identity, _effect);
 

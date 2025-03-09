@@ -50,6 +50,12 @@ sampler2D MainTexSampler = sampler_state
 {
     Texture = <MainTex>;
 };
+float3 SkyColor;
+Texture2D SkyTex;
+sampler2D SkyTexSampler = sampler_state
+{
+    Texture = <SkyTex>;
+};
 
 struct VertexShaderInput
 {
@@ -69,6 +75,8 @@ struct VertexShaderOutput
     float2 MatcapUV : TEXCOORD3;
 };
 
+static const float PI = 3.14159265f;
+
 float2 MatcapUv(float3 worldNorm, matrix modelMatrix, matrix viewMatrix, float4 pos)
 {
     float3 viewNorm = normalize(mul( float4(worldNorm, 0), viewMatrix));
@@ -84,6 +92,14 @@ float2 MatcapUv(float3 worldNorm, matrix modelMatrix, matrix viewMatrix, float4 
     viewNorm = float3(-viewCross.y, viewCross.x, 0.0);
 
     return viewNorm.xy * 0.5 + 0.5;
+}
+
+float2 SphereMapUv(float3 direction) {
+
+    const float PIm2 = 2.0 * PI;
+    direction = normalize(direction);
+    float2 uv = float2((atan2(direction.z, direction.x) / PIm2) + 0.5, acos(-direction.y) / PI);
+    return uv;
 }
 
 VertexShaderOutput MainVS(in VertexShaderInput input)
@@ -109,7 +125,8 @@ float4 MainPS(VertexShaderOutput input) : COLOR
 {
     float3 wn = normalize(mul( normalize(input.Normal), WorldMatrix ));
     float3 depthVector = WorldSpaceCameraPos - input.WorldPosition;
-    float depth = saturate((depthVector.x * depthVector.x + depthVector.y * depthVector.y + depthVector.z * depthVector.z) / (25 * 25));
+    // float depth = saturate((depthVector.x * depthVector.x + depthVector.y * depthVector.y + depthVector.z * depthVector.z) / (25 * 25));
+    float depth = saturate(length(depthVector) / 25);
 
     float3 viewDir = normalize(WorldSpaceCameraPos.xyz - input.WorldPosition.xyz);
 
@@ -144,8 +161,8 @@ float4 MainPS(VertexShaderOutput input) : COLOR
 
     float3 finalColor = diffuse + specular + backLight + reflective + rim;
 
-    float3 foggyColor = lerp(finalColor, float3(1, 1, 1), pow(depth, 0.5));
-    return float4(Posterize(Tonemap(foggyColor), 100), 1);
+    float3 foggyColor = lerp(finalColor, SkyColor * tex2D(SkyTexSampler, SphereMapUv(viewDir * float3(-1, 1, 1))), pow(depth, 0.5));
+    return float4(foggyColor, 1);
 }
 
 technique BasicColorDrawing

@@ -7,6 +7,12 @@
 	#define PS_SHADERMODEL ps_4_0_level_9_1
 #endif
 
+float3 Tonemap(float3 c)
+{
+	float lengthOver = max(length(c) - 1, 0) * 0.3;
+	return c + lengthOver;
+}
+
 float4 ScreenResolution;
 
 Texture2D SpriteTexture;
@@ -38,7 +44,7 @@ float4 MainPS(VertexShaderOutput input) : COLOR
 
     float ditherValue = (ditherMatrix[pos.x % 4][pos.y % 4]) / 16;
 
-    return floor(float4(col.rgb + ditherValue * 0.05, col.a) * 8) / 8;
+    return floor(float4(Tonemap(col.rgb) + ditherValue * 0.05, col.a) * 8) / 8;
 }
 
 technique BasicColorDrawing
