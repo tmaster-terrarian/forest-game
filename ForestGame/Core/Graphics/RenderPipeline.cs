@@ -161,7 +161,7 @@ public static class RenderPipeline
         GraphicsDevice.Clear(Color.CornflowerBlue);
 
         GraphicsDevice.SetRenderTarget(_rt);
-        GraphicsDevice.Clear(Color.White);
+        GraphicsDevice.Clear(Color.Black);
 
         SpriteBatch.Begin(samplerState: SamplerState.PointClamp);
 
@@ -209,7 +209,7 @@ public static class RenderPipeline
         DrawPass(_testEffect, EffectPass.Lit, RenderPass.World);
         DrawPass(_effect, EffectPass.BasicDiffuse, RenderPass.World);
 
-        // GraphicsUtil.DrawGrid(GraphicsDevice, 16, 1, Color.White * 0.95f, Matrix.CreateTranslation(new(-8, -8, 0)) * Matrix.CreateRotationX(MathHelper.PiOver2));
+        GraphicsUtil.DrawGrid(GraphicsDevice, 16, 1, Color.White * 0.1f, Matrix.CreateTranslation(new(-8, -8, 0)) * Matrix.CreateRotationX(MathHelper.PiOver2));
 
         SpriteBatch.End();
 

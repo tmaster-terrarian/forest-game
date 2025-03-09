@@ -115,7 +115,7 @@ public class Camera
                     RenderPipeline.WhiteTexture,
                     Color.Lerp(Color.Gray, Color.White, floats[z][x]),
                     Matrix.CreateRotationX(MathHelper.PiOver2) * Matrix.CreateTranslation(new(x + 0.5f, floats[z][x], z + 0.5f)),
-                    RenderPipeline.EffectBasicDiffuse,
+                    RenderPipeline.EffectLit,
                     1, 1,
                     Vector2.Zero, Vector2.One
                 );
