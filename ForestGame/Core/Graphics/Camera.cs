@@ -35,9 +35,10 @@ public class Camera
         _lastMousePos = Input.MousePosition;
     }
 
-    public void Update(GameTime gameTime)
+    public void Update()
     {
-        var time = (float)gameTime.TotalGameTime.TotalSeconds * 60;
+        // var time = (float)gameTime.TotalGameTime.TotalSeconds * 60;
+        var time = Time.Elapsed * 60;
 
         // Transform.Position = new Vector3(
         //     2.5f * MathF.Cos(time * 0.01f),
@@ -89,16 +90,16 @@ public class Camera
         {
             inputDir = Vector2.Normalize(inputDir);
 
-            _localVelocity.X = MathUtil.Approach(_localVelocity.X, inputDir.X * _speed, 0.1f * gameTime.Delta());
-            _localVelocity.Z = MathUtil.Approach(_localVelocity.Z, inputDir.Y * _speed, 0.1f * gameTime.Delta());
+            _localVelocity.X = MathUtil.Approach(_localVelocity.X, inputDir.X * _speed, 0.1f * Time.Delta);
+            _localVelocity.Z = MathUtil.Approach(_localVelocity.Z, inputDir.Y * _speed, 0.1f * Time.Delta);
         }
         else
         {
-            _localVelocity.X = MathUtil.Approach(_localVelocity.X, 0, 0.08f * gameTime.Delta());
-            _localVelocity.Z = MathUtil.Approach(_localVelocity.Z, 0, 0.08f * gameTime.Delta());
+            _localVelocity.X = MathUtil.Approach(_localVelocity.X, 0, 0.08f * Time.Delta);
+            _localVelocity.Z = MathUtil.Approach(_localVelocity.Z, 0, 0.08f * Time.Delta);
         }
 
-        Transform.Position += Vector3.Transform(_localVelocity * 60 * gameTime.Delta(), Quaternion.CreateFromYawPitchRoll(_yaw, 0, 0));
+        Transform.Position += Vector3.Transform(_localVelocity * 60 * Time.Delta, Quaternion.CreateFromYawPitchRoll(_yaw, 0, 0));
 
         Transform.Position = Transform.Position with { Y = 1.3f + height };
     }

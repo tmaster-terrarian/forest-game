@@ -48,9 +48,4 @@ public static class _Extensions
     {
         return new(vector.X, vector.Y);
     }
-
-    public static float Delta(this GameTime gameTime)
-    {
-        return (float)gameTime.ElapsedGameTime.TotalSeconds;
-    }
 }

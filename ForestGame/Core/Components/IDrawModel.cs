@@ -6,5 +6,5 @@ namespace ForestGame.Core.Components;
 
 public interface IDrawModel : IRequiresTransform, IRequiresEffect
 {
-    public void Draw(Entity entity, GameTime gameTime, GraphicsDevice graphicsDevice, Matrix world, Effect effect);
+    public void Draw(Entity entity, GraphicsDevice graphicsDevice, Matrix world, Effect effect);
 }

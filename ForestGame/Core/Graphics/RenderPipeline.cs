@@ -1,6 +1,7 @@
 using System.Runtime.CompilerServices;
 using Arch.Core;
 using Arch.Core.Extensions;
+using ForestGame.Core.Components;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
@@ -8,12 +9,15 @@ namespace ForestGame.Core.Graphics;
 
 public static class RenderPipeline
 {
-    public enum Pass
+    public enum EffectPass
     {
-        WorldBasicDiffuse,
-        WorldLit,
-        ScreenBasicDiffuse,
-        ScreenLit,
+        BasicDiffuse,
+        Lit,
+    }
+    public enum RenderPass
+    {
+        World,
+        Screen,
     }
 
     public static Matrix WorldMatrix { get; set; } = Matrix.CreateWorld(Vector3.Zero, Vector3.UnitZ, Vector3.UnitY);
@@ -23,7 +27,7 @@ public static class RenderPipeline
     public static Texture2D WhiteTexture { get; private set; }
 
     public static GraphicsDevice GraphicsDevice { get; set; }
-    public static GameWindow Window { get; set; }
+    public static GameWindow Window { get; private set; }
     public static SpriteBatch SpriteBatch { get; private set; }
 
     public static Camera Camera { get; set; }
@@ -51,9 +55,25 @@ public static class RenderPipeline
     public static Effect EffectLit => _testEffect;
     public static Effect EffectBasicDiffuse => _effect;
 
-    internal static readonly HashSet<(Pass Pass, Action<Components.IDrawModel> DrawAction)> toDraw = [];
+    private static readonly List<(Aspect aspect, Transform transform)> _toDraw = [];
 
-    public static void LoadContent()
+    private static readonly Dictionary<string, GltfModel> _modelCache = [];
+
+    private static readonly HashSet<string> _texturesToLoad = [];
+    private static readonly Dictionary<string, Texture2D> _textureCache = [];
+
+    internal static void Initialize(GameWindow window, GraphicsDevice graphicsDevice)
+    {
+        Window = window;
+        Window.ClientSizeChanged += (object? sender, EventArgs e) => {
+            OnWindowResize(Window.ClientBounds);
+        };
+        Window.AllowUserResizing = true;
+
+        GraphicsDevice = graphicsDevice;
+    }
+
+    internal static void LoadContent()
     {
         SpriteBatch = new SpriteBatch(GraphicsDevice);
 
@@ -106,26 +126,6 @@ public static class RenderPipeline
         _testEffect.Parameters["Shininess"]?.SetValue(0.5f);
         _testEffect.Parameters["Metallic"]?.SetValue(1f);
 
-        for(int i = 0; i < 30; i++)
-            EcsManager.world.Create(
-                new Components.Model<GltfModel>("models/fucking-teapot.glb"),
-                new Transform {
-                    Position = MathUtil.RandomInsideUnitSphere() * 20,
-                    Rotation = Quaternion.CreateFromYawPitchRoll(
-                        Random.Shared.NextSingle() * MathHelper.TwoPi,
-                        Random.Shared.NextSingle() * MathHelper.TwoPi,
-                        Random.Shared.NextSingle() * MathHelper.TwoPi
-                    ),
-                    Scale = new Vector3(
-                        MathUtil.RandomRange(0.5f, 2f),
-                        MathUtil.RandomRange(0.5f, 2f),
-                        MathUtil.RandomRange(0.5f, 2f)
-                    )
-                },
-                _testEffect,
-                new Components.Matcapped(_matCap, 1, 2)
-            );
-
         _effect = ContentLoader.Load<Effect>("fx/default")!;
         _effect.Parameters["MainTex"]?.SetValue(WhiteTexture);
         _effect.Parameters["LightIntensity"]?.SetValue(1);
@@ -133,7 +133,20 @@ public static class RenderPipeline
         _screenEffect = ContentLoader.Load<Effect>("fx/screen")!;
     }
 
-    public static void Draw(GameTime gameTime)
+    public static void Submit((Aspect aspect, Transform transform) tuple)
+    {
+        _toDraw.Add(tuple);
+    }
+
+    internal static void LoadTextures()
+    {
+        GraphicsDevice.Reset();
+        foreach(var path in _texturesToLoad)
+            _textureCache[path] = ContentLoader.Load<Texture2D>(path) ?? WhiteTexture;
+        _texturesToLoad.Clear();
+    }
+
+    public static void Draw()
     {
         GraphicsDevice.Clear(Color.CornflowerBlue);
 
@@ -166,7 +179,7 @@ public static class RenderPipeline
 
         _cube.Transform.Rotation = Quaternion.CreateFromAxisAngle(
             Vector3.UnitY,
-            (float)gameTime.TotalGameTime.TotalSeconds / 30f * MathHelper.Pi
+            Time.Elapsed / 30f * MathHelper.Pi
         );
 
         _effect.Parameters["ViewMatrix"]?.SetValue(ViewMatrix);
@@ -181,7 +194,8 @@ public static class RenderPipeline
         // _gltfCube.Transform.Rotation *= Quaternion.CreateFromAxisAngle(Vector3.UnitZ, 0.01f);
         // _gltfCube.Draw(GraphicsDevice, Matrix.Identity, _testEffect);
 
-        EcsManager.Draw(GraphicsDevice, gameTime);
+        DrawPass(_testEffect, EffectPass.Lit, RenderPass.World);
+        DrawPass(_effect, EffectPass.BasicDiffuse, RenderPass.World);
 
         GraphicsUtil.DrawGrid(GraphicsDevice, 16, 1, Matrix.CreateTranslation(new(-8, -8, 0)) * Matrix.CreateRotationX(MathHelper.PiOver2));
 
@@ -207,6 +221,9 @@ public static class RenderPipeline
             * Matrix.CreateTranslation(Camera.Transform.Position + Camera.Forward)
         );
 
+        DrawPass(_testEffect, EffectPass.Lit, RenderPass.Screen);
+        DrawPass(_effect, EffectPass.BasicDiffuse, RenderPass.Screen);
+
         if(_cursorTex is not null)
         {
             Vector2 cursorPos = new(Input.MousePosition.X / _resolutionScale, Input.MousePosition.Y / _resolutionScale);
@@ -221,7 +238,7 @@ public static class RenderPipeline
 
         GraphicsDevice.Reset();
 
-        toDraw.Clear();
+        _toDraw.Clear();
 
         SpriteBatch.Begin(samplerState: SamplerState.PointClamp, effect: _screenEffect);
         {
@@ -238,20 +255,101 @@ public static class RenderPipeline
         SpriteBatch.End();
     }
 
-    public static void OnWindowResize(GameWindow window)
+    private static void DrawPass(Effect effect, EffectPass pass, RenderPass renderPass)
+    {
+        var pWorldMatrix = effect.Parameters["WorldMatrix"];
+        var pViewMatrix = effect.Parameters["ViewMatrix"];
+        var pProjectionMatrix = effect.Parameters["ProjectionMatrix"];
+        var pInverseWorldMatrix = effect.Parameters["InverseWorldMatrix"];
+        var pInverseViewMatrix = effect.Parameters["InverseViewMatrix"];
+        var pViewDir = effect.Parameters["ViewDir"];
+        var pWorldSpaceCameraPos = effect.Parameters["WorldSpaceCameraPos"];
+        var pScreenResolution = effect.Parameters["ScreenResolution"];
+        var pMainTex = effect.Parameters["MainTex"];
+        var pMatcapTex = effect.Parameters["MatcapTex"];
+        var pMatcapIntensity = effect.Parameters["MatcapIntensity"];
+        var pMatcapPower = effect.Parameters["MatcapPower"];
+
+        var query = _toDraw.FindAll(d => d.aspect.EffectPass == pass && d.aspect.RenderPass == renderPass);
+        foreach(var (aspect, transform) in query)
+        {
+            if(aspect.ModelPath is null)
+                continue;
+
+            pWorldMatrix?.SetValue(transform);
+            pViewMatrix?.SetValue(ViewMatrix);
+            pProjectionMatrix?.SetValue(ProjectionMatrix);
+            pInverseWorldMatrix?.SetValue(Matrix.Invert(transform));
+            pInverseViewMatrix?.SetValue(Matrix.Invert(ViewMatrix));
+            pViewDir?.SetValue(Camera.Forward);
+            pWorldSpaceCameraPos?.SetValue(Camera.Transform.Position);
+
+            Vector2 vertexSnapRes = Vector2.Floor(Window.ClientBounds.Size.ToVector2() / ResolutionScale / 2);
+            pScreenResolution?.SetValue(vertexSnapRes);
+
+            if(aspect.Material.MainTexturePath is not null)
+            {
+                if(!_textureCache.TryGetValue(aspect.Material.MainTexturePath, out var tex))
+                {
+                    _texturesToLoad.Add(aspect.Material.MainTexturePath);
+                    pMainTex?.SetValue(WhiteTexture);
+                }
+                else
+                    pMainTex?.SetValue(tex);
+            }
+            else
+                pMainTex?.SetValue(_gltfCubeTex);
+
+            if(aspect.Material.MatcapOptions is not null)
+            {
+                if(aspect.Material.MatcapOptions.TexturePath is not null)
+                    pMatcapTex?.SetValue(ContentLoader.Load<Texture2D>(aspect.Material.MatcapOptions.TexturePath));
+                else
+                    pMatcapTex?.SetValue(WhiteTexture);
+
+                pMatcapIntensity?.SetValue(aspect.Material.MatcapOptions.Intensity);
+                pMatcapPower?.SetValue(aspect.Material.MatcapOptions.Power);
+            }
+            else
+            {
+                pMatcapTex?.SetValue(WhiteTexture);
+                pMatcapIntensity?.SetValue(0);
+            }
+
+            if(aspect.ModelPath.EndsWith(".obj"))
+            {
+                continue;
+            }
+            else
+            {
+                if(!_modelCache.TryGetValue(aspect.ModelPath, out var model))
+                {
+                    model = ContentLoader.Load<GltfModel>(aspect.ModelPath);
+                    _modelCache.Add(aspect.ModelPath, model!);
+                }
+
+                if(model is null)
+                    continue;
+
+                model.Draw(GraphicsDevice, transform, effect);
+            }
+        }
+    }
+
+    public static void OnWindowResize(Rectangle windowBounds)
     {
         _rt = new(
             GraphicsDevice,
-            window.ClientBounds.Width / _resolutionScale,
-            window.ClientBounds.Height / _resolutionScale,
+            windowBounds.Width / _resolutionScale,
+            windowBounds.Height / _resolutionScale,
             false,
             SurfaceFormat.Color,
             DepthFormat.Depth24Stencil8
         );
         _rtUi = new(
             GraphicsDevice,
-            window.ClientBounds.Width / _resolutionScale,
-            window.ClientBounds.Height / _resolutionScale,
+            windowBounds.Width / _resolutionScale,
+            windowBounds.Height / _resolutionScale,
             false,
             SurfaceFormat.Color,
             DepthFormat.Depth24Stencil8
@@ -259,7 +357,7 @@ public static class RenderPipeline
 
         // for whatever reason, the snap vector must be divided by 2 to make the effect visible
         // but it works, so don't touch this!!!!
-        Vector2 vertexSnapRes = Vector2.Floor(Window.ClientBounds.Size.ToVector2() / _resolutionScale / 2);
+        Vector2 vertexSnapRes = Vector2.Floor(windowBounds.Size.ToVector2() / _resolutionScale / 2);
 
         _effect.Parameters["ScreenResolution"]?.SetValue(vertexSnapRes);
         _testEffect.Parameters["ScreenResolution"]?.SetValue(vertexSnapRes);

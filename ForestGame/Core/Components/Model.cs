@@ -11,7 +11,7 @@ public record struct Model<M>(string ModelPath) : IDrawModel where M : class, IM
 
     public readonly M GetModel() => ContentLoader.Load<M>(ModelPath)!;
 
-    public void Draw(Entity entity, GameTime gameTime, GraphicsDevice graphicsDevice, Matrix world, Effect effect)
+    public void Draw(Entity entity, GraphicsDevice graphicsDevice, Matrix world, Effect effect)
     {
         ModelInstance ??= GetModel();
         ModelInstance.Draw(graphicsDevice, world, effect);

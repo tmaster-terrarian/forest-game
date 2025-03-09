@@ -1,16 +1,11 @@
-﻿using ForestGame.Core.Graphics;
-using Microsoft.Xna.Framework;
+﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Input;
 
 namespace ForestGame.Core;
 
 public class Game1 : Game
 {
-    private static readonly object _graphicsLock = new();
-
-    private GraphicsDeviceManager _graphics;
-
-    private float Frame = 0;
+    private readonly GraphicsDeviceManager _graphics;
 
     public Game1()
     {
@@ -24,35 +19,41 @@ public class Game1 : Game
 
     protected override void Initialize()
     {
-        ContentLoader.Initialize(Content, GraphicsDevice);
-
-        Window.ClientSizeChanged += (object? sender, EventArgs e) => {
-            RenderPipeline.OnWindowResize(Window);
-        };
-        Window.AllowUserResizing = true;
-
-        Locale.Configure(new() {
-            RelativeDataPath = "data/lang",
-            SearchRecursively = false,
-        });
-        Locale.CurrentLanguage = "en-us";
-
-        EcsManager.Start();
-
-        // StageManager.Initialize();
-
+        Internals.Initialize(this);
         base.Initialize();
     }
 
     protected override void LoadContent()
     {
-        RenderPipeline.Window = Window;
-        RenderPipeline.GraphicsDevice = GraphicsDevice;
-        RenderPipeline.LoadContent();
+        Internals.LoadContent(this);
+
+        for(int i = 0; i < 30; i++)
+        {
+            EcsManager.world.Create(
+                new Transform {
+                    Position = MathUtil.RandomInsideUnitSphere() * 20,
+                    Rotation = Quaternion.CreateFromYawPitchRoll(
+                        Random.Shared.NextSingle() * MathHelper.TwoPi,
+                        Random.Shared.NextSingle() * MathHelper.TwoPi,
+                        Random.Shared.NextSingle() * MathHelper.TwoPi
+                    ),
+                    Scale = new Vector3(
+                        MathUtil.RandomRange(0.5f, 2f),
+                        MathUtil.RandomRange(0.5f, 2f),
+                        MathUtil.RandomRange(0.5f, 2f)
+                    )
+                },
+                new Components.AspectIdentity(Registries.Aspects.Teapot)
+            );
+        }
+
+        base.LoadContent();
     }
 
     protected override void Update(GameTime gameTime)
     {
+        Time.Update(gameTime);
+
         Input.InputDisabled = !IsActive;
         Input.RefreshKeyboardState();
         Input.RefreshMouseState();
@@ -62,19 +63,14 @@ public class Game1 : Game
         if (Input.GetPressed(Buttons.Back) || Input.GetPressed(Keys.Escape))
             Exit();
 
-        EcsManager.Update(gameTime);
-
-        RenderPipeline.Camera.Update(gameTime);
+        Internals.Update();
 
         base.Update(gameTime);
     }
 
     protected override void Draw(GameTime gameTime)
     {
-        RenderPipeline.Draw(gameTime);
-
+        Internals.Draw();
         base.Draw(gameTime);
-
-        Frame = (float)gameTime.TotalGameTime.TotalSeconds * 60;
     }
 }
