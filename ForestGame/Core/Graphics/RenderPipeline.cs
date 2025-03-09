@@ -62,6 +62,9 @@ public static class RenderPipeline
     private static readonly HashSet<string> _texturesToLoad = [];
     private static readonly Dictionary<string, Texture2D> _textureCache = [];
 
+    private static readonly HashSet<string> _matcapTexturesToLoad = [];
+    private static readonly Dictionary<string, Texture2D> _matcapTextureCache = [];
+
     internal static void Initialize(GameWindow window, GraphicsDevice graphicsDevice)
     {
         Window = window;
@@ -71,14 +74,13 @@ public static class RenderPipeline
         Window.AllowUserResizing = true;
 
         GraphicsDevice = graphicsDevice;
+        WhiteTexture = new(graphicsDevice, 1, 1);
+        WhiteTexture.SetData([Color.White]);
     }
 
     internal static void LoadContent()
     {
         SpriteBatch = new SpriteBatch(GraphicsDevice);
-
-        WhiteTexture = new(GraphicsDevice, 1, 1);
-        WhiteTexture.SetData([Color.White]);
 
         _gltfCube = ContentLoader.Load<GltfModel>("models/fucking-teapot.glb")!;
         // _gltfCube = ContentLoader.Load<GltfModel>("models/sphere.glb")!;
@@ -144,6 +146,9 @@ public static class RenderPipeline
         foreach(var path in _texturesToLoad)
             _textureCache[path] = ContentLoader.Load<Texture2D>(path) ?? WhiteTexture;
         _texturesToLoad.Clear();
+        foreach(var path in _matcapTexturesToLoad)
+            _matcapTextureCache[path] = ContentLoader.Load<Texture2D>(path) ?? WhiteTexture;
+        _matcapTexturesToLoad.Clear();
     }
 
     public static void Draw()
@@ -298,12 +303,20 @@ public static class RenderPipeline
                     pMainTex?.SetValue(tex);
             }
             else
-                pMainTex?.SetValue(_gltfCubeTex);
+                pMainTex?.SetValue(WhiteTexture);
 
             if(aspect.Material.MatcapOptions is not null)
             {
                 if(aspect.Material.MatcapOptions.TexturePath is not null)
-                    pMatcapTex?.SetValue(ContentLoader.Load<Texture2D>(aspect.Material.MatcapOptions.TexturePath));
+                {
+                    if(!_matcapTextureCache.TryGetValue(aspect.Material.MatcapOptions.TexturePath, out var matcap))
+                    {
+                        _matcapTexturesToLoad.Add(aspect.Material.MatcapOptions.TexturePath);
+                        pMatcapTex?.SetValue(WhiteTexture);
+                    }
+                    else
+                        pMatcapTex?.SetValue(matcap);
+                }
                 else
                     pMatcapTex?.SetValue(WhiteTexture);
 
