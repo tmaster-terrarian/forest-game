@@ -29,7 +29,7 @@ public static class ContentLoader
         ArgumentException.ThrowIfNullOrWhiteSpace(path);
 
         string filePath = Path.Combine(_dataPath, path);
-        if(Check<T,SpriteEffect>() || Check<T,Effect>())
+        if(Check<T,Effect>())
         {
             filePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, _shaderLoader.RootDirectory, path);
         }
@@ -62,7 +62,7 @@ public static class ContentLoader
         if(!File.Exists(path) && !Check<T,SpriteEffect>() && !Check<T,Effect>())
             throw new FileNotFoundException($"file does not exist or could not be found");
 
-        if(Check<T,SpriteEffect>() || Check<T,Effect>())
+        if(Check<T,Effect>())
         {
             lock(_shaderLoader)
                 return _shaderLoader.Load<T>(Path.ChangeExtension(path, null));

@@ -35,12 +35,26 @@ public static class RenderPipeline
     private static ObjModel _cube2;
     private static GltfModel _gltfCube;
     private static Effect _effect;
+
     private static RenderTarget2D _rt;
     private static RenderTarget2D _rtUi;
+    private static RenderTarget2D _rtSky;
+    private static RenderTarget2D[] _renderTargets;
+    public static RenderTarget2D[] RenderTargets => _renderTargets;
+
+    private static readonly VertexPositionColorTexture[] _rtDrawingPrimitive = [
+        new(new Vector3(0, 0, -0.5f), Color.White, Vector2.Zero),
+        new(new Vector3(0, 1, -0.5f), Color.White, Vector2.UnitY),
+        new(new Vector3(1, 0, -0.5f), Color.White, Vector2.UnitX),
+        new(new Vector3(1, 1, -0.5f), Color.White, Vector2.One)
+    ];
 
     private static Effect _testEffect;
 
     private static Effect _screenEffect;
+    private static EffectParameter _screenScreenResolution;
+    private static EffectParameter _screenProjection;
+    private static EffectParameter _screenTexture;
 
     private static Texture2D? _cursorTex;
 
@@ -110,8 +124,11 @@ public static class RenderPipeline
         // _matCap = ContentLoader.Load<Texture2D>("matcaps/Matcap_Metal_02.png")!;
         // _matCap = ContentLoader.Load<Texture2D>("matcaps/Matcap_Metal_03.png")!;
 
-        _rt = new(GraphicsDevice, 240, 135, false, SurfaceFormat.Color, DepthFormat.Depth24Stencil8);
-        _rtUi = new(GraphicsDevice, 240, 135, false, SurfaceFormat.Color, DepthFormat.Depth24Stencil8);
+        _renderTargets = [
+            _rt = new(GraphicsDevice, 240, 135, false, SurfaceFormat.Color, DepthFormat.Depth24Stencil8),
+            _rtUi = new(GraphicsDevice, 240, 135, false, SurfaceFormat.Color, DepthFormat.Depth24Stencil8),
+            _rtSky = new(GraphicsDevice, 240, 135, false, SurfaceFormat.Color, DepthFormat.Depth24Stencil8),
+        ];
 
         Camera = new()
         {
@@ -138,9 +155,14 @@ public static class RenderPipeline
         _effect.Parameters["MainTex"]?.SetValue(WhiteTexture);
         _effect.Parameters["LightIntensity"]?.SetValue(1);
 
-        _screenEffect = ContentLoader.Load<Effect>("fx/screen")!;
+        _screenEffect = ContentLoader.Load<Effect>("fx/sprite/screen")!;
+        _screenScreenResolution = _screenEffect.Parameters["ScreenResolution"];
+        _screenProjection = _screenEffect.Parameters["ProjectionMatrix"];
+        _screenTexture = _screenEffect.Parameters["SpriteTexture"];
 
         _skyboxRenderer = new SkyboxRenderer("textures/skybox_test_texture.png", GraphicsDevice);
+
+        OnWindowResize(Window.ClientBounds);
     }
 
     public static void Submit((Aspect aspect, Transform transform) tuple)
@@ -161,26 +183,7 @@ public static class RenderPipeline
 
     public static void Draw()
     {
-        GraphicsDevice.Clear(Color.CornflowerBlue);
-
-        GraphicsDevice.SetRenderTarget(_rt);
-        GraphicsDevice.Clear(Color.Black);
-
-        SpriteBatch.Begin(samplerState: SamplerState.PointClamp);
-
         GraphicsDevice.SamplerStates[0] = SamplerState.PointClamp;
-
-        ViewMatrix = Matrix.CreateLookAt(
-            Camera.Transform.WorldPosition,
-            Camera.Transform.WorldPosition + Camera.Transform.Matrix.Forward,
-            Vector3.Up
-        );
-
-        ProjectionMatrix = Matrix.CreatePerspectiveFieldOfView(
-            MathHelper.ToRadians(95),
-            GraphicsDevice.Viewport.AspectRatio,
-            0.01f, 25.0f
-        );
 
         GraphicsDevice.RasterizerState = new()
         {
@@ -189,6 +192,31 @@ public static class RenderPipeline
 
         GraphicsDevice.DepthStencilState = DepthStencilState.Default;
         GraphicsDevice.BlendState = BlendState.Opaque;
+
+        ProjectionMatrix = Matrix.CreatePerspectiveFieldOfView(
+            MathHelper.ToRadians(95),
+            GraphicsDevice.Viewport.AspectRatio,
+            0.01f, 25.0f
+        );
+
+        GraphicsDevice.SetRenderTarget(_rtSky);
+
+        ViewMatrix = Matrix.CreateLookAt(
+            Vector3.Zero,
+            Camera.Transform.Matrix.Forward,
+            Vector3.UnitY
+        );
+
+        _skyboxRenderer.Draw(Vector3.Zero, Quaternion.Identity);
+
+        ViewMatrix = Matrix.CreateLookAt(
+            Camera.Transform.WorldPosition,
+            Camera.Transform.WorldPosition + Camera.Transform.Matrix.Forward,
+            Vector3.UnitY
+        );
+
+        GraphicsDevice.SetRenderTarget(_rt);
+        GraphicsDevice.Clear(Color.Transparent);
 
         _cube.Transform.Rotation = Quaternion.CreateFromAxisAngle(
             Vector3.UnitY,
@@ -202,8 +230,6 @@ public static class RenderPipeline
 
         Camera.Draw(GraphicsDevice);
 
-        _skyboxRenderer.Draw(Camera.Transform.WorldPosition, Quaternion.Identity);
-
         _cube.Draw(GraphicsDevice, Matrix.Identity, _effect);
 
         // _gltfCube.Transform.Rotation *= Quaternion.CreateFromAxisAngle(Vector3.UnitZ, 0.01f);
@@ -214,14 +240,8 @@ public static class RenderPipeline
 
         GraphicsUtil.DrawGrid(GraphicsDevice, 16, 1, Color.White * 0.1f, Matrix.CreateTranslation(new(-8, -8, 0)) * Matrix.CreateRotationX(MathHelper.PiOver2));
 
-        SpriteBatch.End();
-
-        GraphicsDevice.Reset();
-
         GraphicsDevice.SetRenderTarget(_rtUi);
         GraphicsDevice.Clear(Color.Transparent);
-
-        SpriteBatch.Begin(samplerState: SamplerState.PointClamp);
 
         EcsManager.world.Query(new QueryDescription().WithAll<Components.Actor, Transform>(),
             (Entity entity, ref Components.Actor actor, ref Transform transform) => {
@@ -255,33 +275,60 @@ public static class RenderPipeline
 
         if(_cursorTex is not null && CursorVisible)
         {
+            SpriteBatch.Begin(samplerState: SamplerState.PointClamp);
             Vector2 cursorPos = new(Input.MousePosition.X / _resolutionScale, Input.MousePosition.Y / _resolutionScale);
             SpriteBatch.Draw(
                 _cursorTex,
                 cursorPos,
                 Color.White
             );
+            SpriteBatch.End();
         }
 
-        SpriteBatch.End();
-
         GraphicsDevice.Reset();
+        GraphicsDevice.BlendState = BlendState.AlphaBlend;
 
         _toDraw.Clear();
 
+        DrawRt(_rtSky);
+
+        // SpriteBatch.Begin(samplerState: SamplerState.PointClamp, effect: _screenEffect);
+        // {
+        //     _screenEffect.Parameters["ScreenResolution"]?.SetValue(new Vector2(_rt.Width, _rt.Height));
+        //     SpriteBatch.Draw(_rt, Vector2.Zero, null, Color.White, 0, Vector2.Zero, _resolutionScale, SpriteEffects.None, 0);
+        // }
+        // SpriteBatch.End();
+        DrawRt(_rt);
+
+        // SpriteBatch.Begin(samplerState: SamplerState.PointClamp, effect: _screenEffect);
+        // {
+        //     _screenEffect.Parameters["ScreenResolution"]?.SetValue(new Vector2(_rtUi.Width, _rtUi.Height));
+        //     SpriteBatch.Draw(_rtUi, Vector2.Zero, null, Color.White, 0, Vector2.Zero, _resolutionScale, SpriteEffects.None, 0);
+        // }
+        // SpriteBatch.End();
+        DrawRt(_rtUi);
+    }
+
+    private static void DrawRt(RenderTarget2D rt)
+    {
+        // GraphicsDevice.SamplerStates[0] = SamplerState.PointClamp;
+        // GraphicsDevice.DepthStencilState = DepthStencilState.None;
+
+        // foreach(var pass in _screenEffect.CurrentTechnique.Passes)
+        // {
+        //     pass.Apply();
+        //     GraphicsDevice.DrawUserPrimitives(
+        //         PrimitiveType.TriangleStrip,
+        //         _rtDrawingPrimitive,
+        //         0, 2,
+        //         VertexPositionColorTexture.VertexDeclaration
+        //     );
+        // }
+
         SpriteBatch.Begin(samplerState: SamplerState.PointClamp, effect: _screenEffect);
         {
-            _screenEffect.Parameters["ScreenResolution"]?.SetValue(new Vector2(_rt.Width, _rt.Height));
-            SpriteBatch.Draw(_rt, Vector2.Zero, null, Color.White, 0, Vector2.Zero, _resolutionScale, SpriteEffects.None, 0);
-        }
-        SpriteBatch.End();
-
-        GraphicsDevice.BlendState = BlendState.AlphaBlend;
-
-        SpriteBatch.Begin(samplerState: SamplerState.PointClamp, effect: _screenEffect);
-        {
-            _screenEffect.Parameters["ScreenResolution"]?.SetValue(new Vector2(_rtUi.Width, _rtUi.Height));
-            SpriteBatch.Draw(_rtUi, Vector2.Zero, null, Color.White, 0, Vector2.Zero, _resolutionScale, SpriteEffects.None, 0);
+            _screenScreenResolution?.SetValue(new Vector2(_rtUi.Width, _rtUi.Height));
+            SpriteBatch.Draw(rt, Vector2.Zero, null, Color.White, 0, Vector2.Zero, _resolutionScale, SpriteEffects.None, 0);
         }
         SpriteBatch.End();
     }
@@ -373,22 +420,9 @@ public static class RenderPipeline
 
     public static void OnWindowResize(Rectangle windowBounds)
     {
-        _rt = new(
-            GraphicsDevice,
-            windowBounds.Width / _resolutionScale,
-            windowBounds.Height / _resolutionScale,
-            false,
-            SurfaceFormat.Color,
-            DepthFormat.Depth24Stencil8
-        );
-        _rtUi = new(
-            GraphicsDevice,
-            windowBounds.Width / _resolutionScale,
-            windowBounds.Height / _resolutionScale,
-            false,
-            SurfaceFormat.Color,
-            DepthFormat.Depth24Stencil8
-        );
+        RebuildRt(out _rt, windowBounds);
+        RebuildRt(out _rtUi, windowBounds);
+        RebuildRt(out _rtSky, windowBounds);
 
         // for whatever reason, the snap vector must be divided by 2 to make the effect visible
         // but it works, so don't touch this!!!!
@@ -396,5 +430,17 @@ public static class RenderPipeline
 
         _effect.Parameters["ScreenResolution"]?.SetValue(vertexSnapRes);
         _testEffect.Parameters["ScreenResolution"]?.SetValue(vertexSnapRes);
+    }
+
+    private static void RebuildRt(out RenderTarget2D rt, Rectangle windowBounds)
+    {
+        rt = new(
+            GraphicsDevice,
+            windowBounds.Width / _resolutionScale,
+            windowBounds.Height / _resolutionScale,
+            false,
+            SurfaceFormat.Color,
+            DepthFormat.Depth24Stencil8
+        );
     }
 }

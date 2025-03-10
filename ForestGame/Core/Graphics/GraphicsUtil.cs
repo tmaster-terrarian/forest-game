@@ -126,7 +126,11 @@ public static class GraphicsUtil
     {
         _basicEffect.World = Matrix.CreateTranslation(origin) * world;
         _basicEffect.View = RenderPipeline.ViewMatrix;
-        _basicEffect.Projection = RenderPipeline.ProjectionMatrix;
+        _basicEffect.Projection = Matrix.CreatePerspectiveFieldOfView(
+            MathHelper.ToRadians(30),
+            graphicsDevice.Viewport.AspectRatio,
+            0.01f, 300.0f
+        );
 
         // Start rendering with the BasicEffect
         _basicEffect.CurrentTechnique.Passes[0].Apply();

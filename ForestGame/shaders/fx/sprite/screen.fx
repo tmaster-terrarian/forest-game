@@ -13,7 +13,7 @@ float3 Tonemap(float3 c)
 	return c + lengthOver;
 }
 
-float4 ScreenResolution;
+float2 ScreenResolution;
 
 Texture2D SpriteTexture;
 sampler2D SpriteTextureSampler = sampler_state
@@ -23,7 +23,7 @@ sampler2D SpriteTextureSampler = sampler_state
 
 struct VertexShaderOutput
 {
-    float4 Position : SV_POSITION;
+    float4 Position : POSITION0;
     float4 Color : COLOR0;
     float2 TextureCoordinates : TEXCOORD0;
 };

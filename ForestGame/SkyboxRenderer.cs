@@ -4,7 +4,7 @@ using Microsoft.Xna.Framework.Graphics;
 
 namespace ForestGame;
 
-public class SkyboxRenderer(String imagePath, GraphicsDevice graphicsDevice)
+public class SkyboxRenderer(string imagePath, GraphicsDevice graphicsDevice)
 {
     private Texture2D _texture = ContentLoader.Load<Texture2D>(imagePath)!;
     private BasicEffect _basicEffect = new BasicEffect(graphicsDevice);
@@ -14,7 +14,7 @@ public class SkyboxRenderer(String imagePath, GraphicsDevice graphicsDevice)
     {
         _basicEffect.Texture = _texture;
         _basicEffect.TextureEnabled = true;
-        _basicEffect.World =  Matrix.CreateScale(50) * Matrix.CreateFromQuaternion(rotation) * Matrix.CreateTranslation(position);
+        _basicEffect.World = Matrix.CreateFromQuaternion(rotation) * Matrix.CreateTranslation(position);
         _basicEffect.View = RenderPipeline.ViewMatrix;
         _basicEffect.Projection = RenderPipeline.ProjectionMatrix;
 
