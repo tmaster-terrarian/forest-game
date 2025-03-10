@@ -22,9 +22,7 @@ public static class Input
 
     private static Point _oldMousePos;
 
-    public static Point MousePosition => InputDisabled
-        ? _oldMousePos
-        : currentMouseState.Position;
+    public static Point MousePosition => currentMouseState.Position;
 
     public static KeyboardState RefreshKeyboardState()
     {
@@ -169,12 +167,10 @@ public static class Input
 
     public static bool GetAnyDown(InputType inputType)
     {
-        if(InputDisabled) return false;
-
         switch(inputType)
         {
             case InputType.Keyboard:
-                return currentKeyboardState.GetPressedKeyCount() > 0;
+                return currentKeyboardState.GetPressedKeyCount() > 0 && !InputDisabled;
             case InputType.Mouse:
                 for(int i = 0; i < 5; i++)
                     if(GetDown((MouseButtons)i)) return true;
@@ -182,7 +178,7 @@ public static class Input
             case InputType.GamePad:
                 foreach(var state in currentGamepadStates)
                 {
-                    if(!state.IsConnected) continue;
+                    if(!state.IsConnected || InputDisabled) continue;
                     return
                         state.Buttons != GamePadState.Default.Buttons ||
                         state.DPad != GamePadState.Default.DPad ||

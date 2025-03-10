@@ -1,15 +1,19 @@
 using ForestGame.Core.Graphics;
-using Microsoft.Xna.Framework;
 
 namespace ForestGame.Core;
 
 public static class Internals
 {
-    internal static void Initialize(Game game)
-    {
-        ContentLoader.Initialize(game.Content, game.GraphicsDevice);
+    internal static Game1 _game;
+    internal static bool _focusClicked = false;
 
-        RenderPipeline.Initialize(game.Window, game.GraphicsDevice);
+    private static bool _exited = false;
+
+    internal static void Initialize()
+    {
+        ContentLoader.Initialize(_game.Content, _game.GraphicsDevice);
+
+        RenderPipeline.Initialize(_game.Window, _game.GraphicsDevice);
 
         Locale.Configure(new() {
             RelativeDataPath = "data/lang",
@@ -24,13 +28,26 @@ public static class Internals
         // StageManager.Initialize();
     }
 
-    internal static void LoadContent(Game game)
+    internal static void LoadContent()
     {
         RenderPipeline.LoadContent();
     }
 
     internal static void Update()
     {
+        _game.IsMouseVisible = !Global.GameWindowFocused;
+
+        if(!_focusClicked)
+        {
+            bool disabled = Input.InputDisabled;
+            Input.InputDisabled = false;
+            _focusClicked = Input.GetAnyPressed(InputType.Mouse);
+            Input.InputDisabled = disabled;
+        }
+
+        if(!_game.IsActive)
+            _focusClicked = false;
+
         EcsManager.Update();
 
         RenderPipeline.Camera.Update();
@@ -43,5 +60,25 @@ public static class Internals
         EcsManager.GetDrawables(RenderPipeline.GraphicsDevice);
 
         RenderPipeline.Draw();
+    }
+
+    internal static void ProcessExited()
+    {
+        if(_exited)
+            return;
+        _exited = true;
+
+        if(!_game.IsDisposed)
+        {
+            // the game is accessible
+        }
+
+        // assume game is disposed here!
+
+        Console.WriteLine();
+
+        EcsManager.Cleanup();
+
+        // other on-exit code
     }
 }
