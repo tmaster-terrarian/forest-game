@@ -17,7 +17,7 @@ public class BouncingSystem : IComponentSystem
                     actor.Velocity = actor.Velocity with { Y = -actor.Velocity.Y };
                 }
 
-                transform.Rotation *= Quaternion.CreateFromAxisAngle(Vector3.UnitY, MathF.PI * Time.Delta * MathHelper.Max(0.5f, actor.Velocity.LengthSquared() / (10 * 10)));
+                // transform.Rotation *= Quaternion.CreateFromAxisAngle(Vector3.UnitY, MathF.PI * Time.Delta * MathHelper.Max(0.5f, actor.Velocity.LengthSquared() / (10 * 10)));
             }
         );
     }

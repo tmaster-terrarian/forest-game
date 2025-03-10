@@ -32,8 +32,10 @@ public class Game1 : Game
         for(int i = 0; i < 30; i++)
         {
             var entity = Registry<Prototype>.Get(Registries.Prototypes.Teapot).Construct().Entity;
+            var randomPos = MathUtil.RandomInsideUnitSphere() * 20;
+            randomPos.Y = MathF.Abs(randomPos.Y);
             entity.Add(new Transform {
-                Position = MathUtil.RandomInsideUnitSphere() * 20,
+                Position = randomPos,
                 Rotation = Quaternion.CreateFromYawPitchRoll(
                     Random.Shared.NextSingle() * MathHelper.TwoPi,
                     Random.Shared.NextSingle() * MathHelper.TwoPi,
@@ -49,6 +51,7 @@ public class Game1 : Game
         }
 
         var player = Registry<Prototype>.Get(Registries.Prototypes.Player).Construct();
+        player.Entity.Set(new Transform { Position = Vector3.UnitY * 10 });
         RenderPipeline.Camera.Target = player;
 
         base.LoadContent();

@@ -114,7 +114,7 @@ public static class RenderPipeline
         {
             Transform = new()
             {
-                Position = new Vector3(0, 1.3f, 2),
+                Position = new Vector3(0, 0, 0),
                 Rotation = Quaternion.CreateFromYawPitchRoll(0, -MathHelper.PiOver4, 0)
             }
         };
@@ -230,7 +230,7 @@ public static class RenderPipeline
             GraphicsDevice,
             Vector3.Zero,
             Matrix.CreateScale(0.02f)
-            * Matrix.CreateTranslation(Camera.Transform.Position + Camera.Forward)
+            * Matrix.CreateTranslation(Camera.Transform.WorldPosition + Camera.Transform.Matrix.Forward)
         );
 
         DrawPass(_testEffect, EffectPass.Lit, RenderPass.Screen);
@@ -294,7 +294,7 @@ public static class RenderPipeline
             pInverseWorldMatrix?.SetValue(Matrix.Invert(transform));
             pInverseViewMatrix?.SetValue(Matrix.Invert(ViewMatrix));
             pViewDir?.SetValue(Camera.Forward);
-            pWorldSpaceCameraPos?.SetValue(Camera.Transform.Position);
+            pWorldSpaceCameraPos?.SetValue(Camera.Transform.WorldPosition);
 
             Vector2 vertexSnapRes = Vector2.Floor(Window.ClientBounds.Size.ToVector2() / ResolutionScale / 2);
             pScreenResolution?.SetValue(vertexSnapRes);

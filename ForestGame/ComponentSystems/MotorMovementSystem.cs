@@ -11,25 +11,16 @@ public class MotorMovementSystem : IComponentSystem
     {
         EcsManager.world.Query(new QueryDescription().WithAll<Actor, Motor>(), (ref Actor actor, ref Motor motor) =>
         {
-            // if (actor.HasGravity)
-            // {
-            //     actor.Velocity += new Vector3(0, -9.81f, 0) * Time.Delta;
-            // }
+            var planarVel = MathUtil.ProjectOnPlane(actor.Velocity, Vector3.UnitY);
+            var verticalVel = MathUtil.Project(actor.Velocity, Vector3.UnitY);
 
-            var targetVel = Vector3.Normalize(motor.MovementDirection) * motor.MaxSpeed;
-            // if(motor.MovementDirection.X == 0)
-            //     targetVel.X = actor.Velocity.X;
-            if(motor.MovementDirection.Y == 0)
-                targetVel.Y = actor.Velocity.Y;
-            // if(motor.MovementDirection.Z == 0)
-            //     targetVel.Z = actor.Velocity.Z;
+            var targetVel = Vector3.Zero;
+            if (motor.MovementDirection != Vector3.Zero)
+                targetVel = Vector3.Normalize(motor.MovementDirection) * motor.MaxSpeed;
 
-            actor.Velocity = MathUtil.MoveTo(
-                actor.Velocity,
-                targetVel,
-                motor.Acceleration * Time.Delta,
-                motor.Deceleration * Time.Delta
-            );
+            planarVel = MathUtil.ExpDecay(planarVel, targetVel, 12, 1f / 60f);
+
+            actor.Velocity = planarVel + verticalVel;
         });
     }
 }

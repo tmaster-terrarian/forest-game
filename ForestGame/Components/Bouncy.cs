@@ -1,3 +1,3 @@
 namespace ForestGame.Components;
 
-public record struct Bouncy(float RandomSeed, float BounceSpeed = 1f);
+public record struct Bouncy(float BounceHeight = 1f);

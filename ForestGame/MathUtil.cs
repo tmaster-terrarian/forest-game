@@ -290,6 +290,7 @@ public static class MathUtil
 
     public static Vector3 Project(Vector3 vector, Vector3 onNormal)
     {
+        if (vector == Vector3.Zero) return Vector3.Zero;
         float num = Vector3.Dot(onNormal, onNormal);
         if (num < float.Epsilon)
             return Vector3.Zero;
@@ -298,6 +299,7 @@ public static class MathUtil
 
     public static Vector3 ProjectOnPlane(Vector3 vector, Vector3 planeNormal)
     {
+        if (vector == Vector3.Zero) return Vector3.Zero;
         return vector - Project(vector, planeNormal);
     }
 }

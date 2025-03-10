@@ -21,6 +21,7 @@ public static class Prototypes
                     Deceleration = 2f,
                     MaxSpeed = 5f,
                 },
+                new Components.Bouncy()
             },
         });
 

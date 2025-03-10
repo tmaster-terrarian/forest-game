@@ -65,7 +65,7 @@ public static class GraphicsUtil
         Vector2 uvTopLeft = pixelTopLeft / texture.Bounds.Size.ToVector2();
         Vector2 uvBottomRight = pixelBottomRight / texture.Bounds.Size.ToVector2();
 
-        Vector3 normal = Vector3.UnitX;
+        Vector3 normal = Vector3.Forward;
 
         // Define the vertices of the quad
         VertexPositionColorNormalTexture[] vertices = [
