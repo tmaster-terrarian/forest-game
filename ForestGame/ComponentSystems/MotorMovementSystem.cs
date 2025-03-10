@@ -18,7 +18,7 @@ public class MotorMovementSystem : IComponentSystem
             if (motor.MovementDirection != Vector3.Zero)
                 targetVel = Vector3.Normalize(motor.MovementDirection) * motor.MaxSpeed;
 
-            planarVel = MathUtil.ExpDecay(planarVel, targetVel, 12, 1f / 60f);
+            planarVel = MathUtil.ExpDecay(planarVel, targetVel, 12, Time.Delta);
 
             actor.Velocity = planarVel + verticalVel;
         });

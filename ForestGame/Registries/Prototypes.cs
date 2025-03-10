@@ -1,4 +1,5 @@
 using ForestGame.Core;
+using Microsoft.Xna.Framework;
 
 namespace ForestGame.Registries;
 
@@ -15,20 +16,21 @@ public static class Prototypes
                 new Components.PlayerControlled(),
                 new Components.Actor {
                     HasGravity = true,
+                    Collider = new Collider(Vector3.Zero, new Vector3(0.5f, 1.5f, 0.5f), Vector3.UnitY * -0.75f)
                 },
                 new Components.Motor {
-                    Acceleration = 2f,
-                    Deceleration = 2f,
                     MaxSpeed = 2.5f,
-                },
-                new Components.Bouncy()
+                }
             },
         });
 
         Registry.Register<Prototype>(Teapot, new() {
             Components = {
                 Transform.Identity,
-                new Components.Actor(),
+                new Components.Actor
+                {
+                    Collider = new Collider(Vector3.Zero, Vector3.One * 1.5f, -Vector3.UnitY * 0.75f),
+                },
                 new Components.AspectIdentity(Aspects.Teapot),
             },
         });

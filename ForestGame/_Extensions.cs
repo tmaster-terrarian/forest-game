@@ -48,4 +48,9 @@ public static class _Extensions
     {
         return new(vector.X, vector.Y);
     }
+
+    public static Vector3 Median(this BoundingBox boundingBox)
+    {
+        return Vector3.Lerp(boundingBox.Min, boundingBox.Max, 0.5f);
+    }
 }

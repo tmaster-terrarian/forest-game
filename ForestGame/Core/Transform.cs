@@ -6,7 +6,7 @@ namespace ForestGame.Core;
 
 public struct Transform()
 {
-    public static Transform Identity { get; } = new();
+    public static Transform Identity => new();
 
     public Vector3 Scale { get; set; } = Vector3.One;
     public Quaternion Rotation { get; set; } = Quaternion.Identity;

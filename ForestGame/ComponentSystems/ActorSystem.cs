@@ -17,6 +17,16 @@ public class ActorSystem : IComponentSystem
             {
                 actor.Velocity += new Vector3(0, -9.81f, 0) * Time.Delta;
             }
+
+            if (!entity.Has<Motor>())
+            {
+                var planarVel = MathUtil.ProjectOnPlane(actor.Velocity, Vector3.UnitY);
+                var verticalVel = MathUtil.Project(actor.Velocity, Vector3.UnitY);
+
+                planarVel = MathUtil.ExpDecay(planarVel, Vector3.Zero, 8, Time.Delta);
+                actor.Velocity = planarVel + verticalVel;
+            }
+
             transform.Position += actor.Velocity * Time.Delta;
 
             if (transform.Position.Y <= 0)
@@ -41,6 +51,8 @@ public class ActorSystem : IComponentSystem
                     transform.Position = transform.Position with { Y = 0 };
                 }
             }
+
+            actor.Collider = actor.Collider with { Position = transform.Position };
         });
     }
 }
