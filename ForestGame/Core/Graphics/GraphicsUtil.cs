@@ -103,7 +103,7 @@ public static class GraphicsUtil
         }
     }
 
-    private static void DrawArrow(GraphicsDevice graphicsDevice, Vector3 origin, Vector3 direction, Color color, float length = 1)
+    private static void DrawVector(GraphicsDevice graphicsDevice, Vector3 origin, Vector3 direction, Color color, float length = 1)
     {
         // Normalize the direction vector to get the arrow direction
         direction.Normalize();
@@ -128,9 +128,21 @@ public static class GraphicsUtil
         _basicEffect.CurrentTechnique.Passes[0].Apply();
 
         // Draw the arrows
-        DrawArrow(graphicsDevice, Vector3.Forward * 0.5f, Vector3.Forward, Color.Blue, 0.5f);   // forward arrow
-        DrawArrow(graphicsDevice, Vector3.Zero, Vector3.UnitX, Color.Red);    // X-axis arrow
-        DrawArrow(graphicsDevice, Vector3.Zero, Vector3.UnitY, Color.Lime);   // Y-axis arrow
-        DrawArrow(graphicsDevice, Vector3.Zero, Vector3.UnitZ, Color.Blue);   // Z-axis arrow
+        DrawVector(graphicsDevice, Vector3.Forward * 0.5f, Vector3.Forward, Color.Blue, 0.5f);   // forward arrow
+        DrawVector(graphicsDevice, Vector3.Zero, Vector3.UnitX, Color.Red);    // X-axis arrow
+        DrawVector(graphicsDevice, Vector3.Zero, Vector3.UnitY, Color.Lime);   // Y-axis arrow
+        DrawVector(graphicsDevice, Vector3.Zero, Vector3.UnitZ, Color.Blue);   // Z-axis arrow
+    }
+
+    public static void DrawBoundingBox(GraphicsDevice graphicsDevice, BoundingBox boundingBox, Color color)
+    {
+        var min = boundingBox.Min;
+        var max = boundingBox.Max;
+        DrawVector(graphicsDevice, min, min with { X = max.X }, color);
+        DrawVector(graphicsDevice, min, min with { Y = max.Y }, color);
+        DrawVector(graphicsDevice, min, min with { Z = max.Z }, color);
+        DrawVector(graphicsDevice, max, max with { X = min.X }, color);
+        DrawVector(graphicsDevice, max, max with { Y = min.Y }, color);
+        DrawVector(graphicsDevice, max, max with { Z = min.Z }, color);
     }
 }
