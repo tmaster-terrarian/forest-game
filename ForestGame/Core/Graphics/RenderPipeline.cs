@@ -44,6 +44,9 @@ public static class RenderPipeline
 
     private static Texture2D? _cursorTex;
 
+    public static bool CursorVisible { get; set; }
+    public static bool GizmosVisible { get; set; }
+
     private static int _resolutionScale = 4;
 
     public static int ResolutionScale => _resolutionScale;
@@ -220,23 +223,26 @@ public static class RenderPipeline
 
         SpriteBatch.Begin(samplerState: SamplerState.PointClamp);
 
-        ProjectionMatrix = Matrix.CreatePerspectiveFieldOfView(
-            MathHelper.ToRadians(30),
-            GraphicsDevice.Viewport.AspectRatio,
-            0.01f, 300.0f
-        );
+        if(GizmosVisible)
+        {
+            ProjectionMatrix = Matrix.CreatePerspectiveFieldOfView(
+                MathHelper.ToRadians(30),
+                GraphicsDevice.Viewport.AspectRatio,
+                0.01f, 300.0f
+            );
 
-        GraphicsUtil.DrawGizmo(
-            GraphicsDevice,
-            Vector3.Zero,
-            Matrix.CreateScale(0.02f)
-            * Matrix.CreateTranslation(Camera.Transform.WorldPosition + Camera.Transform.Matrix.Forward)
-        );
+            GraphicsUtil.DrawGizmo(
+                GraphicsDevice,
+                Vector3.Zero,
+                Matrix.CreateScale(0.02f)
+                * Matrix.CreateTranslation(Camera.Transform.WorldPosition + Camera.Transform.Matrix.Forward)
+            );
+        }
 
         DrawPass(_testEffect, EffectPass.Lit, RenderPass.Screen);
         DrawPass(_effect, EffectPass.BasicDiffuse, RenderPass.Screen);
 
-        if(_cursorTex is not null)
+        if(_cursorTex is not null && CursorVisible)
         {
             Vector2 cursorPos = new(Input.MousePosition.X / _resolutionScale, Input.MousePosition.Y / _resolutionScale);
             SpriteBatch.Draw(
