@@ -1,4 +1,5 @@
 using Arch.Core;
+using Arch.Core.Extensions;
 using ForestGame.Components;
 using ForestGame.Core;
 using Microsoft.Xna.Framework;
@@ -7,9 +8,10 @@ namespace ForestGame.ComponentSystems;
 
 public class ActorSystem : IComponentSystem
 {
+
     public void Update()
     {
-        EcsManager.world.Query(new QueryDescription().WithAll<Actor, Transform>(), (ref Actor actor, ref Transform transform) =>
+        EcsManager.world.Query(new QueryDescription().WithAll<Actor, Transform>(), (Entity entity, ref Actor actor, ref Transform transform) =>
         {
             if (actor.HasGravity)
             {
@@ -17,9 +19,28 @@ public class ActorSystem : IComponentSystem
             }
             transform.Position += actor.Velocity * Time.Delta;
 
-            transform.Position = transform.Position with {
-                Y = MathHelper.Max(transform.Position.Y, 0),
-            };
+            if (transform.Position.Y <= 0)
+            {
+                if (entity.TryGet<Bouncy>(out var bouncy))
+                {
+                    transform.Position = transform.Position with { Y = 0 };
+                    if (bouncy.OriginalBounceVelocity is null)
+                    {
+                        actor.Velocity = actor.Velocity with { Y = MathF.Abs(actor.Velocity.Y) };
+                        bouncy.OriginalBounceVelocity = actor.Velocity.Y;
+                    }
+                    else
+                    {
+                        actor.Velocity = actor.Velocity with { Y = bouncy.OriginalBounceVelocity.Value };
+                    }
+                    entity.Set(bouncy);
+                }
+                else
+                {
+                    actor.Velocity = MathUtil.ProjectOnPlane(actor.Velocity, Vector3.UnitY);
+                    transform.Position = transform.Position with { Y = 0 };
+                }
+            }
         });
     }
 }

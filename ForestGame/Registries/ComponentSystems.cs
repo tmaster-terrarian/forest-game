@@ -8,7 +8,6 @@ public static class ComponentSystems
     public const string Actor = "actor";
     public const string Player = "player";
     public const string ModelGraphics = "model_graphics";
-    public const string Bouncing = "bouncing";
     public const string MotorMovement = "motor_movement";
 
     internal static void Initialize()
@@ -16,7 +15,6 @@ public static class ComponentSystems
         Registry.Register<IComponentSystem>(Actor, new ActorSystem());
         Registry.Register<IComponentSystem>(Player, new PlayerSystem());
         Registry.Register<IComponentSystem>(ModelGraphics, new ModelGraphicsSystem());
-        Registry.Register<IComponentSystem>(Bouncing, new BouncingSystem());
         Registry.Register<IComponentSystem>(MotorMovement, new MotorMovementSystem());
     }
 }

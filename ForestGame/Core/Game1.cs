@@ -51,7 +51,7 @@ public class Game1 : Game
         }
 
         var player = Registry<Prototype>.Get(Registries.Prototypes.Player).Construct();
-        player.Entity.Set(new Transform { Position = Vector3.UnitY * 10 });
+        player.Entity.Set(new Transform { Position = Vector3.UnitY * 1 });
         RenderPipeline.Camera.Target = player;
 
         base.LoadContent();

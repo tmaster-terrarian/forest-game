@@ -19,7 +19,7 @@ public static class Prototypes
                 new Components.Motor {
                     Acceleration = 2f,
                     Deceleration = 2f,
-                    MaxSpeed = 5f,
+                    MaxSpeed = 2.5f,
                 },
                 new Components.Bouncy()
             },
