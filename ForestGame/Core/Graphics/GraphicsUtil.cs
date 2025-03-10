@@ -52,12 +52,16 @@ public static class GraphicsUtil
         _basicEffect.View = RenderPipeline.ViewMatrix;
         _basicEffect.Projection = RenderPipeline.ProjectionMatrix;
 
+        graphicsDevice.BlendState = BlendState.AlphaBlend;
+
         foreach (var pass in _basicEffect.CurrentTechnique.Passes)
         {
             pass.Apply();
 
             graphicsDevice.DrawUserPrimitives(PrimitiveType.LineList, _gridVertices, 0, _gridVertices.Length / 2);
         }
+
+        graphicsDevice.BlendState = BlendState.Opaque;
     }
 
     public static void DrawQuad(GraphicsDevice graphicsDevice, Texture2D texture, Color color, Matrix worldMatrix, Effect effect, float width, float height, Vector2 pixelTopLeft, Vector2 pixelBottomRight)
@@ -138,11 +142,43 @@ public static class GraphicsUtil
     {
         var min = boundingBox.Min;
         var max = boundingBox.Max;
-        DrawVector(graphicsDevice, min, min with { X = max.X }, color);
-        DrawVector(graphicsDevice, min, min with { Y = max.Y }, color);
-        DrawVector(graphicsDevice, min, min with { Z = max.Z }, color);
-        DrawVector(graphicsDevice, max, max with { X = min.X }, color);
-        DrawVector(graphicsDevice, max, max with { Y = min.Y }, color);
-        DrawVector(graphicsDevice, max, max with { Z = min.Z }, color);
+
+        var rMin = min + new Vector3(MathF.Sin(Time.Elapsed * 3f) * 0.01f, MathF.Cos(Time.Elapsed * 3f) * 0.01f, MathF.Sin(Time.Elapsed * 3f) * 0.01f);
+        var rMax = max - new Vector3(MathF.Sin(Time.Elapsed * 3f) * 0.01f, MathF.Cos(Time.Elapsed * 3f) * 0.01f, MathF.Sin(Time.Elapsed * 3f) * 0.01f);
+
+        VertexPositionColor[] vertices = [
+            new VertexPositionColor(rMin, color),
+            new VertexPositionColor(rMin with { X = rMax.X } + MathUtil.RandomVector3(-0.01f, 0.01f), color),
+
+            new VertexPositionColor(rMin, color),
+            new VertexPositionColor(rMin with { Y = rMax.Y } + MathUtil.RandomVector3(-0.01f, 0.01f), color),
+
+            new VertexPositionColor(rMin, color),
+            new VertexPositionColor(rMin with { Z = rMax.Z } + MathUtil.RandomVector3(-0.01f, 0.01f), color),
+
+            new VertexPositionColor(rMax, color),
+            new VertexPositionColor(rMax with { X = rMin.X } + MathUtil.RandomVector3(-0.01f, 0.01f), color),
+
+            new VertexPositionColor(rMax, color),
+            new VertexPositionColor(rMax with { Y = rMin.Y } + MathUtil.RandomVector3(-0.01f, 0.01f), color),
+
+            new VertexPositionColor(rMax, color),
+            new VertexPositionColor(rMax with { Z = rMin.Z } + MathUtil.RandomVector3(-0.01f, 0.01f), color),
+        ];
+
+        _basicEffect.World = Matrix.Identity;
+        _basicEffect.View = RenderPipeline.ViewMatrix;
+        _basicEffect.Projection = RenderPipeline.ProjectionMatrix;
+
+        graphicsDevice.BlendState = BlendState.Additive;
+
+        foreach (var pass in _basicEffect.CurrentTechnique.Passes)
+        {
+            pass.Apply();
+
+            graphicsDevice.DrawUserPrimitives(PrimitiveType.LineList, vertices, 0, 6);
+        }
+
+        graphicsDevice.BlendState = BlendState.Opaque;
     }
 }

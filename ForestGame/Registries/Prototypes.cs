@@ -16,7 +16,7 @@ public static class Prototypes
                 new Components.PlayerControlled(),
                 new Components.Actor {
                     HasGravity = true,
-                    Collider = new Collider(Vector3.Zero, new Vector3(0.5f, 1.5f, 0.5f), Vector3.UnitY * -0.75f)
+                    Collider = new Collider(Vector3.Zero, new Vector3(0.5f, 1.5f, 0.5f), Vector3.UnitY * 0.75f)
                 },
                 new Components.Motor {
                     MaxSpeed = 2.5f,
@@ -29,7 +29,7 @@ public static class Prototypes
                 Transform.Identity,
                 new Components.Actor
                 {
-                    Collider = new Collider(Vector3.Zero, Vector3.One * 1.5f, -Vector3.UnitY * 0.75f),
+                    Collider = new Collider(Vector3.Zero, Vector3.One * 1.5f, Vector3.UnitY * 0.75f),
                 },
                 new Components.AspectIdentity(Aspects.Teapot),
             },

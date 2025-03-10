@@ -223,6 +223,12 @@ public static class RenderPipeline
 
         SpriteBatch.Begin(samplerState: SamplerState.PointClamp);
 
+        EcsManager.world.Query(new QueryDescription().WithAll<Components.Actor, Transform>(),
+            (Entity entity, ref Components.Actor actor, ref Transform transform) => {
+                GraphicsUtil.DrawBoundingBox(GraphicsDevice, actor.Collider.BoundingBox(transform.Scale), Color.Orange * 0.95f);
+            }
+        );
+
         if(GizmosVisible)
         {
             ProjectionMatrix = Matrix.CreatePerspectiveFieldOfView(
@@ -264,6 +270,8 @@ public static class RenderPipeline
             SpriteBatch.Draw(_rt, Vector2.Zero, null, Color.White, 0, Vector2.Zero, _resolutionScale, SpriteEffects.None, 0);
         }
         SpriteBatch.End();
+
+        GraphicsDevice.BlendState = BlendState.AlphaBlend;
 
         SpriteBatch.Begin(samplerState: SamplerState.PointClamp, effect: _screenEffect);
         {

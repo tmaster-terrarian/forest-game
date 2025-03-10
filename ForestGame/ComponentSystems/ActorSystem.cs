@@ -8,7 +8,6 @@ namespace ForestGame.ComponentSystems;
 
 public class ActorSystem : IComponentSystem
 {
-
     public void Update()
     {
         EcsManager.world.Query(new QueryDescription().WithAll<Actor, Transform>(), (Entity entity, ref Actor actor, ref Transform transform) =>

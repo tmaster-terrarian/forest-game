@@ -32,12 +32,12 @@ public class Game1 : Game
         for(int i = 0; i < 30; i++)
         {
             var entity = Registry<Prototype>.Get(Registries.Prototypes.Teapot).Construct().Entity;
-            var randomPos = MathUtil.RandomInsideUnitSphere() * 1f;
+            var randomPos = MathUtil.RandomInsideUnitSphere() * 30f;
             randomPos.Y = MathF.Abs(randomPos.Y);
             entity.Set<Transform>(new() {
                 Position = randomPos,
             });
-            entity.Add<Components.Bouncy>(new(Random.Shared.NextSingle()));
+            // entity.Add<Components.Bouncy>(new(Random.Shared.NextSingle()));
             // entity.Remove<Components.Bouncy>();
         }
 

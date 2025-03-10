@@ -302,4 +302,22 @@ public static class MathUtil
         if (vector == Vector3.Zero) return Vector3.Zero;
         return vector - Project(vector, planeNormal);
     }
+
+    public static Vector3 RandomVector3(float min, float max)
+    {
+        return new(
+            Random.Shared.NextSingle() * (max - min) + min,
+            Random.Shared.NextSingle() * (max - min) + min,
+            Random.Shared.NextSingle() * (max - min) + min
+        );
+    }
+
+    public static Vector3 RandomVector3(Vector3 min, Vector3 max)
+    {
+        return new(
+            Random.Shared.NextSingle() * (max.X - min.X) + min.X,
+            Random.Shared.NextSingle() * (max.Y - min.Y) + min.Y,
+            Random.Shared.NextSingle() * (max.Z - min.Z) + min.Z
+        );
+    }
 }
