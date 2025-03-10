@@ -29,7 +29,7 @@ public static class Prototypes
                 Transform.Identity,
                 new Components.Actor
                 {
-                    Collider = new Collider(Vector3.Zero, Vector3.One * 1.5f, Vector3.UnitY * 0.75f),
+                    Collider = new Collider(Vector3.Zero, Vector3.One * 1.8f, Vector3.UnitY * (1.8f/2f)),
                 },
                 new Components.AspectIdentity(Aspects.Teapot),
             },

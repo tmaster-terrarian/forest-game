@@ -225,7 +225,12 @@ public static class RenderPipeline
 
         EcsManager.world.Query(new QueryDescription().WithAll<Components.Actor, Transform>(),
             (Entity entity, ref Components.Actor actor, ref Transform transform) => {
-                GraphicsUtil.DrawBoundingBox(GraphicsDevice, actor.Collider.BoundingBox(transform.Scale), Color.Orange * 0.95f);
+                GraphicsUtil.DrawBoundingBox(
+                    GraphicsDevice,
+                    actor.Collider.BoundingBox(transform.Scale),
+                    Color.Orange * 0.95f,
+                    actor.Velocity.Length() > 0.1f
+                );
             }
         );
 

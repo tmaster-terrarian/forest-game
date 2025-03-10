@@ -320,4 +320,13 @@ public static class MathUtil
             Random.Shared.NextSingle() * (max.Z - min.Z) + min.Z
         );
     }
+
+    public static Vector3 SquashScale(float height)
+    {
+        return new(
+            1f/height,
+            height,
+            1f/height
+        );
+    }
 }

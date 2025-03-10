@@ -138,7 +138,7 @@ public static class GraphicsUtil
         DrawVector(graphicsDevice, Vector3.Zero, Vector3.UnitZ, Color.Blue);   // Z-axis arrow
     }
 
-    public static void DrawBoundingBox(GraphicsDevice graphicsDevice, BoundingBox boundingBox, Color color)
+    public static void DrawBoundingBox(GraphicsDevice graphicsDevice, BoundingBox boundingBox, Color color, bool highlighted)
     {
         var min = boundingBox.Min;
         var max = boundingBox.Max;
@@ -146,23 +146,30 @@ public static class GraphicsUtil
         var rMin = min + new Vector3(MathF.Sin(Time.Elapsed * 3f) * 0.01f, MathF.Cos(Time.Elapsed * 3f) * 0.01f, MathF.Sin(Time.Elapsed * 3f) * 0.01f);
         var rMax = max - new Vector3(MathF.Sin(Time.Elapsed * 3f) * 0.01f, MathF.Cos(Time.Elapsed * 3f) * 0.01f, MathF.Sin(Time.Elapsed * 3f) * 0.01f);
 
+        if(!highlighted)
+        {
+            color *= 0.8f;
+        }
+
+        var cornerColor = color * 1.2f;
+
         VertexPositionColor[] vertices = [
-            new VertexPositionColor(rMin, color),
+            new VertexPositionColor(rMin, cornerColor),
             new VertexPositionColor(rMin with { X = rMax.X } + MathUtil.RandomVector3(-0.01f, 0.01f), color),
 
-            new VertexPositionColor(rMin, color),
+            new VertexPositionColor(rMin, cornerColor),
             new VertexPositionColor(rMin with { Y = rMax.Y } + MathUtil.RandomVector3(-0.01f, 0.01f), color),
 
-            new VertexPositionColor(rMin, color),
+            new VertexPositionColor(rMin, cornerColor),
             new VertexPositionColor(rMin with { Z = rMax.Z } + MathUtil.RandomVector3(-0.01f, 0.01f), color),
 
-            new VertexPositionColor(rMax, color),
+            new VertexPositionColor(rMax, cornerColor),
             new VertexPositionColor(rMax with { X = rMin.X } + MathUtil.RandomVector3(-0.01f, 0.01f), color),
 
-            new VertexPositionColor(rMax, color),
+            new VertexPositionColor(rMax, cornerColor),
             new VertexPositionColor(rMax with { Y = rMin.Y } + MathUtil.RandomVector3(-0.01f, 0.01f), color),
 
-            new VertexPositionColor(rMax, color),
+            new VertexPositionColor(rMax, cornerColor),
             new VertexPositionColor(rMax with { Z = rMin.Z } + MathUtil.RandomVector3(-0.01f, 0.01f), color),
         ];
 
