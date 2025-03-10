@@ -39,6 +39,48 @@ public static class MathUtil
         return value;
     }
 
+    public static float ApproachNotExceeding(float value, float target, float rate)
+    {
+        if(Math.Abs(value) < Math.Abs(target))
+            value = Approach(value, target, rate);
+        return value;
+    }
+
+    public static Vector3 ApproachNotExceeding(Vector3 value, Vector3 target, float rate)
+    {
+        return new(
+            ApproachNotExceeding(value.X, target.X, rate),
+            ApproachNotExceeding(value.Y, target.Y, rate),
+            ApproachNotExceeding(value.Z, target.Z, rate)
+        );
+    }
+
+    public static float MoveTo(float value, float target, float accel, float decel)
+    {
+        if(Math.Abs(value) < Math.Abs(target))
+            value = Approach(value, target, accel);
+        if(Math.Abs(value) > Math.Abs(target))
+            value = Approach(value, target, decel);
+        return value;
+    }
+
+    public static Vector3 MoveTo(Vector3 value, Vector3 target, float accel, float decel)
+    {
+        return new(
+            MoveTo(value.X, target.X, accel, decel),
+            MoveTo(value.Y, target.Y, accel, decel),
+            MoveTo(value.Z, target.Z, accel, decel)
+        );
+    }
+
+    public static Vector2 MoveTo(Vector2 value, Vector2 target, float accel, float decel)
+    {
+        return new(
+            MoveTo(value.X, target.X, accel, decel),
+            MoveTo(value.Y, target.Y, accel, decel)
+        );
+    }
+
     public static float Sqr(float value)
     {
         return value*value;

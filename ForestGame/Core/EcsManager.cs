@@ -11,8 +11,6 @@ public static class EcsManager
 {
     private static bool _initialized;
 
-    private static readonly QueryDescription _velocityQuery = new QueryDescription().WithAll<Velocity, Transform>();
-
     public static World world { get; private set; }
 
     internal static void Update()

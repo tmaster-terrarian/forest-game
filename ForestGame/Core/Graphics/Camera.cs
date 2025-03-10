@@ -1,3 +1,6 @@
+using Arch.Core;
+using Arch.Core.Extensions;
+using ForestGame.Components;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
@@ -14,12 +17,10 @@ public class Camera
 
     public Vector3 Right => Vector3.Transform(Vector3.Right, Transform.Rotation);
 
-    private Point _lastMousePos;
-    private float _pitch = 0;
-    private float _yaw = 0;
-    private float _sensitivity = 0.5f;
-    private float _speed = 0.02f;
-    private Vector3 _localVelocity;
+    public EntityReference Target;
+
+    public float Yaw { get; set; }
+    public float Pitch { get; set; }
 
     private float[][] floats = [
         [0.0f, 0.3f, 0.7f, 0.7f, 0.3f],
@@ -29,17 +30,10 @@ public class Camera
         [0.0f, 0.3f, 0.7f, 0.9f, 0.7f]
     ];
 
-    public Camera()
-    {
-        // Transform.Position = new(0, 0, 0);
-        _lastMousePos = Input.MousePosition;
-    }
-
     public void Update()
     {
-        // var time = (float)gameTime.TotalGameTime.TotalSeconds * 60;
-        var time = Time.Elapsed * 60;
-
+        // var time = Time.Elapsed * 60;
+        //
         // Transform.Position = new Vector3(
         //     2.5f * MathF.Cos(time * 0.01f),
         //     2.5f * MathF.Sin(time * 0.01f),
@@ -58,50 +52,26 @@ public class Camera
         //     0
         // );
 
-        int tz = MathHelper.Clamp(MathUtil.FloorToInt(Transform.Position.Z - 0.5f), 0, 4);
-        int tx = MathHelper.Clamp(MathUtil.FloorToInt(Transform.Position.X - 0.5f), 0, 4);
-        int ntz = MathHelper.Clamp(MathUtil.FloorToInt(Transform.Position.Z - 0.5f + 1), 0, 4);
-        int ntx = MathHelper.Clamp(MathUtil.FloorToInt(Transform.Position.X - 0.5f + 1), 0, 4);
-        float fz = MathUtil.SmoothCos((Transform.Position.Z - 0.5f) % 1f, 0.9f);
-        float fx = MathUtil.SmoothCos((Transform.Position.X - 0.5f) % 1f, 0.9f);
+        if(!Target.IsAlive())
+            return;
 
-        float hz1 = MathHelper.Lerp(floats[tz][tx], floats[ntz][tx], fz);
-        float hz2 = MathHelper.Lerp(floats[tz][ntx], floats[ntz][ntx], fz);
-        float height = MathHelper.Lerp(hz1, hz2, fx);
+        if(Target.Entity.TryGet<Transform>(out var transform))
+            Transform.Parent = transform;
 
-        // float height = floats[tz][tx] + floats[ntz][tx] * fz + floats[tz][ntx] * fx + floats[ntz][ntx] * fz * fx;
+        // int tz = MathHelper.Clamp(MathUtil.FloorToInt(Transform.Position.Z - 0.5f), 0, 4);
+        // int tx = MathHelper.Clamp(MathUtil.FloorToInt(Transform.Position.X - 0.5f), 0, 4);
+        // int ntz = MathHelper.Clamp(MathUtil.FloorToInt(Transform.Position.Z - 0.5f + 1), 0, 4);
+        // int ntx = MathHelper.Clamp(MathUtil.FloorToInt(Transform.Position.X - 0.5f + 1), 0, 4);
+        // float fz = MathUtil.SmoothCos((Transform.Position.Z - 0.5f) % 1f, 0.9f);
+        // float fx = MathUtil.SmoothCos((Transform.Position.X - 0.5f) % 1f, 0.9f);
 
-        if(Input.MousePosition != _lastMousePos)
-        {
-            var difference = Input.MousePosition - _lastMousePos;
-            _yaw -= difference.X * (1f/144f) * _sensitivity;
-            _pitch -= difference.Y * (1f/144f) * _sensitivity;
-            _pitch = MathHelper.Clamp(_pitch, -MathHelper.ToRadians(89.99f), MathHelper.ToRadians(89.99f));
-            Transform.Rotation = Quaternion.CreateFromYawPitchRoll(_yaw, _pitch, 0);
-            _lastMousePos = new(RenderPipeline.Window.ClientBounds.Width / 2, RenderPipeline.Window.ClientBounds.Height / 2);
-            Mouse.SetPosition(_lastMousePos.X, _lastMousePos.Y);
-        }
+        // float hz1 = MathHelper.Lerp(floats[tz][tx], floats[ntz][tx], fz);
+        // float hz2 = MathHelper.Lerp(floats[tz][ntx], floats[ntz][ntx], fz);
+        // float height = MathHelper.Lerp(hz1, hz2, fx);
 
-        Vector2 inputDir = new(
-            (Input.GetDown(Keys.D) ? 1 : 0) - (Input.GetDown(Keys.A) ? 1 : 0),
-            (Input.GetDown(Keys.S) ? 1 : 0) - (Input.GetDown(Keys.W) ? 1 : 0)
-        );
-        if(inputDir != Vector2.Zero)
-        {
-            inputDir = Vector2.Normalize(inputDir);
+        // Transform.Position = Transform.Position with { Y = 1.3f + height };
 
-            _localVelocity.X = MathUtil.Approach(_localVelocity.X, inputDir.X * _speed, 0.1f * Time.Delta);
-            _localVelocity.Z = MathUtil.Approach(_localVelocity.Z, inputDir.Y * _speed, 0.1f * Time.Delta);
-        }
-        else
-        {
-            _localVelocity.X = MathUtil.Approach(_localVelocity.X, 0, 0.08f * Time.Delta);
-            _localVelocity.Z = MathUtil.Approach(_localVelocity.Z, 0, 0.08f * Time.Delta);
-        }
-
-        Transform.Position += Vector3.Transform(_localVelocity * 60 * Time.Delta, Quaternion.CreateFromYawPitchRoll(_yaw, 0, 0));
-
-        Transform.Position = Transform.Position with { Y = 1.3f + height };
+        Transform.Position = Transform.Position with { Y = 1.3f };
     }
 
     public void Draw(GraphicsDevice graphicsDevice)
@@ -121,5 +91,13 @@ public class Camera
                 );
             }
         }
+
+        // VertexPositionColorNormalTexture[] point = [
+        //     new(Vector3.Zero, Color.Red, Vector3.UnitY, Vector2.Zero),
+        // ];
+        // graphicsDevice.DrawUserPrimitives(
+        //     PrimitiveType.PointList, point, 0, 1,
+        //     VertexPositionColorNormalTexture.VertexDeclaration
+        // );
     }
 }

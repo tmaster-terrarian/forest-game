@@ -16,6 +16,10 @@ public class ActorSystem : IComponentSystem
                 actor.Velocity += new Vector3(0, -9.81f, 0) * Time.Delta;
             }
             transform.Position += actor.Velocity * Time.Delta;
+
+            transform.Position = transform.Position with {
+                Y = MathHelper.Max(transform.Position.Y, 0),
+            };
         });
     }
 }

@@ -1,4 +1,6 @@
-﻿using Microsoft.Xna.Framework;
+﻿using Arch.Core.Extensions;
+using ForestGame.Core.Graphics;
+using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Input;
 
 namespace ForestGame.Core;
@@ -29,25 +31,25 @@ public class Game1 : Game
 
         for(int i = 0; i < 30; i++)
         {
-            EcsManager.world.Create(
-                new Transform {
-                    Position = MathUtil.RandomInsideUnitSphere() * 20,
-                    Rotation = Quaternion.CreateFromYawPitchRoll(
-                        Random.Shared.NextSingle() * MathHelper.TwoPi,
-                        Random.Shared.NextSingle() * MathHelper.TwoPi,
-                        Random.Shared.NextSingle() * MathHelper.TwoPi
-                    ),
-                    Scale = new Vector3(
-                        MathUtil.RandomRange(0.5f, 2f),
-                        MathUtil.RandomRange(0.5f, 2f),
-                        MathUtil.RandomRange(0.5f, 2f)
-                    )
-                },
-                new Components.Actor(),
-                new Components.AspectIdentity(Registries.Aspects.Teapot),
-                new Components.Bouncy(Random.Shared.NextSingle())
-            );
+            var entity = Registry<Prototype>.Get(Registries.Prototypes.Teapot).Construct().Entity;
+            entity.Add(new Transform {
+                Position = MathUtil.RandomInsideUnitSphere() * 20,
+                Rotation = Quaternion.CreateFromYawPitchRoll(
+                    Random.Shared.NextSingle() * MathHelper.TwoPi,
+                    Random.Shared.NextSingle() * MathHelper.TwoPi,
+                    Random.Shared.NextSingle() * MathHelper.TwoPi
+                ),
+                Scale = new Vector3(
+                    MathUtil.RandomRange(0.5f, 2f),
+                    MathUtil.RandomRange(0.5f, 2f),
+                    MathUtil.RandomRange(0.5f, 2f)
+                )
+            });
+            entity.Add<Components.Bouncy>(new(Random.Shared.NextSingle()));
         }
+
+        var player = Registry<Prototype>.Get(Registries.Prototypes.Player).Construct();
+        RenderPipeline.Camera.Target = player;
 
         base.LoadContent();
     }

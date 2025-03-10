@@ -17,9 +17,9 @@ public static class Internals
         });
         Locale.CurrentLanguage = "en-us";
 
-        Registry.Initialize();
-
         EcsManager.Start();
+
+        Registry.Initialize();
 
         // StageManager.Initialize();
     }

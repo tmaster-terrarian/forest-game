@@ -161,7 +161,7 @@ float4 MainPS(VertexShaderOutput input) : COLOR
 
     float3 finalColor = diffuse + specular + backLight + reflective + rim;
 
-    float3 foggyColor = lerp(finalColor, SkyColor * tex2D(SkyTexSampler, SphereMapUv(viewDir * float3(-1, 1, 1))), pow(depth, 0.5));
+    float3 foggyColor = lerp(finalColor, SkyColor * tex2D(SkyTexSampler, SphereMapUv(viewDir * float3(-1, 1, 1))), depth);
     return float4(foggyColor, 1);
 }
 

@@ -8,10 +8,14 @@ public static class Registry
 
     internal static void Initialize()
     {
-        Create<IComponentSystem>();
-        Registries.ComponentSystems.Initialize();
         Create<Aspect>();
         Registries.Aspects.Initialize();
+
+        Create<Prototype>();
+        Registries.Prototypes.Initialize();
+
+        Create<IComponentSystem>();
+        Registries.ComponentSystems.Initialize();
     }
 
     public static void Create<T>() where T : class
@@ -63,9 +67,9 @@ public static class Registry<T> where T : class
         return false;
     }
 
-    public static T? GetValue(string key)
+    public static T Get(string key)
     {
-        return _values.GetValueOrDefault(key);
+        return _values[key];
     }
 
     public static string? GetKey(T entry)

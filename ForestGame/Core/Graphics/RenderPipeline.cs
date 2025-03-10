@@ -168,8 +168,8 @@ public static class RenderPipeline
         GraphicsDevice.SamplerStates[0] = SamplerState.PointClamp;
 
         ViewMatrix = Matrix.CreateLookAt(
-            Camera.Transform.Position,
-            Camera.Transform.Position + Camera.Forward,
+            Camera.Transform.WorldPosition,
+            Camera.Transform.WorldPosition + Camera.Transform.Matrix.Forward,
             Vector3.Up
         );
 
@@ -199,7 +199,7 @@ public static class RenderPipeline
 
         Camera.Draw(GraphicsDevice);
 
-        _skyboxRenderer.Draw(Camera.Transform.Position, Quaternion.Identity);
+        _skyboxRenderer.Draw(Camera.Transform.WorldPosition, Quaternion.Identity);
 
         _cube.Draw(GraphicsDevice, Matrix.Identity, _effect);
 
@@ -337,22 +337,18 @@ public static class RenderPipeline
             }
 
             if(aspect.ModelPath.EndsWith(".obj"))
-            {
                 continue;
-            }
-            else
+
+            if(!_modelCache.TryGetValue(aspect.ModelPath, out var model))
             {
-                if(!_modelCache.TryGetValue(aspect.ModelPath, out var model))
-                {
-                    model = ContentLoader.Load<GltfModel>(aspect.ModelPath);
-                    _modelCache.Add(aspect.ModelPath, model!);
-                }
-
-                if(model is null)
-                    continue;
-
-                model.Draw(GraphicsDevice, transform, effect);
+                model = ContentLoader.Load<GltfModel>(aspect.ModelPath);
+                _modelCache.Add(aspect.ModelPath, model!);
             }
+
+            if(model is null)
+                continue;
+
+            model.Draw(GraphicsDevice, transform, effect);
         }
     }
 

@@ -16,7 +16,7 @@ public class ModelGraphicsSystem : IDrawableComponentSystem
     {
         EcsManager.world.Query(new QueryDescription().WithAll<AspectIdentity>(), (Entity entity, ref AspectIdentity aspectId) =>
         {
-            Aspect? aspect = Registry<Aspect>.GetValue(aspectId.ID);
+            Aspect? aspect = Registry<Aspect>.Get(aspectId.Id);
             if(aspect is null)
                 return;
 
