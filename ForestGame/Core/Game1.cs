@@ -36,6 +36,7 @@ public class Game1 : Game
             randomPos.Y = MathF.Abs(randomPos.Y);
             entity.Set<Transform>(new() {
                 Position = randomPos,
+                Scale = MathUtil.RandomVector3(0.5f, 1f),
             });
             // entity.Add<Components.Bouncy>(new(Random.Shared.NextSingle()));
             // entity.Remove<Components.Bouncy>();

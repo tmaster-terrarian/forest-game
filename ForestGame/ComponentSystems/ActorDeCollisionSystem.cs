@@ -25,7 +25,7 @@ public class ActorDeCollisionSystem : IComponentSystem
                 var direction = median1 - median2;
                 var amount = actor2.Collider.Size / 2f / direction.Length();
                 direction = Vector3.Normalize(MathUtil.ProjectOnPlane(direction, Vector3.UnitY));
-                actor.Velocity += direction * amount * 50f * Time.Delta;
+                actor.Velocity = MathUtil.ExpDecay(actor.Velocity, direction * amount * 2f, 12, Time.Delta);
             });
             entity1.Set(actor);
         });
