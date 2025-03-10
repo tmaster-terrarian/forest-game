@@ -43,7 +43,7 @@ internal class Game1 : Game
             randomPos.Y = MathF.Abs(randomPos.Y);
             entity.Set<Transform>(new() {
                 Position = randomPos,
-                Scale = MathUtil.SquashScale(MathUtil.RandomRange(0.8f, 1.5f)) * 1.5f,
+                Scale = MathUtil.SquashScale(MathUtil.RandomRange(0.8f, 1.5f)) * MathUtil.RandomRange(0.5f, 2f),
                 Rotation = Quaternion.CreateFromAxisAngle(Vector3.UnitY, MathUtil.RandomRange(-MathHelper.Pi, MathHelper.Pi))
             });
             // entity.Add<Components.Bouncy>(new(Random.Shared.NextSingle()));
