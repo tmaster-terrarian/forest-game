@@ -13,10 +13,10 @@ public static class ComponentSystems
 
     internal static void Initialize()
     {
-        Registry.Register<IComponentSystem>(Actor, new ActorSystem());
         Registry.Register<IComponentSystem>(Player, new PlayerSystem());
-        Registry.Register<IComponentSystem>(ModelGraphics, new ModelGraphicsSystem());
         Registry.Register<IComponentSystem>(MotorMovement, new MotorMovementSystem());
+        Registry.Register<IComponentSystem>(Actor, new ActorSystem());
+        Registry.Register<IComponentSystem>(ModelGraphics, new ModelGraphicsSystem());
         Registry.Register<IComponentSystem>(ActorDeCollision, new ActorDeCollisionSystem());
     }
 }
