@@ -9,10 +9,10 @@ public class MotorMovementSystem : IComponentSystem
 {
     public void Update()
     {
-        EcsManager.world.Query(new QueryDescription().WithAll<Actor, Motor>(), (ref Actor actor, ref Motor motor) =>
+        EcsManager.world.Query(new QueryDescription().WithAll<Actor, Motor, Transform>(), (ref Actor actor, ref Motor motor, ref Transform transform) =>
         {
-            var planarVel = MathUtil.ProjectOnPlane(actor.Velocity, Vector3.UnitY);
-            var verticalVel = MathUtil.Project(actor.Velocity, Vector3.UnitY);
+            var planarVel = MathUtil.ProjectOnPlane(actor.Velocity, transform.Matrix.Up);
+            var verticalVel = MathUtil.Project(actor.Velocity, transform.Matrix.Up);
 
             var targetVel = Vector3.Zero;
             if (motor.MovementDirection != Vector3.Zero)
