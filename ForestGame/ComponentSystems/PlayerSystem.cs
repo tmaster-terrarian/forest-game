@@ -28,8 +28,10 @@ public class PlayerSystem : IComponentSystem
                     if(Input.MousePosition != _lastMousePos)
                     {
                         var difference = Input.MousePosition - _lastMousePos;
-                        camera.Yaw -= difference.X * (1f/144f) * _sensitivity;
-                        camera.Pitch -= difference.Y * (1f/144f) * _sensitivity;
+                        motor.Yaw -= difference.X * (1f/144f) * _sensitivity;
+                        motor.Pitch -= difference.Y * (1f/144f) * _sensitivity;
+                        camera.Yaw = motor.Yaw;
+                        camera.Pitch = motor.Pitch;
                         camera.Pitch = MathHelper.Clamp(camera.Pitch, -MathHelper.ToRadians(89.99f), MathHelper.ToRadians(89.99f));
                         camera.Transform.Rotation = Quaternion.CreateFromYawPitchRoll(camera.Yaw, camera.Pitch, 0);
                         _lastMousePos = new(RenderPipeline.Window.ClientBounds.Width / 2, RenderPipeline.Window.ClientBounds.Height / 2);
@@ -42,6 +44,7 @@ public class PlayerSystem : IComponentSystem
                     0,
                     (Input.GetDown(Keys.S) ? 1 : 0) - (Input.GetDown(Keys.W) ? 1 : 0)
                 );
+
                 // if(inputDir != Vector3.Zero)
                 // {
                 //     inputDir = Vector3.Normalize(inputDir);
