@@ -8,16 +8,10 @@ public class ColliderSyncSystem : IComponentSystem
 {
     public void Update()
     {
-        EcsManager.world.Query(new QueryDescription().WithAll<Actor, Transform>(),
-            (ref Actor actor, ref Transform transform) =>
-            {
-                actor.Collider = actor.Collider with { Position = transform.Position };
-            });
-
-        EcsManager.world.Query(new QueryDescription().WithAll<Solid, Transform>(),
-            (ref Solid solid, ref Transform transform) =>
-            {
-                solid.Collider = solid.Collider with { Position = transform.Position };
-            });
+        EcsManager.world.Query(new QueryDescription().WithAll<Collider, Transform>(),
+            (ref Collider collider, ref Transform transform) => {
+                collider = collider with { Position = transform.Position };
+            }
+        );
     }
 }

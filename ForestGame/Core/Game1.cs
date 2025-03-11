@@ -56,12 +56,10 @@ internal class Game1 : Game
         // player.Entity.Add(new Bouncy());
         RenderPipeline.Camera.Target = player;
 
-        var testSolid = EcsManager.world.Create();
-        var testSolidComponent = new Solid
-        {
-            Collider = new Collider(new(-3.5f, 0.5f, -3.5f), Vector3.One, Vector3.Zero)
-        };
-        testSolid.Add(testSolidComponent);
+        EcsManager.world.Create(
+            new Solid(),
+            new Collider(new(-3.5f, 0.5f, -3.5f), Vector3.One, Vector3.Zero)
+        );
 
         base.LoadContent();
     }

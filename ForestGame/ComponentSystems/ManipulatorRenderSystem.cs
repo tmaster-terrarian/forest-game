@@ -75,8 +75,8 @@ public class ManipulatorRenderSystem : IComponentSystem, IDrawableComponentSyste
         if(!_manipulatorHolder.IsAlive())
             return;
 
-        EcsManager.world.Query(new QueryDescription().WithAll<Actor, Transform>(),
-            (Entity entity, ref Actor actor, ref Transform transform) => {
+        EcsManager.world.Query(new QueryDescription().WithAll<Collider, Transform>(),
+            (Entity entity, ref Collider collider, ref Transform transform) => {
                 float opacity = _fadeAmount;
                 if(scanning)
                 {
@@ -94,10 +94,11 @@ public class ManipulatorRenderSystem : IComponentSystem, IDrawableComponentSyste
                 ref ManipulatorData data = ref _manipulatorHolder.Entity.Get<ManipulatorData>();
                 aspect.Submit(
                     transform,
-                    actor.Collider,
+                    collider,
                     entity == data.TargetEntity ? HighlightFadeAmount + MathHelper.Max(0, opacity) : 0,
                     opacity,
-                    scanning || entity == data.TargetEntity
+                    scanning || entity == data.TargetEntity,
+                    entity.Has<Solid>()
                 );
             }
         );
