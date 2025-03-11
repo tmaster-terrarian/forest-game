@@ -14,15 +14,13 @@ public class ActorSolidCollisionSystem : IComponentSystem
     public void Update()
     {
         EcsManager.world.Query(new QueryDescription().WithAll<Actor, Transform>(),
-            (Entity entity, ref Actor actor, ref Transform transform) =>
+            (Entity entity, ref Actor actor, ref Collider collider, ref Transform transform) =>
         {
             var actorMutable = actor;
-            var collider = actor.Collider;
             var bb = collider.BoundingBox(transform.Scale);
             var transformMutable = transform;
-            EcsManager.world.Query(new QueryDescription().WithAll<Solid>(), (Entity solidEntity, ref Solid solid) =>
+            EcsManager.world.Query(new QueryDescription().WithAll<Solid, Collider>(), (Entity solidEntity, ref Solid solid, ref Collider solidCollider) =>
             {
-                var solidCollider = solid.Collider;
                 var solidBb = solidCollider.BoundingBox(Vector3.One);
                 if (solidEntity.TryGet<Transform>(out var solidTransform))
                 {

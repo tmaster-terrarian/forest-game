@@ -3,4 +3,4 @@ using Microsoft.Xna.Framework;
 
 namespace ForestGame.Components;
 
-public record struct Solid(Collider Collider);
+public record struct Solid();

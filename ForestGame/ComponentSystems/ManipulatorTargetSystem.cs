@@ -31,9 +31,9 @@ public class ManipulatorTargetSystem : IComponentSystem
         var reference = EntityReference.Null;
         Ray ray = new(RenderPipeline.Camera.Transform.WorldPosition, RenderPipeline.Camera.Transform.Matrix.Forward);
 
-        EcsManager.world.Query(new QueryDescription().WithAll<Actor, Transform>().WithNone<PlayerControlled>(),
-            (Entity entity, ref Actor actor, ref Transform transform) => {
-                if(ray.Intersects(actor.Collider.BoundingBox(transform.Scale)) is float hit)
+        EcsManager.world.Query(new QueryDescription().WithAll<Collider, Transform>().WithNone<PlayerControlled>(),
+            (Entity entity, ref Collider collider, ref Transform transform) => {
+                if(ray.Intersects(collider.BoundingBox(transform.Scale)) is float hit)
                 {
                     if(hit >= closest)
                         return;

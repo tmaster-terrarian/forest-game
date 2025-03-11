@@ -10,7 +10,7 @@ public class ActorSystem : IComponentSystem
 {
     public void Update()
     {
-        EcsManager.world.Query(new QueryDescription().WithAll<Actor, Transform>(), (Entity entity, ref Actor actor, ref Transform transform) =>
+        EcsManager.world.Query(new QueryDescription().WithAll<Actor, Collider, Transform>(), (Entity entity, ref Actor actor, ref Collider collider, ref Transform transform) =>
         {
             if (actor.HasGravity)
             {
@@ -63,7 +63,7 @@ public class ActorSystem : IComponentSystem
                 actor.Collisions.Add(new(Vector3.UnitY));
             }
 
-            actor.Collider = actor.Collider with { Position = transform.Position };
+            collider = collider with { Position = transform.Position };
         });
     }
 }
