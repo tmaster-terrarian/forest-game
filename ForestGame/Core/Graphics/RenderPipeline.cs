@@ -131,6 +131,7 @@ public static class RenderPipeline
         _testEffect = ContentLoader.Load<Effect>("fx/depth")!;
         _testEffect.Parameters["MatcapTex"]?.SetValue(_matCap);
         _testEffect.Parameters["MainTex"]?.SetValue(WhiteTexture);
+        _testEffect.Parameters["VertexColorIntensity"]?.SetValue(1f);
         _testEffect.Parameters["MatcapIntensity"]?.SetValue(1f);
         _testEffect.Parameters["MatcapPower"]?.SetValue(2f);
         _testEffect.Parameters["Shininess"]?.SetValue(0.5f);
@@ -325,6 +326,7 @@ public static class RenderPipeline
         var pWorldSpaceCameraPos = effect.Parameters["WorldSpaceCameraPos"];
         var pScreenResolution = effect.Parameters["ScreenResolution"];
         var pMainTex = effect.Parameters["MainTex"];
+        var pVertexColorIntensity = effect.Parameters["VertexColorIntensity"];
         var pMatcapTex = effect.Parameters["MatcapTex"];
         var pMatcapIntensity = effect.Parameters["MatcapIntensity"];
         var pMatcapPower = effect.Parameters["MatcapPower"];
@@ -358,6 +360,8 @@ public static class RenderPipeline
             }
             else
                 pMainTex?.SetValue(WhiteTexture);
+
+            pVertexColorIntensity?.SetValue(aspect.Material.VertexColorIntensity);
 
             if(aspect.Material.MatcapOptions is not null)
             {

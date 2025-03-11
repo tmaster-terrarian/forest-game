@@ -6,6 +6,7 @@ public class Material
 {
     public string? MainTexturePath { get; set; }
     public Matcap? MatcapOptions { get; set; }
+    public float VertexColorIntensity { get; set; } = 1;
 
     public class Matcap
     {

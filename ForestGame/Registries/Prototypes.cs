@@ -7,6 +7,7 @@ public static class Prototypes
 {
     public const string Player = "player";
     public const string Teapot = "teapot";
+    public const string StreetLamp = "street_lamp";
 
     public static void Initialize()
     {
@@ -28,11 +29,22 @@ public static class Prototypes
         Registry.Register<Prototype>(Teapot, new() {
             Components = {
                 Transform.Identity,
-                new Components.Solid
+                new Components.Actor
                 {
                     Collider = new Collider(Vector3.Zero, new Vector3(1.8f, 1.4f, 1.8f), Vector3.UnitY * (1.4f/2f)),
                 },
                 new Components.AspectIdentity(Aspects.Teapot),
+            },
+        });
+
+        Registry.Register<Prototype>(StreetLamp, new() {
+            Components = {
+                Transform.Identity,
+                new Components.Solid
+                {
+                    Collider = new Collider(Vector3.Zero, new Vector3(0.5f, 4f, 0.5f), Vector3.UnitY * (4f/2f)),
+                },
+                new Components.AspectIdentity(Aspects.StreetLamp),
             },
         });
     }

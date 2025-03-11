@@ -76,21 +76,21 @@ public class Camera
 
     public void Draw(GraphicsDevice graphicsDevice)
     {
-        for(int z = 0; z < 5; z++)
-        {
-            for(int x = 0; x < 5; x++)
-            {
-                GraphicsUtil.DrawQuad(
-                    graphicsDevice,
-                    RenderPipeline.WhiteTexture,
-                    Color.Lerp(Color.Gray, Color.White, floats[z][x]),
-                    Matrix.CreateRotationX(MathHelper.PiOver2) * Matrix.CreateTranslation(new(x + 0.5f, floats[z][x], z + 0.5f)),
-                    RenderPipeline.EffectLit,
-                    1, 1,
-                    Vector2.Zero, Vector2.One
-                );
-            }
-        }
+        // for(int z = 0; z < 5; z++)
+        // {
+        //     for(int x = 0; x < 5; x++)
+        //     {
+        //         GraphicsUtil.DrawQuad(
+        //             graphicsDevice,
+        //             RenderPipeline.WhiteTexture,
+        //             Color.Lerp(Color.Gray, Color.White, floats[z][x]),
+        //             Matrix.CreateRotationX(MathHelper.PiOver2) * Matrix.CreateTranslation(new(x + 0.5f, floats[z][x], z + 0.5f)),
+        //             RenderPipeline.EffectLit,
+        //             1, 1,
+        //             Vector2.Zero, Vector2.One
+        //         );
+        //     }
+        // }
 
         // VertexPositionColorNormalTexture[] point = [
         //     new(Vector3.Zero, Color.Red, Vector3.UnitY, Vector2.Zero),

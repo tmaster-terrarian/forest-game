@@ -51,6 +51,17 @@ internal class Game1 : Game
             // entity.Remove<Components.Bouncy>();
         }
 
+        for(int i = 0; i < 30; i++)
+        {
+            var entity = Registry<Prototype>.Get(Registries.Prototypes.StreetLamp).Construct().Entity;
+            var randomPos = MathUtil.RandomInsideUnitSphere() * 30f;
+            randomPos.Y = MathF.Abs(randomPos.Y) * 0;
+            entity.Set<Transform>(new() {
+                Position = randomPos,
+                Rotation = Quaternion.CreateFromAxisAngle(Vector3.UnitY, MathUtil.RandomRange(-MathHelper.Pi, MathHelper.Pi))
+            });
+        }
+
         var player = Registry<Prototype>.Get(Registries.Prototypes.Player).Construct();
         player.Entity.Set(new Transform { Position = Vector3.UnitY * 10 });
         // player.Entity.Add(new Bouncy());
