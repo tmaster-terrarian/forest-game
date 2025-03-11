@@ -75,7 +75,7 @@ public class ManipulatorRenderSystem : IComponentSystem, IDrawableComponentSyste
         if(!_manipulatorHolder.IsAlive())
             return;
 
-        EcsManager.world.Query(new QueryDescription().WithAll<Collider, Transform>(),
+        EcsManager.world.Query(new QueryDescription().WithAll<Collider, Transform>().WithNone<ManipulatorData>(),
             (Entity entity, ref Collider collider, ref Transform transform) => {
                 float opacity = _fadeAmount;
                 if(scanning)

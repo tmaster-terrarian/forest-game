@@ -30,7 +30,7 @@ public class BoundingBoxAspect : Aspect
         {
             var camTransform = RenderPipeline.Camera.Transform with { };
             var camPos = camTransform.WorldPosition;
-            camPos += RenderPipeline.Camera.Right * 0.1f + RenderPipeline.Camera.Forward * 0.1f - RenderPipeline.Camera.Up * 0.1f;
+            camPos += RenderPipeline.Camera.Forward * 0.12f - RenderPipeline.Camera.Up * 0.05f;
 
             var direction = bbox.Median() - camPos;
 
@@ -38,7 +38,7 @@ public class BoundingBoxAspect : Aspect
                 graphicsDevice,
                 camPos,
                 direction / 2 * MathF.Pow(MathHelper.Max(0, _toDraw[_index].Opacity - 0.3f), 2f),
-                highlightedColor,
+                highlightedColor * (0.05f + 0.95f * MathF.Pow(Math.Max(0, Vector3.Dot(RenderPipeline.Camera.Forward, Vector3.Normalize(direction))), 2f)),
                 Color.Lerp(baseColor, highlightedColor, _toDraw[_index].HighlightAmount)
             );
         }
