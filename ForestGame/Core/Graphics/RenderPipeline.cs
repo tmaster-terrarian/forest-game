@@ -245,18 +245,6 @@ public static class RenderPipeline
             }
         );
 
-        // Draw Colliders
-        // EcsManager.world.Query(new QueryDescription().WithAll<Components.Solid>(),
-        //     (Entity entity, ref Components.Solid solid) => {
-        //         GraphicsUtil.DrawBoundingBox(
-        //             GraphicsDevice,
-        //             solid.Collider.BoundingBox(entity.TryGet(out Transform transform) ? transform.Scale : Vector3.One),
-        //             Color.Red * 0.95f,
-        //             true
-        //         );
-        //     }
-        // );
-
         if(GizmosVisible)
         {
             ProjectionMatrix = Matrix.CreatePerspectiveFieldOfView(
