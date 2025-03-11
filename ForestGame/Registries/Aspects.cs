@@ -6,10 +6,11 @@ namespace ForestGame.Registries;
 public static class Aspects
 {
     public const string Teapot = "teapot";
+    public const string BoundingBox = "bounding_box";
 
     public static void Initialize()
     {
-        Registry.Register<Aspect>(Teapot, new() {
+        Registry.Register<Aspect>(Teapot, new ModelAspect() {
             ModelPath = "models/fucking-teapot.glb",
             Material = {
                 MatcapOptions = new() {
@@ -20,6 +21,10 @@ public static class Aspects
             },
             EffectPass = RenderPipeline.EffectPass.Lit,
             RenderPass = RenderPipeline.RenderPass.World
+        });
+
+        Registry.Register<Aspect>(BoundingBox, new BoundingBoxAspect() {
+            RenderPass = RenderPipeline.RenderPass.Screen,
         });
     }
 }

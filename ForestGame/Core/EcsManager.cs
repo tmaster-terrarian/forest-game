@@ -26,7 +26,7 @@ public static class EcsManager
         foreach(var system in Registry<IComponentSystem>.Registered)
         {
             if(system is IDrawableComponentSystem drawableSystem)
-                drawableSystem.GetDrawables(graphicsDevice, RenderPipeline.Submit);
+                drawableSystem.GetDrawables(graphicsDevice);
         }
     }
 

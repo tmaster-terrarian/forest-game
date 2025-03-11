@@ -12,17 +12,19 @@ public class ModelGraphicsSystem : IComponentSystem, IDrawableComponentSystem
 {
     public void Update() { }
 
-    public void GetDrawables(GraphicsDevice graphicsDevice, Action<(Aspect aspect, Transform transform)> consumer)
+    public void GetDrawables(GraphicsDevice graphicsDevice)
     {
-        EcsManager.world.Query(new QueryDescription().WithAll<AspectIdentity>(), (Entity entity, ref AspectIdentity aspectId) =>
-        {
-            Aspect? aspect = Registry<Aspect>.Get(aspectId.Id);
-            if(aspect is null)
-                return;
+        EcsManager.world.Query(new QueryDescription().WithAll<AspectIdentity>(),
+            (Entity entity, ref AspectIdentity aspectId) => {
+                Aspect? aspect = Registry<Aspect>.Get(aspectId.Id);
+                if(aspect is null)
+                    return;
 
-            bool hasTransform = entity.TryGet<Transform>(out var transform);
-
-            consumer?.Invoke(new(aspect, hasTransform ? transform : Transform.Identity));
-        });
+                if(!entity.TryGet<Transform>(out var transform))
+                    aspect.Submit(Transform.Identity);
+                else
+                    aspect.Submit(transform);
+            }
+        );
     }
 }
