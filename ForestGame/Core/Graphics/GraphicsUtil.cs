@@ -107,19 +107,31 @@ public static class GraphicsUtil
         }
     }
 
-    private static void DrawVector(GraphicsDevice graphicsDevice, Vector3 origin, Vector3 direction, Color color, float length = 1)
+    public static void DrawVector(GraphicsDevice graphicsDevice, Vector3 origin, Vector3 direction, Color colorA, Color colorB)
     {
-        // Normalize the direction vector to get the arrow direction
-        direction.Normalize();
-        direction *= length;
-
         // Draw the arrow body (line)
         VertexPositionColor[] vertices = [
-            new VertexPositionColor(origin, color),
-            new VertexPositionColor(origin + direction, color)
+            new VertexPositionColor(origin, colorA),
+            new VertexPositionColor(origin + direction, colorB)
         ];
 
         graphicsDevice.DrawUserPrimitives(PrimitiveType.LineList, vertices, 0, 1);
+    }
+
+    public static void DrawVector(GraphicsDevice graphicsDevice, Vector3 origin, Vector3 direction, Color color)
+    {
+        DrawVector(graphicsDevice, origin, direction, color, color);
+    }
+
+    public static void DrawVector(GraphicsDevice graphicsDevice, Vector3 origin, Vector3 direction, Color colorA, Color colorB, float length)
+    {
+        direction.Normalize();
+        DrawVector(graphicsDevice, origin, direction * length, colorA, colorB);
+    }
+
+    public static void DrawVector(GraphicsDevice graphicsDevice, Vector3 origin, Vector3 direction, Color color, float length)
+    {
+        DrawVector(graphicsDevice, origin, direction, color, length);
     }
 
     public static void DrawGizmo(GraphicsDevice graphicsDevice, Vector3 origin, Matrix world)
@@ -142,7 +154,7 @@ public static class GraphicsUtil
         DrawVector(graphicsDevice, Vector3.Zero, Vector3.UnitZ, Color.Blue);   // Z-axis arrow
     }
 
-    public static void DrawBoundingBox(GraphicsDevice graphicsDevice, BoundingBox boundingBox, Color color, bool highlighted)
+    public static void DrawBoundingBox(GraphicsDevice graphicsDevice, BoundingBox boundingBox, Color baseColor, Color highlightedColor, float highlighted)
     {
         var min = boundingBox.Min;
         var max = boundingBox.Max;
@@ -151,10 +163,7 @@ public static class GraphicsUtil
         var rMin = min + new Vector3(MathF.Sin(Time.Elapsed * 3f), MathF.Cos(Time.Elapsed * 3f), MathF.Sin(Time.Elapsed * 3f)) * hoverRange;
         var rMax = max - new Vector3(MathF.Sin(Time.Elapsed * 3f), MathF.Cos(Time.Elapsed * 3f), MathF.Sin(Time.Elapsed * 3f)) * hoverRange;
 
-        if(!highlighted)
-        {
-            color *= 0.8f;
-        }
+        Color color = Color.Lerp(baseColor, highlightedColor, highlighted);
 
         var cornerColor = color * 1.2f;
 

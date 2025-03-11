@@ -54,6 +54,24 @@ public static class _Extensions
         return Vector3.Lerp(boundingBox.Min, boundingBox.Max, 0.5f);
     }
 
+    public static TValue? AddOrGet<TKey, TValue>(this IDictionary<TKey, TValue> dict, TKey key, Func<TValue?> getDefault)
+    {
+        if(!dict.TryGetValue(key, out var value))
+        {
+            value = getDefault();
+            dict.Add(key, value!);
+        }
+
+        return value;
+    }
+
+    /// <returns>true if the default value was added, false if a value was already present</returns>
+    public static bool TryAddOrGet<TKey, TValue>(this IDictionary<TKey, TValue> dict, TKey key, Func<TValue> getDefault, out TValue result)
+    {
+        result = dict.AddOrGet(key, getDefault)!;
+        return !(result?.Equals(default(TValue)) ?? true);
+    }
+
     public static BoundingBox MinkowskiDifference(this BoundingBox a, BoundingBox b)
     {
         float minkowskiFront = a.Max.Z - b.Min.Z;

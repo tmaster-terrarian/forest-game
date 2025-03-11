@@ -70,10 +70,6 @@ public static class RenderPipeline
     public static Effect EffectLit => _testEffect;
     public static Effect EffectBasicDiffuse => _effect;
 
-    private static readonly List<(Aspect aspect, Transform transform)> _toDraw = [];
-
-    private static readonly Dictionary<string, GltfModel> _modelCache = [];
-
     private static readonly HashSet<string> _texturesToLoad = [];
     private static readonly Dictionary<string, Texture2D> _textureCache = [];
 
@@ -156,11 +152,6 @@ public static class RenderPipeline
         OnWindowResize(Window.ClientBounds);
     }
 
-    public static void Submit((Aspect aspect, Transform transform) tuple)
-    {
-        _toDraw.Add(tuple);
-    }
-
     internal static void LoadTextures()
     {
         GraphicsDevice.Reset();
@@ -234,16 +225,17 @@ public static class RenderPipeline
         GraphicsDevice.SetRenderTarget(_rtUi);
         GraphicsDevice.Clear(Color.Transparent);
 
-        EcsManager.world.Query(new QueryDescription().WithAll<Components.Actor, Transform>(),
-            (Entity entity, ref Components.Actor actor, ref Transform transform) => {
-                GraphicsUtil.DrawBoundingBox(
-                    GraphicsDevice,
-                    actor.Collider.BoundingBox(transform.Scale),
-                    Color.Orange * 0.95f,
-                    actor.Velocity.Length() > 0.1f
-                );
-            }
-        );
+        // EcsManager.world.Query(new QueryDescription().WithAll<Components.Actor, Transform>(),
+        //     (Entity entity, ref Components.Actor actor, ref Transform transform) => {
+        //         GraphicsUtil.DrawBoundingBox(
+        //             GraphicsDevice,
+        //             actor.Collider.BoundingBox(transform.Scale),
+        //             Color.Orange * 0.95f * 0.8f,
+        //             Color.Yellow * 0.95f,
+        //             actor.Velocity.Length()
+        //         );
+        //     }
+        // );
 
         if(GizmosVisible)
         {
@@ -278,8 +270,6 @@ public static class RenderPipeline
 
         GraphicsDevice.Reset();
         GraphicsDevice.BlendState = BlendState.AlphaBlend;
-
-        _toDraw.Clear();
 
         DrawRt(_rtSky);
 
@@ -339,16 +329,16 @@ public static class RenderPipeline
         var pMatcapIntensity = effect.Parameters["MatcapIntensity"];
         var pMatcapPower = effect.Parameters["MatcapPower"];
 
-        var query = _toDraw.FindAll(d => d.aspect.EffectPass == pass && d.aspect.RenderPass == renderPass);
-        foreach(var (aspect, transform) in query)
-        {
-            if(aspect.ModelPath is null)
-                continue;
+        var query =
+            from a in Registry<Aspect>.Registered
+            where a.EffectPass == pass && a.RenderPass == renderPass
+            where a.CheckValid()
+            select a;
 
-            pWorldMatrix?.SetValue(transform);
+        foreach(var aspect in query)
+        {
             pViewMatrix?.SetValue(ViewMatrix);
             pProjectionMatrix?.SetValue(ProjectionMatrix);
-            pInverseWorldMatrix?.SetValue(Matrix.Invert(transform));
             pInverseViewMatrix?.SetValue(Matrix.Invert(ViewMatrix));
             pViewDir?.SetValue(Camera.Forward);
             pWorldSpaceCameraPos?.SetValue(Camera.Transform.WorldPosition);
@@ -393,19 +383,10 @@ public static class RenderPipeline
                 pMatcapIntensity?.SetValue(0);
             }
 
-            if(aspect.ModelPath.EndsWith(".obj"))
-                continue;
-
-            if(!_modelCache.TryGetValue(aspect.ModelPath, out var model))
-            {
-                model = ContentLoader.Load<GltfModel>(aspect.ModelPath);
-                _modelCache.Add(aspect.ModelPath, model!);
-            }
-
-            if(model is null)
-                continue;
-
-            model.Draw(GraphicsDevice, transform, effect);
+            aspect.Draw(GraphicsDevice, effect, t => {
+                pWorldMatrix?.SetValue(t);
+                pInverseWorldMatrix?.SetValue(Matrix.Invert(t));
+            });
         }
     }
 

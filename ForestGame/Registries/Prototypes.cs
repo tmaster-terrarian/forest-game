@@ -20,7 +20,8 @@ public static class Prototypes
                 },
                 new Components.Motor {
                     MaxSpeed = 2.5f,
-                }
+                },
+                new Components.ManipulatorData(),
             },
         });
 
