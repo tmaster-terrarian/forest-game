@@ -27,7 +27,7 @@ public static class Prototypes
         Registry.Register<Prototype>(Teapot, new() {
             Components = {
                 Transform.Identity,
-                new Components.Actor
+                new Components.Solid
                 {
                     Collider = new Collider(Vector3.Zero, new Vector3(1.8f, 1.4f, 1.8f), Vector3.UnitY * (1.4f/2f)),
                 },

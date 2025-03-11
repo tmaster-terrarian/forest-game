@@ -1,4 +1,5 @@
 ﻿using Arch.Core.Extensions;
+using ForestGame.Components;
 using ForestGame.Core.Graphics;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Input;
@@ -40,7 +41,7 @@ internal class Game1 : Game
         {
             var entity = Registry<Prototype>.Get(Registries.Prototypes.Teapot).Construct().Entity;
             var randomPos = MathUtil.RandomInsideUnitSphere() * 30f;
-            randomPos.Y = MathF.Abs(randomPos.Y);
+            randomPos.Y = MathF.Abs(randomPos.Y) * 0;
             entity.Set<Transform>(new() {
                 Position = randomPos,
                 Scale = MathUtil.SquashScale(MathUtil.RandomRange(0.8f, 1.5f)) * MathUtil.RandomRange(0.5f, 2f),
@@ -51,8 +52,16 @@ internal class Game1 : Game
         }
 
         var player = Registry<Prototype>.Get(Registries.Prototypes.Player).Construct();
-        player.Entity.Set(new Transform { Position = Vector3.UnitY * 0 });
+        player.Entity.Set(new Transform { Position = Vector3.UnitY * 10 });
+        // player.Entity.Add(new Bouncy());
         RenderPipeline.Camera.Target = player;
+
+        var testSolid = EcsManager.world.Create();
+        var testSolidComponent = new Solid
+        {
+            Collider = new Collider(new(-3.5f, 0.5f, -3.5f), Vector3.One, Vector3.Zero)
+        };
+        testSolid.Add(testSolidComponent);
 
         base.LoadContent();
     }

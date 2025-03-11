@@ -28,27 +28,39 @@ public class ActorSystem : IComponentSystem
 
             transform.Position += actor.Velocity * Time.Delta;
 
-            if (transform.Position.Y <= 0)
+            foreach (var collision in actor.Collisions)
             {
-                if (entity.TryGet<Bouncy>(out var bouncy))
+                if (collision.Normal == Vector3.UnitY)
                 {
-                    transform.Position = transform.Position with { Y = 0 };
-                    if (bouncy.OriginalBounceVelocity is null)
+                    if (entity.TryGet<Bouncy>(out var bouncy))
                     {
-                        actor.Velocity = actor.Velocity with { Y = MathF.Abs(actor.Velocity.Y) };
-                        bouncy.OriginalBounceVelocity = actor.Velocity.Y;
+                        if (bouncy.OriginalBounceVelocity is null)
+                        {
+                            actor.Velocity = actor.Velocity with { Y = MathF.Abs(actor.Velocity.Y) };
+                            bouncy.OriginalBounceVelocity = actor.Velocity.Y;
+                        }
+                        else
+                        {
+                            actor.Velocity = actor.Velocity with { Y = bouncy.OriginalBounceVelocity.Value };
+                        }
+                        entity.Set(bouncy);
                     }
                     else
                     {
-                        actor.Velocity = actor.Velocity with { Y = bouncy.OriginalBounceVelocity.Value };
+                        actor.Velocity = MathUtil.ProjectOnPlane(actor.Velocity, collision.Normal);
                     }
-                    entity.Set(bouncy);
                 }
                 else
                 {
-                    actor.Velocity = MathUtil.ProjectOnPlane(actor.Velocity, Vector3.UnitY);
-                    transform.Position = transform.Position with { Y = 0 };
+                    actor.Velocity = MathUtil.ProjectOnPlane(actor.Velocity, collision.Normal);
                 }
+            }
+            actor.Collisions.Clear();
+
+            if (transform.Position.Y <= 0 && actor.Velocity.Y < 0)
+            {
+                transform.Position = transform.Position with { Y = 0 };
+                actor.Collisions.Add(new(Vector3.UnitY));
             }
 
             actor.Collider = actor.Collider with { Position = transform.Position };

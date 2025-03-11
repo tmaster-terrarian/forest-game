@@ -53,4 +53,19 @@ public static class _Extensions
     {
         return Vector3.Lerp(boundingBox.Min, boundingBox.Max, 0.5f);
     }
+
+    public static BoundingBox MinkowskiDifference(this BoundingBox a, BoundingBox b)
+    {
+        float minkowskiFront = a.Max.Z - b.Min.Z;
+        float minkowskiBack = a.Min.Z - b.Max.Z;
+        float minkowskiRight = a.Max.X - b.Min.X;
+        float minkowskiLeft = a.Min.X - b.Max.X;
+        float minkowskiTop = a.Max.Y - b.Min.Y;
+        float minkowskiBottom = a.Min.Y - b.Max.Y;
+
+        return new BoundingBox(
+            new Vector3(minkowskiLeft, minkowskiBottom, minkowskiBack),
+            new Vector3(minkowskiRight, minkowskiTop, minkowskiFront)
+        );
+    }
 }
