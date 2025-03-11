@@ -24,7 +24,6 @@ public class ActorSolidCollisionSystem : IComponentSystem
                 var solidBb = solidCollider.BoundingBox(Vector3.One);
                 if (solidEntity.TryGet<Transform>(out var solidTransform))
                 {
-                    solidCollider = solidCollider with { Position = solidTransform.Position };
                     solidBb = solidCollider.BoundingBox(solidTransform.Scale);
                 }
 
@@ -63,7 +62,7 @@ public class ActorSolidCollisionSystem : IComponentSystem
                 if (actorMutable.Velocity == Vector3.Zero || penetration == Vector3.Zero) return;
                 transformMutable.Position -= penetration;
                 Vector3 normal = Vector3.Normalize(-penetration);
-                actorMutable.Collisions.Add(new CollisionInfo(normal));
+                actorMutable.Collisions = [..actorMutable.Collisions, new CollisionInfo(normal)];
             });
 
             entity.Set(actorMutable);

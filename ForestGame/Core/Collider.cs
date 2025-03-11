@@ -2,7 +2,7 @@ using Microsoft.Xna.Framework;
 
 namespace ForestGame.Core;
 
-public readonly record struct Collider(Vector3 Position, Vector3 Size, Vector3 Offset)
+public record struct Collider(Vector3 Position, Vector3 Size, Vector3 Offset)
 {
     public Collider() : this(Vector3.Zero, Vector3.One, Vector3.Zero) { }
 

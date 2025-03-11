@@ -10,7 +10,7 @@ public class ActorSystem : IComponentSystem
 {
     public void Update()
     {
-        EcsManager.world.Query(new QueryDescription().WithAll<Actor, Collider, Transform>(), (Entity entity, ref Actor actor, ref Collider collider, ref Transform transform) =>
+        EcsManager.world.Query(new QueryDescription().WithAll<Actor, Transform>(), (Entity entity, ref Actor actor, ref Transform transform) =>
         {
             if (actor.HasGravity)
             {
@@ -55,15 +55,14 @@ public class ActorSystem : IComponentSystem
                     actor.Velocity = MathUtil.ProjectOnPlane(actor.Velocity, collision.Normal);
                 }
             }
-            actor.Collisions.Clear();
 
-            if (transform.Position.Y <= 0 && actor.Velocity.Y < 0)
+            actor.Collisions = [];
+
+            if (transform.Position.Y <= 0 && actor.Velocity.Y <= 0)
             {
                 transform.Position = transform.Position with { Y = 0 };
-                actor.Collisions.Add(new(Vector3.UnitY));
+                actor.Collisions = [..actor.Collisions, new CollisionInfo(Vector3.UnitY)];
             }
-
-            collider = collider with { Position = transform.Position };
         });
     }
 }

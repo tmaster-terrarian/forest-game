@@ -15,9 +15,7 @@ public static class Prototypes
             Components = {
                 Transform.Identity,
                 new Components.PlayerControlled(),
-                new Components.Actor {
-                    HasGravity = true
-                },
+                new Components.Actor(),
                 new Collider(Vector3.Zero, new Vector3(0.5f, 1.5f, 0.5f), Vector3.UnitY * 0.75f),
                 new Components.Motor {
                     MaxSpeed = 2.5f,

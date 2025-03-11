@@ -41,7 +41,7 @@ internal class Game1 : Game
         {
             var entity = Registry<Prototype>.Get(Registries.Prototypes.Teapot).Construct().Entity;
             var randomPos = MathUtil.RandomInsideUnitSphere() * 30f;
-            randomPos.Y = MathF.Abs(randomPos.Y) * 0;
+            randomPos.Y = MathF.Abs(randomPos.Y);
             entity.Set<Transform>(new() {
                 Position = randomPos,
                 Scale = MathUtil.SquashScale(MathUtil.RandomRange(0.8f, 1.5f)) * MathUtil.RandomRange(0.5f, 2f),
@@ -67,10 +67,10 @@ internal class Game1 : Game
         // player.Entity.Add(new Bouncy());
         RenderPipeline.Camera.Target = player;
 
-        EcsManager.world.Create(
-            new Solid(),
-            new Collider(new(-3.5f, 0.5f, -3.5f), Vector3.One, Vector3.Zero)
-        );
+        // EcsManager.world.Create(
+        //     new Solid(),
+        //     new Collider(new(-3.5f, 0.5f, -3.5f), Vector3.One, Vector3.Zero)
+        // );
 
         base.LoadContent();
     }

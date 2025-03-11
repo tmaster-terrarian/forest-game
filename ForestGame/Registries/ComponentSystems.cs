@@ -24,7 +24,7 @@ public static class ComponentSystems
         Registry.Register<IComponentSystem>(ActorDeCollision, new ActorDeCollisionSystem());
         Registry.Register<IComponentSystem>(Actor, new ActorSystem());
         Registry.Register<IComponentSystem>(ModelGraphics, new ModelGraphicsSystem());
-        Registry.Register<IComponentSystem>(ManipulatorRender, new ManipulatorRenderSystem());
         Registry.Register<IComponentSystem>(ManipulatorTarget, new ManipulatorTargetSystem());
+        Registry.Register<IComponentSystem>(ManipulatorRender, new ManipulatorRenderSystem());
     }
 }
