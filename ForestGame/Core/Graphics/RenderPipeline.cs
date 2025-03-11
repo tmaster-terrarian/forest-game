@@ -32,7 +32,6 @@ public static class RenderPipeline
     public static Camera Camera { get; set; }
 
     private static ObjModel _cube;
-    private static ObjModel _cube2;
     private static GltfModel _gltfCube;
     private static Effect _effect;
 
@@ -107,14 +106,6 @@ public static class RenderPipeline
         _cube = ContentLoader.Load<ObjModel>("cube.obj")!;
         _cube.Transform.Origin = -Vector3.One * 0.5f;
         _cube.Transform.Position = new(-3.5f, 0.5f, -3.5f);
-
-        _cube2 = ContentLoader.Load<ObjModel>("teapot.obj")!;
-        // _cube2.Transform = Matrix.CreateTranslation(Vector3.One * -0.5f) * Matrix.CreateScale(0.5f) * Matrix.CreateTranslation(Vector3.Left * 0.5f);
-        // _cube2.Transform = Transform.CreateFromMatrix(Matrix.CreateRotationY(MathHelper.PiOver4) * Matrix.CreateTranslation(0.5f, 0, 1));
-        _cube2.Transform = new() {
-            Rotation = Quaternion.CreateFromAxisAngle(Vector3.Up, MathHelper.PiOver4),
-            Position = new(0, -0.5f, 0),
-        };
 
         _matCap = ContentLoader.Load<Texture2D>("matcaps/Matcap_Metal_04.jpeg")!;
         // _matCap = ContentLoader.Load<Texture2D>("matcaps/Matcap_Metal_02.png")!;

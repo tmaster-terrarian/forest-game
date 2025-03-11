@@ -159,8 +159,9 @@ public static class GraphicsUtil
         var min = boundingBox.Min;
         var max = boundingBox.Max;
 
-        var rMin = min + new Vector3(MathF.Sin(Time.Elapsed * 3f) * 0.01f, MathF.Cos(Time.Elapsed * 3f) * 0.01f, MathF.Sin(Time.Elapsed * 3f) * 0.01f);
-        var rMax = max - new Vector3(MathF.Sin(Time.Elapsed * 3f) * 0.01f, MathF.Cos(Time.Elapsed * 3f) * 0.01f, MathF.Sin(Time.Elapsed * 3f) * 0.01f);
+        float hoverRange = 0.05f;
+        var rMin = min + new Vector3(MathF.Sin(Time.Elapsed * 3f), MathF.Cos(Time.Elapsed * 3f), MathF.Sin(Time.Elapsed * 3f)) * hoverRange;
+        var rMax = max - new Vector3(MathF.Sin(Time.Elapsed * 3f), MathF.Cos(Time.Elapsed * 3f), MathF.Sin(Time.Elapsed * 3f)) * hoverRange;
 
         Color color = Color.Lerp(baseColor, highlightedColor, highlighted);
 
