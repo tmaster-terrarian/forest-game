@@ -11,6 +11,7 @@ namespace ForestGame.ComponentSystems;
 
 public class ManipulatorRenderSystem : IComponentSystem, IDrawableComponentSystem
 {
+    private const float Range = 10;
     public bool Enabled { get; set; } = true;
 
     public float HighlightFadeAmount { get; set; } = 0;
@@ -20,6 +21,7 @@ public class ManipulatorRenderSystem : IComponentSystem, IDrawableComponentSyste
     private float scanProgress;
 
     private EntityReference _manipulatorHolder = EntityReference.Null;
+
 
     public void DoScan()
     {
@@ -80,14 +82,14 @@ public class ManipulatorRenderSystem : IComponentSystem, IDrawableComponentSyste
                 float opacity = _fadeAmount;
                 if(scanning)
                 {
-                    var scanDistance = scanProgress * 35;
+                    var scanDistance = scanProgress * Range;
                     var objDistance = (transform.WorldPosition - RenderPipeline.Camera.Transform.WorldPosition).Length();
-                    var scanInfluence = 2f - MathHelper.Clamp(objDistance - scanDistance, 0, 2);
+                    var scanInfluence = 2f * (Range / 35f) - MathHelper.Clamp(objDistance - scanDistance, 0, 2 * (Range / 35f));
                     scanInfluence += MathHelper.Min(0, objDistance - scanDistance) * 0.1f;
                     scanInfluence -= MathHelper.Max(0, objDistance - scanDistance) * 0.25f;
-                    if(Math.Sign(objDistance - scanDistance) == -1 || scanDistance > 34)
+                    if(Math.Sign(objDistance - scanDistance) == -1)
                         scanInfluence = MathHelper.Max(0.5f, scanInfluence);
-                    scanInfluence *= 1 - MathHelper.Max(0, scanDistance - 34);
+                    scanInfluence *= 1 - MathHelper.Max(0, scanDistance - Range - 1);
                     opacity = scanInfluence;
                 }
 
