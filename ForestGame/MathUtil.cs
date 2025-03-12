@@ -329,4 +329,19 @@ public static class MathUtil
             1f/height
         );
     }
+
+    public static float Mod(float a, float b)
+    {
+        return ((a % b) + b) % b;
+    }
+
+    public static Vector2 Mod(Vector2 a, Vector2 b)
+    {
+        return new Vector2(Mod(a.X, b.X), Mod(a.Y, b.Y));
+    }
+
+    public static Vector3 Mod(Vector3 a, Vector3 b)
+    {
+        return new Vector3(Mod(a.X, b.X), Mod(a.Y, b.Y), Mod(a.Z, b.Z));
+    }
 }

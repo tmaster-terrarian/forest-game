@@ -14,9 +14,11 @@ public static class ComponentSystems
     public const string ManipulatorTarget = "manipulator_target";
     public const string ActorSolidCollisionSystem = "actor_solid_collision_system";
     public const string ColliderSyncSystem = "collider_sync_system";
+    public const string WorldLoopingSystem = "world_looping_system";
 
     internal static void Initialize()
     {
+        Registry.Register<IComponentSystem>(WorldLoopingSystem, new WorldLoopingSystem());
         Registry.Register<IComponentSystem>(ColliderSyncSystem, new ColliderSyncSystem());
         Registry.Register<IComponentSystem>(Player, new PlayerSystem());
         Registry.Register<IComponentSystem>(MotorMovement, new MotorMovementSystem());

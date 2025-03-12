@@ -40,7 +40,7 @@ internal class Game1 : Game
         for(int i = 0; i < 30; i++)
         {
             var entity = Registry<Prototype>.Get(Registries.Prototypes.Teapot).Construct().Entity;
-            var randomPos = MathUtil.RandomInsideUnitSphere() * 30f;
+            var randomPos = MathUtil.RandomInsideUnitSphere() * 80;
             randomPos.Y = MathF.Abs(randomPos.Y);
             entity.Set<Transform>(new() {
                 Position = randomPos,
@@ -54,7 +54,7 @@ internal class Game1 : Game
         for(int i = 0; i < 30; i++)
         {
             var entity = Registry<Prototype>.Get(Registries.Prototypes.StreetLamp).Construct().Entity;
-            var randomPos = MathUtil.RandomInsideUnitSphere() * 30f;
+            var randomPos = MathUtil.RandomInsideUnitSphere() * 80;
             randomPos.Y = MathF.Abs(randomPos.Y) * 0;
             entity.Set<Transform>(new() {
                 Position = randomPos,
@@ -71,6 +71,10 @@ internal class Game1 : Game
         //     new Solid(),
         //     new Collider(new(-3.5f, 0.5f, -3.5f), Vector3.One, Vector3.Zero)
         // );
+
+        EcsManager.world.Create(
+            new WorldLooper(new Vector3(80, 0, 80))
+        );
 
         base.LoadContent();
     }
