@@ -1,6 +1,3 @@
-using System.Runtime.CompilerServices;
-using Arch.Core;
-using Arch.Core.Extensions;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
@@ -32,8 +29,7 @@ public static class RenderPipeline
     public static Camera Camera { get; set; }
 
     private static ObjModel _cube;
-    private static GltfModel _gltfCube;
-    private static Effect _effect;
+    private static Effect _diffuse;
 
     private static RenderTarget2D _rt;
     private static RenderTarget2D _rtUi;
@@ -41,19 +37,10 @@ public static class RenderPipeline
     private static RenderTarget2D[] _renderTargets;
     public static RenderTarget2D[] RenderTargets => _renderTargets;
 
-    private static readonly VertexPositionColorTexture[] _rtDrawingPrimitive = [
-        new(new Vector3(0, 0, -0.5f), Color.White, Vector2.Zero),
-        new(new Vector3(0, 1, -0.5f), Color.White, Vector2.UnitY),
-        new(new Vector3(1, 0, -0.5f), Color.White, Vector2.UnitX),
-        new(new Vector3(1, 1, -0.5f), Color.White, Vector2.One)
-    ];
-
-    private static Effect _testEffect;
+    private static Effect _lit;
 
     private static Effect _screenEffect;
     private static EffectParameter _screenScreenResolution;
-    private static EffectParameter _screenProjection;
-    private static EffectParameter _screenTexture;
 
     private static Texture2D? _cursorTex;
 
@@ -65,10 +52,9 @@ public static class RenderPipeline
     public static int ResolutionScale => _resolutionScale;
 
     private static Texture2D _matCap;
-    private static Texture2D _gltfCubeTex;
 
-    public static Effect EffectLit => _testEffect;
-    public static Effect EffectBasicDiffuse => _effect;
+    public static Effect EffectLit => _lit;
+    public static Effect EffectBasicDiffuse => _diffuse;
 
     private static readonly HashSet<string> _texturesToLoad = [];
     private static readonly Dictionary<string, Texture2D> _textureCache = [];
@@ -95,14 +81,6 @@ public static class RenderPipeline
     {
         SpriteBatch = new SpriteBatch(GraphicsDevice);
 
-        _gltfCube = ContentLoader.Load<GltfModel>("models/fucking-teapot.glb")!;
-        // _gltfCube = ContentLoader.Load<GltfModel>("models/sphere.glb")!;
-        // _gltfCube.Transform = new() {
-        //     Rotation = Quaternion.CreateFromYawPitchRoll(MathF.PI, 0, 0),
-        // };
-
-        _gltfCubeTex = ContentLoader.Load<Texture2D>("textures/checkerboard.png")!;
-
         _cube = ContentLoader.Load<ObjModel>("cube.obj")!;
         _cube.Transform.Origin = -Vector3.One * 0.5f;
         _cube.Transform.Position = new(-3.5f, 0.5f, -3.5f);
@@ -128,25 +106,23 @@ public static class RenderPipeline
 
         _cursorTex = ContentLoader.Load<Texture2D>("textures/cursor.png");
 
-        _testEffect = ContentLoader.Load<Effect>("fx/depth")!;
-        _testEffect.Parameters["MatcapTex"]?.SetValue(_matCap);
-        _testEffect.Parameters["MainTex"]?.SetValue(WhiteTexture);
-        _testEffect.Parameters["VertexColorIntensity"]?.SetValue(1f);
-        _testEffect.Parameters["MatcapIntensity"]?.SetValue(1f);
-        _testEffect.Parameters["MatcapPower"]?.SetValue(2f);
-        _testEffect.Parameters["Shininess"]?.SetValue(0.5f);
-        _testEffect.Parameters["Metallic"]?.SetValue(1f);
-        _testEffect.Parameters["SkyColor"]?.SetValue(Color.White.ToVector3());
-        _testEffect.Parameters["SkyTex"]?.SetValue(ContentLoader.Load<Texture2D>("textures/skybox_test_texture.png"));
+        _lit = ContentLoader.Load<Effect>("fx/depth")!;
+        _lit.Parameters["MatcapTex"]?.SetValue(_matCap);
+        _lit.Parameters["MainTex"]?.SetValue(WhiteTexture);
+        _lit.Parameters["VertexColorIntensity"]?.SetValue(1f);
+        _lit.Parameters["MatcapIntensity"]?.SetValue(1f);
+        _lit.Parameters["MatcapPower"]?.SetValue(2f);
+        _lit.Parameters["Shininess"]?.SetValue(0.5f);
+        _lit.Parameters["Metallic"]?.SetValue(1f);
+        _lit.Parameters["SkyColor"]?.SetValue(Color.White.ToVector3());
+        _lit.Parameters["SkyTex"]?.SetValue(ContentLoader.Load<Texture2D>("textures/skybox_test_texture.png"));
 
-        _effect = ContentLoader.Load<Effect>("fx/default")!;
-        _effect.Parameters["MainTex"]?.SetValue(WhiteTexture);
-        _effect.Parameters["LightIntensity"]?.SetValue(1);
+        _diffuse = ContentLoader.Load<Effect>("fx/default")!;
+        _diffuse.Parameters["MainTex"]?.SetValue(WhiteTexture);
+        _diffuse.Parameters["LightIntensity"]?.SetValue(1);
 
         _screenEffect = ContentLoader.Load<Effect>("fx/sprite/screen")!;
         _screenScreenResolution = _screenEffect.Parameters["ScreenResolution"];
-        _screenProjection = _screenEffect.Parameters["ProjectionMatrix"];
-        _screenTexture = _screenEffect.Parameters["SpriteTexture"];
 
         _skyboxRenderer = new SkyboxRenderer("textures/skybox_test_texture.png", GraphicsDevice);
 
@@ -206,20 +182,20 @@ public static class RenderPipeline
             Time.Elapsed / 30f * MathHelper.Pi
         );
 
-        _effect.Parameters["ViewMatrix"]?.SetValue(ViewMatrix);
-        _effect.Parameters["ProjectionMatrix"]?.SetValue(ProjectionMatrix);
-        _testEffect.Parameters["ViewMatrix"]?.SetValue(ViewMatrix);
-        _testEffect.Parameters["ProjectionMatrix"]?.SetValue(ProjectionMatrix);
+        _diffuse.Parameters["ViewMatrix"]?.SetValue(ViewMatrix);
+        _diffuse.Parameters["ProjectionMatrix"]?.SetValue(ProjectionMatrix);
+        _lit.Parameters["ViewMatrix"]?.SetValue(ViewMatrix);
+        _lit.Parameters["ProjectionMatrix"]?.SetValue(ProjectionMatrix);
 
         Camera.Draw(GraphicsDevice);
 
-        _cube.Draw(GraphicsDevice, Matrix.Identity, _effect);
+        _cube.Draw(GraphicsDevice, Matrix.Identity, _diffuse);
 
         // _gltfCube.Transform.Rotation *= Quaternion.CreateFromAxisAngle(Vector3.UnitZ, 0.01f);
         // _gltfCube.Draw(GraphicsDevice, Matrix.Identity, _testEffect);
 
-        DrawPass(_testEffect, EffectPass.Lit, RenderPass.World);
-        DrawPass(_effect, EffectPass.BasicDiffuse, RenderPass.World);
+        DrawPass(_lit, EffectPass.Lit, RenderPass.World);
+        DrawPass(_diffuse, EffectPass.BasicDiffuse, RenderPass.World);
 
         GraphicsUtil.DrawGrid(GraphicsDevice, 16, 1, Color.White * 0.1f, Matrix.CreateTranslation(new(-8, -8, 0)) * Matrix.CreateRotationX(MathHelper.PiOver2));
 
@@ -254,8 +230,8 @@ public static class RenderPipeline
             );
         }
 
-        DrawPass(_testEffect, EffectPass.Lit, RenderPass.Screen);
-        DrawPass(_effect, EffectPass.BasicDiffuse, RenderPass.Screen);
+        DrawPass(_lit, EffectPass.Lit, RenderPass.Screen);
+        DrawPass(_diffuse, EffectPass.BasicDiffuse, RenderPass.Screen);
 
         if(_cursorTex is not null && CursorVisible)
         {
@@ -404,8 +380,8 @@ public static class RenderPipeline
         // but it works, so don't touch this!!!!
         Vector2 vertexSnapRes = Vector2.Floor(windowBounds.Size.ToVector2() / _resolutionScale / 2);
 
-        _effect.Parameters["ScreenResolution"]?.SetValue(vertexSnapRes);
-        _testEffect.Parameters["ScreenResolution"]?.SetValue(vertexSnapRes);
+        _diffuse.Parameters["ScreenResolution"]?.SetValue(vertexSnapRes);
+        _lit.Parameters["ScreenResolution"]?.SetValue(vertexSnapRes);
     }
 
     private static void RebuildRt(out RenderTarget2D rt, Rectangle windowBounds)
@@ -418,5 +394,14 @@ public static class RenderPipeline
             SurfaceFormat.Color,
             DepthFormat.Depth24Stencil8
         );
+    }
+
+    internal static void Cleanup()
+    {
+        _texturesToLoad.Clear();
+        _textureCache.Clear();
+        _matcapTexturesToLoad.Clear();
+        _matcapTextureCache.Clear();
+        Camera = new();
     }
 }

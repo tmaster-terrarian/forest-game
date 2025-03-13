@@ -9,7 +9,8 @@
                 "build",
                 "${workspaceFolder}/ForestGame.sln",
                 "/property:GenerateFullPaths=true",
-                "/consoleloggerparameters:NoSummary;ForceNoAlign"
+                "/consoleloggerparameters:NoSummary;ForceNoAlign",
+                "/tl:off"
             ],
             "problemMatcher": "$msCompile"
         },

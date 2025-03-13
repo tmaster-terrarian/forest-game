@@ -62,6 +62,22 @@ public static class Internals
         RenderPipeline.Draw();
     }
 
+    internal static void Cleanup()
+    {
+        StageManager.Cleanup();
+
+        ModelAspect.Cleanup();
+
+        foreach(var aspect in Registry<Aspect>.Registered)
+        {
+            aspect.Clear();
+        }
+
+        GC.Collect();
+
+        EcsManager.Restart();
+    }
+
     internal static void ProcessExited()
     {
         if(_exited)

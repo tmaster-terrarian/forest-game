@@ -16,6 +16,9 @@ public static class Registry
 
         Create<IComponentSystem>();
         Registries.ComponentSystems.Initialize();
+
+        Create<Stage>();
+        Registries.Stages.Initialize();
     }
 
     public static void Create<T>() where T : class

@@ -1,6 +1,5 @@
 using ForestGame.Core;
 using ForestGame.Core.Graphics;
-using ForestGame.Core.Serialization;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 
@@ -79,10 +78,6 @@ public static class ContentLoader
         else if(Check<T,ObjModel>())
         {
             return ObjModel.Load(path) as T;
-        }
-        else if(Check<T,Stage>())
-        {
-            return StageSerializer.Load(path) as T;
         }
 
         throw new Exception($"the target type {typeof(T).FullName} is not loadable from a file");

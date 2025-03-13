@@ -36,15 +36,12 @@ public static class EcsManager
         _initialized = true;
 
         world = World.Create();
+    }
 
-        // world.SubscribeComponentAdded((in Entity entity, ref Matcapped _) =>
-        // {
-        //     entity.AddOrGet(ContentLoader.Load<Effect>("fx/depth"));
-        // });
-        // world.SubscribeComponentAdded((in Entity entity, ref IRequiresEffect _) =>
-        // {
-        //     entity.AddOrGet(ContentLoader.Load<Effect>("fx/default"));
-        // });
+    internal static void Restart()
+    {
+        Cleanup();
+        world = World.Create();
     }
 
     internal static void Cleanup()

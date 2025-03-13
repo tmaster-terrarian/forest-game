@@ -10,8 +10,6 @@ public abstract class Aspect
 
     private readonly List<Transform> _toDraw = [];
 
-    protected static readonly Dictionary<string, GltfModel> modelCache = [];
-
     public virtual bool CheckValid() => true;
 
     public virtual void Submit(Transform transform)
