@@ -9,6 +9,7 @@ public static class RenderPipeline
     {
         BasicDiffuse,
         Lit,
+        MatcapOnly,
     }
     public enum RenderPass
     {
@@ -39,6 +40,8 @@ public static class RenderPipeline
 
     private static Effect _lit;
 
+    private static Effect _matCapOnly;
+
     private static Effect _screenEffect;
     private static EffectParameter _screenScreenResolution;
 
@@ -55,6 +58,7 @@ public static class RenderPipeline
 
     public static Effect EffectLit => _lit;
     public static Effect EffectBasicDiffuse => _diffuse;
+    public static Effect EffectMatcapOnly => _matCapOnly;
 
     private static readonly HashSet<string> _texturesToLoad = [];
     private static readonly Dictionary<string, Texture2D> _textureCache = [];
@@ -126,6 +130,8 @@ public static class RenderPipeline
 
         _skyboxRenderer = new SkyboxRenderer("textures/skybox_test_texture.png", GraphicsDevice);
 
+        _matCapOnly = ContentLoader.Load<Effect>("fx/matcap")!;
+
         OnWindowResize(Window.ClientBounds);
     }
 
@@ -196,6 +202,7 @@ public static class RenderPipeline
 
         DrawPass(_lit, EffectPass.Lit, RenderPass.World);
         DrawPass(_diffuse, EffectPass.BasicDiffuse, RenderPass.World);
+        DrawPass(_matCapOnly, EffectPass.MatcapOnly, RenderPass.World);
 
         GraphicsUtil.DrawGrid(GraphicsDevice, 16, 1, Color.White * 0.1f, Matrix.CreateTranslation(new(-8, -8, 0)) * Matrix.CreateRotationX(MathHelper.PiOver2));
 
@@ -232,6 +239,7 @@ public static class RenderPipeline
 
         DrawPass(_lit, EffectPass.Lit, RenderPass.Screen);
         DrawPass(_diffuse, EffectPass.BasicDiffuse, RenderPass.Screen);
+        DrawPass(_matCapOnly, EffectPass.MatcapOnly, RenderPass.Screen);
 
         if(_cursorTex is not null && CursorVisible)
         {
@@ -303,6 +311,8 @@ public static class RenderPipeline
         var pScreenResolution = effect.Parameters["ScreenResolution"];
         var pMainTex = effect.Parameters["MainTex"];
         var pVertexColorIntensity = effect.Parameters["VertexColorIntensity"];
+        var pShininess = effect.Parameters["Shininess"];
+        var pMetallic = effect.Parameters["Metallic"];
         var pMatcapTex = effect.Parameters["MatcapTex"];
         var pMatcapIntensity = effect.Parameters["MatcapIntensity"];
         var pMatcapPower = effect.Parameters["MatcapPower"];
@@ -361,6 +371,17 @@ public static class RenderPipeline
             {
                 pMatcapTex?.SetValue(WhiteTexture);
                 pMatcapIntensity?.SetValue(0);
+            }
+
+            if(aspect.Material.SurfaceOptions is not null)
+            {
+                pShininess?.SetValue(aspect.Material.SurfaceOptions.Shininess);
+                pMetallic?.SetValue(aspect.Material.SurfaceOptions.Metallic);
+            }
+            else
+            {
+                pShininess?.SetValue(0.5f);
+                pMetallic?.SetValue(0);
             }
 
             aspect.Draw(GraphicsDevice, effect, t => {
