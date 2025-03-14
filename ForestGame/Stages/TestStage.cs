@@ -50,5 +50,12 @@ public class TestStage : Stage
         EcsManager.world.Create(
             new WorldLooper(new Vector3(80, 0, 80))
         );
+
+        EcsManager.world.Create(
+            new Transform {
+                Position = new(4.5f, 0.5f, 4.5f),
+            },
+            new AspectIdentity(Registries.Aspects.Icosphere)
+        );
     }
 }

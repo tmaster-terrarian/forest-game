@@ -8,6 +8,7 @@ public static class Aspects
     public const string Teapot = "teapot";
     public const string StreetLamp = "street_lamp";
     public const string BoundingBox = "bounding_box";
+    public const string Icosphere = "sphere";
 
     public static void Initialize()
     {
@@ -41,6 +42,23 @@ public static class Aspects
 
         Registry.Register<Aspect>(BoundingBox, new BoundingBoxAspect() {
             RenderPass = RenderPipeline.RenderPass.Screen,
+        });
+
+        Registry.Register<Aspect>(Icosphere, new ModelAspect {
+            ModelPath = "models/icosphere/icosphere.glb",
+            Material = {
+                MatcapOptions = new() {
+                    TexturePath = "matcaps/glossy_below.png",
+                    Intensity = 1,
+                    Power = 2,
+                },
+                SurfaceOptions = new() {
+                    Shininess = 1,
+                    Metallic = 0.5f,
+                },
+            },
+            EffectPass = RenderPipeline.EffectPass.MatcapOnly,
+            RenderPass = RenderPipeline.RenderPass.World,
         });
     }
 }
