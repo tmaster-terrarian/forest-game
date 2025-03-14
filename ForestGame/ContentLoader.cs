@@ -11,15 +11,15 @@ public static class ContentLoader
 
     private static readonly List<string> _missingPaths = [];
 
-    private static ContentManager _shaderLoader = null!;
+    private static ContentManager _xnaLoader = null!;
     private static GraphicsDevice _graphicsDevice = null!;
 
     internal static void Initialize(ContentManager shaderLoader, GraphicsDevice graphicsDevice)
     {
-        if(_shaderLoader is not null)
+        if(_xnaLoader is not null)
             throw new InvalidOperationException("attempted to initialize ContentLoader after it has already been initialized");
 
-        _shaderLoader = shaderLoader;
+        _xnaLoader = shaderLoader;
         _graphicsDevice = graphicsDevice;
     }
 
@@ -28,9 +28,9 @@ public static class ContentLoader
         ArgumentException.ThrowIfNullOrWhiteSpace(path);
 
         string filePath = Path.Combine(_dataPath, path);
-        if(Check<T,Effect>())
+        if(Check<T,Effect>() || Check<T,SpriteFont>())
         {
-            filePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, _shaderLoader.RootDirectory, path);
+            filePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, _xnaLoader.RootDirectory, path);
         }
 
         lock(_missingPaths)
@@ -58,13 +58,13 @@ public static class ContentLoader
 
     private static T? LoadInternal<T>(string path) where T : class
     {
-        if(!File.Exists(path) && !Check<T,SpriteEffect>() && !Check<T,Effect>())
+        if(!File.Exists(path) && !Check<T,Effect>() && !Check<T,SpriteFont>())
             throw new FileNotFoundException($"file does not exist or could not be found");
 
-        if(Check<T,Effect>())
+        if(Check<T,Effect>() || Check<T,SpriteFont>())
         {
-            lock(_shaderLoader)
-                return _shaderLoader.Load<T>(Path.ChangeExtension(path, null));
+            lock(_xnaLoader)
+                return _xnaLoader.Load<T>(Path.ChangeExtension(path, null));
         }
         else if (Check<T,Texture2D>())
         {
