@@ -9,6 +9,7 @@ public static class GraphicsUtil
     private static Effect _vertSnapEffect;
     private static VertexPositionColor[] _gridVertices;
     private static bool _isInitialized = false;
+    private static SpriteFont _font;
 
     static GraphicsUtil()
     {
@@ -91,6 +92,9 @@ public static class GraphicsUtil
         // };
 
         effect.Parameters["WorldMatrix"]?.SetValue(worldMatrix);
+
+        if(texture is not null)
+            effect.Parameters["MainTex"]?.SetValue(texture);
 
         // Apply the basic effect
         foreach (EffectPass pass in effect.CurrentTechnique.Passes)

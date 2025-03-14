@@ -22,7 +22,6 @@ public class ManipulatorRenderSystem : IComponentSystem, IDrawableComponentSyste
 
     private EntityReference _manipulatorHolder = EntityReference.Null;
 
-
     public void DoScan()
     {
         scanning = true;
@@ -41,14 +40,9 @@ public class ManipulatorRenderSystem : IComponentSystem, IDrawableComponentSyste
                     _manipulatorHolder = entity.Reference();
                 }
             );
-            if(!_manipulatorHolder.IsAlive())
-                return;
         }
 
-        if(Input.GetPressed(Keys.P))
-            Enabled = !Enabled;
-
-        if(Input.GetPressed(Keys.O))
+        if(_manipulatorHolder.IsAlive() && Input.GetPressed(Keys.O))
             DoScan();
 
         if(!Enabled)
@@ -74,9 +68,6 @@ public class ManipulatorRenderSystem : IComponentSystem, IDrawableComponentSyste
         if(aspect is null)
             return;
 
-        if(!_manipulatorHolder.IsAlive())
-            return;
-
         EcsManager.world.Query(new QueryDescription().WithAll<Collider, Transform>().WithNone<ManipulatorData>(),
             (Entity entity, ref Collider collider, ref Transform transform) => {
                 float opacity = _fadeAmount;
@@ -93,13 +84,17 @@ public class ManipulatorRenderSystem : IComponentSystem, IDrawableComponentSyste
                     opacity = scanInfluence;
                 }
 
-                ref ManipulatorData data = ref _manipulatorHolder.Entity.Get<ManipulatorData>();
+                EntityReference target = EntityReference.Null;
+
+                if(_manipulatorHolder.IsAlive())
+                    target = _manipulatorHolder.Entity.Get<ManipulatorData>().TargetEntity;
+
                 aspect.Submit(
                     transform,
                     collider,
-                    entity == data.TargetEntity ? HighlightFadeAmount + MathHelper.Max(0, opacity) : 0,
+                    entity == target ? HighlightFadeAmount + MathHelper.Max(0, opacity) : 0,
                     opacity,
-                    scanning || entity == data.TargetEntity,
+                    scanning || entity == target,
                     entity.Has<Solid>()
                 );
             }
