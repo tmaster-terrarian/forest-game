@@ -11,6 +11,9 @@ TestResults
 # Ignore library files
 *.dll
 
+# Ignore fonts
+*/xna/*/*.ttf
+
 # Ignore ImGui runtime info
 Beebo/imgui.ini
 

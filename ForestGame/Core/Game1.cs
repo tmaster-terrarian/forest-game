@@ -19,7 +19,7 @@ internal class Game1 : Game
 
         _graphics = new GraphicsDeviceManager(this);
 
-        Content.RootDirectory = "shaders";
+        Content.RootDirectory = "xna";
 
         IsMouseVisible = false;
         IsFixedTimeStep = false;
