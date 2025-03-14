@@ -90,7 +90,7 @@ float2 MatcapUv(float3 worldNorm, matrix modelMatrix, matrix viewMatrix, float4 
     float3 viewCross = cross(viewDir, viewNorm);
 
     // swizzle perpendicular vector components to create a new perspective corrected view normal
-    viewNorm = float3(-viewCross.y, viewCross.x, 0.0);
+    viewNorm = float3(-viewCross.y, -viewCross.x, 0.0);
 
     return viewNorm.xy * 0.5 + 0.5;
 }
