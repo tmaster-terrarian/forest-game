@@ -12,6 +12,11 @@ public class TestStage : Stage
     {
         base.Start();
 
+        var player = Registry<Prototype>.Get(Registries.Prototypes.Player).Construct();
+        player.Entity.Set(new Transform { Position = Vector3.UnitY * 10 });
+        // player.Entity.Add(new Bouncy());
+        RenderPipeline.Camera.Target = player;
+
         for(int i = 0; i < 30; i++)
         {
             var entity = Registry<Prototype>.Get(Registries.Prototypes.Teapot).Construct().Entity;
@@ -22,6 +27,7 @@ public class TestStage : Stage
                 Scale = MathUtil.SquashScale(MathUtil.RandomRange(0.8f, 1.5f)) * MathUtil.RandomRange(0.5f, 2f),
                 Rotation = Quaternion.CreateFromAxisAngle(Vector3.UnitY, MathUtil.RandomRange(-MathHelper.Pi, MathHelper.Pi))
             });
+
             // entity.Add<Components.Bouncy>(new(Random.Shared.NextSingle()));
             // entity.Remove<Components.Bouncy>();
         }
@@ -36,11 +42,6 @@ public class TestStage : Stage
                 Rotation = Quaternion.CreateFromAxisAngle(Vector3.UnitY, MathUtil.RandomRange(-MathHelper.Pi, MathHelper.Pi))
             });
         }
-
-        var player = Registry<Prototype>.Get(Registries.Prototypes.Player).Construct();
-        player.Entity.Set(new Transform { Position = Vector3.UnitY * 10 });
-        // player.Entity.Add(new Bouncy());
-        RenderPipeline.Camera.Target = player;
 
         // EcsManager.world.Create(
         //     new Solid(),
