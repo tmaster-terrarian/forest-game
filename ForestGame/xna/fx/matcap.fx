@@ -38,12 +38,14 @@ float LightIntensity;
 float VertexColorIntensity;
 float MatcapIntensity;
 float MatcapPower;
+int MatcapBlendMode;
 float3 WorldSpaceCameraPos;
 float2 ScreenResolution;
 Texture2D MatcapTex;
 sampler2D MatcapSampler = sampler_state
 {
     Texture = <MatcapTex>;
+    Filter = Linear;
 };
 Texture2D MainTex;
 sampler2D MainTexSampler = sampler_state
@@ -139,7 +141,7 @@ float4 MainPS(VertexShaderOutput input) : COLOR
 
     float3 diffuse = albedo * lerp(1, directionalLight + ambient, LightIntensity);
 
-	float3 finalColor = diffuse + matcapAdjusted;
+	float3 finalColor = lerp(diffuse + matcapAdjusted, diffuse * matcapAdjusted, MatcapBlendMode);
 
     return float4(finalColor, 1);
 }

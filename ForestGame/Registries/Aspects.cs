@@ -16,12 +16,13 @@ public static class Aspects
             ModelPath = "models/fucking-teapot.glb",
             Material = {
                 MatcapOptions = new() {
-                    TexturePath = "matcaps/Matcap_Metal_04.jpeg",
-                    Intensity = 1,
-                    Power = 2,
+                    TexturePath = "matcaps/mario_small.jpg",
+                    Intensity = 0.35f,
+                    Power = 1f,
                 },
+                VertexColorIntensity = 1,
             },
-            EffectPass = RenderPipeline.EffectPass.Lit,
+            EffectPass = RenderPipeline.EffectPass.MatcapOnly,
             RenderPass = RenderPipeline.RenderPass.World
         });
 

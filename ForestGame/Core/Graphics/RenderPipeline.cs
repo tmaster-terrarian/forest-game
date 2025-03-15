@@ -316,6 +316,7 @@ public static class RenderPipeline
         var pMatcapTex = effect.Parameters["MatcapTex"];
         var pMatcapIntensity = effect.Parameters["MatcapIntensity"];
         var pMatcapPower = effect.Parameters["MatcapPower"];
+        var pMatcapBlendMode = effect.Parameters["MatcapBlendMode"];
 
         var query =
             from a in Registry<Aspect>.Registered
@@ -366,11 +367,13 @@ public static class RenderPipeline
 
                 pMatcapIntensity?.SetValue(aspect.Material.MatcapOptions.Intensity);
                 pMatcapPower?.SetValue(aspect.Material.MatcapOptions.Power);
+                pMatcapBlendMode?.SetValue((int)aspect.Material.MatcapOptions.BlendMode);
             }
             else
             {
                 pMatcapTex?.SetValue(WhiteTexture);
                 pMatcapIntensity?.SetValue(0);
+                pMatcapBlendMode?.SetValue(0);
             }
 
             if(aspect.Material.SurfaceOptions is not null)
