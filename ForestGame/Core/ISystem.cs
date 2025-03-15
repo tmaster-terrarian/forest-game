@@ -1,6 +1,6 @@
 namespace ForestGame.Core;
 
-public interface IComponentSystem
+public interface ISystem
 {
     public void Update();
 }

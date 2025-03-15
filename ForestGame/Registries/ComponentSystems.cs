@@ -18,15 +18,15 @@ public static class ComponentSystems
 
     internal static void Initialize()
     {
-        Registry.Register<IComponentSystem>(WorldLooping, new WorldLoopingSystem());
-        Registry.Register<IComponentSystem>(ColliderSync, new ColliderSyncSystem());
-        Registry.Register<IComponentSystem>(Player, new PlayerSystem());
-        Registry.Register<IComponentSystem>(MotorMovement, new MotorMovementSystem());
-        Registry.Register<IComponentSystem>(ActorSolidCollision, new ActorSolidCollisionSystem());
-        Registry.Register<IComponentSystem>(ActorDeCollision, new ActorDeCollisionSystem());
-        Registry.Register<IComponentSystem>(Actor, new ActorSystem());
-        Registry.Register<IComponentSystem>(ModelGraphics, new ModelGraphicsSystem());
-        Registry.Register<IComponentSystem>(ManipulatorTarget, new ManipulatorTargetSystem());
-        Registry.Register<IComponentSystem>(ManipulatorRender, new ManipulatorRenderSystem());
+        Registry.Register<ISystem>(WorldLooping, new WorldLoopingSystem());
+        Registry.Register<ISystem>(ColliderSync, new ColliderSyncSystem());
+        Registry.Register<ISystem>(Player, new PlayerSystem());
+        Registry.Register<ISystem>(MotorMovement, new MotorMovementSystem());
+        Registry.Register<ISystem>(ActorSolidCollision, new ActorSolidCollisionSystem());
+        Registry.Register<ISystem>(ActorDeCollision, new ActorDeCollisionSystem());
+        Registry.Register<ISystem>(Actor, new ActorSystem());
+        Registry.Register<ISystem>(ModelGraphics, new ModelGraphicsSystem());
+        Registry.Register<ISystem>(ManipulatorTarget, new ManipulatorTargetSystem());
+        Registry.Register<ISystem>(ManipulatorRender, new ManipulatorRenderSystem());
     }
 }

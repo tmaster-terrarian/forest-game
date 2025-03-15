@@ -5,7 +5,7 @@ using ForestGame.Core;
 
 namespace ForestGame.ComponentSystems;
 
-public class ColliderSyncSystem : IComponentSystem
+public class ColliderSyncSystem : ISystem
 {
     public void Update()
     {

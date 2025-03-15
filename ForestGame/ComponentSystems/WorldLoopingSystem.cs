@@ -5,7 +5,7 @@ using Microsoft.Xna.Framework;
 
 namespace ForestGame.ComponentSystems;
 
-public class WorldLoopingSystem : IComponentSystem
+public class WorldLoopingSystem : ISystem
 {
     public void Update()
     {

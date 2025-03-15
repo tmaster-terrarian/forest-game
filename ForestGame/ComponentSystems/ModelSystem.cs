@@ -8,7 +8,7 @@ using Microsoft.Xna.Framework.Graphics;
 
 namespace ForestGame.ComponentSystems;
 
-public class ModelGraphicsSystem : IComponentSystem, IDrawableComponentSystem
+public class ModelGraphicsSystem : ISystem, IDrawableSystem
 {
     public void Update() { }
 

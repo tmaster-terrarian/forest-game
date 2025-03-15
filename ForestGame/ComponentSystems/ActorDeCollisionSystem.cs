@@ -6,7 +6,7 @@ using Microsoft.Xna.Framework;
 
 namespace ForestGame.ComponentSystems;
 
-public class ActorDeCollisionSystem : IComponentSystem
+public class ActorDeCollisionSystem : ISystem
 {
     public void Update()
     {

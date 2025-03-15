@@ -14,7 +14,7 @@ public static class Registry
         Create<Prototype>();
         Registries.Prototypes.Initialize();
 
-        Create<IComponentSystem>();
+        Create<ISystem>();
         Registries.ComponentSystems.Initialize();
 
         Create<Stage>();

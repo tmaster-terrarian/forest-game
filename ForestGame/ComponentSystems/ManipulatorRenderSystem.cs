@@ -9,7 +9,7 @@ using Microsoft.Xna.Framework.Input;
 
 namespace ForestGame.ComponentSystems;
 
-public class ManipulatorRenderSystem : IComponentSystem, IDrawableComponentSystem
+public class ManipulatorRenderSystem : ISystem, IDrawableSystem
 {
     private const float Range = 16;
     public bool Enabled { get; set; } = false;

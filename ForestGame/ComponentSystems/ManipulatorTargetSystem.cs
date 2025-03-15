@@ -7,7 +7,7 @@ using Microsoft.Xna.Framework;
 
 namespace ForestGame.ComponentSystems;
 
-public class ManipulatorTargetSystem : IComponentSystem
+public class ManipulatorTargetSystem : ISystem
 {
     private EntityReference _manipulatorHolder = EntityReference.Null;
 
@@ -45,7 +45,7 @@ public class ManipulatorTargetSystem : IComponentSystem
 
         ref ManipulatorData data = ref _manipulatorHolder.Entity.Get<ManipulatorData>();
 
-        ManipulatorRenderSystem renderSystem = (ManipulatorRenderSystem)Registry<IComponentSystem>.Get(Registries.ComponentSystems.ManipulatorRender)!;
+        ManipulatorRenderSystem renderSystem = (ManipulatorRenderSystem)Registry<ISystem>.Get(Registries.ComponentSystems.ManipulatorRender)!;
 
         if(reference != data.TargetEntity)
             renderSystem.HighlightFadeAmount = 0.1f;

@@ -15,7 +15,7 @@ public static class EcsManager
 
     internal static void Update()
     {
-        foreach(var system in Registry<IComponentSystem>.Registered)
+        foreach(var system in Registry<ISystem>.Registered)
         {
             system.Update();
         }
@@ -23,9 +23,9 @@ public static class EcsManager
 
     internal static void GetDrawables(GraphicsDevice graphicsDevice)
     {
-        foreach(var system in Registry<IComponentSystem>.Registered)
+        foreach(var system in Registry<ISystem>.Registered)
         {
-            if(system is IDrawableComponentSystem drawableSystem)
+            if(system is IDrawableSystem drawableSystem)
                 drawableSystem.GetDrawables(graphicsDevice);
         }
     }

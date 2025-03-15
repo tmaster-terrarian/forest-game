@@ -3,7 +3,7 @@ using Microsoft.Xna.Framework.Graphics;
 
 namespace ForestGame.Core;
 
-public interface IDrawableComponentSystem
+public interface IDrawableSystem
 {
     public void GetDrawables(GraphicsDevice graphicsDevice);
 }

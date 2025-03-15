@@ -5,7 +5,7 @@ using Microsoft.Xna.Framework;
 
 namespace ForestGame.ComponentSystems;
 
-public class MotorMovementSystem : IComponentSystem
+public class MotorMovementSystem : ISystem
 {
     public void Update()
     {

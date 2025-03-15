@@ -9,7 +9,7 @@ namespace ForestGame.ComponentSystems;
 /// <summary>
 /// Made with the help of <see href="https://spader.zone/minkowski/">"2D Collisions with Minkowski Differences"</see>
 /// </summary>
-public class ActorSolidCollisionSystem : IComponentSystem
+public class ActorSolidCollisionSystem : ISystem
 {
     public void Update()
     {

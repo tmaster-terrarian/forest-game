@@ -8,7 +8,7 @@ using Microsoft.Xna.Framework.Input;
 
 namespace ForestGame.ComponentSystems;
 
-public class PlayerSystem : IComponentSystem
+public class PlayerSystem : ISystem
 {
     private Point _lastMousePos;
 
