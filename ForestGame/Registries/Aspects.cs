@@ -18,12 +18,12 @@ public static class Aspects
             Material = {
                 MatcapOptions = new() {
                     TexturePath = "matcaps/mario_small.jpg",
-                    Intensity = 0.35f,
+                    Intensity = 0.7f,
                     Power = 1f,
                 },
                 VertexColorIntensity = 1,
             },
-            EffectPass = RenderPipeline.EffectPass.MatcapOnly,
+            EffectPass = RenderPipeline.EffectPass.Lit,
             RenderPass = RenderPipeline.RenderPass.World
         });
 
