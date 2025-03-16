@@ -1,4 +1,5 @@
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
 
 namespace ForestGame;
 
@@ -85,5 +86,27 @@ public static class _Extensions
             new Vector3(minkowskiLeft, minkowskiBottom, minkowskiBack),
             new Vector3(minkowskiRight, minkowskiTop, minkowskiFront)
         );
+    }
+
+    public static void DrawStringSpacesFix(this SpriteBatch spriteBatch, SpriteFont font, string text, Vector2 position, Color color, float rotation, Vector2 origin, Vector2 scale, SpriteEffects effects = SpriteEffects.None, float layerDepth = 0, bool rtl = false)
+    {
+        var split = text.Split(' ');
+        float x = 0;
+        int spaceSize = MathUtil.RoundToInt(font.MeasureString("t").X);
+        foreach(var word in split)
+        {
+            spriteBatch.DrawString(font, word, position + (Vector2.UnitX * x * scale.X), color, rotation, origin, scale, effects, layerDepth, rtl);
+            x += font.MeasureString(word).X + spaceSize;
+        }
+    }
+
+    public static void DrawStringSpacesFix(this SpriteBatch spriteBatch, SpriteFont font, string text, Vector2 position, Color color, float rotation, Vector2 origin, float scale = 1, SpriteEffects effects = SpriteEffects.None, float layerDepth = 0, bool rtl = false)
+    {
+        spriteBatch.DrawStringSpacesFix(font, text, position, color, rotation, origin, new Vector2(scale), effects, layerDepth, rtl);
+    }
+
+    public static void DrawStringSpacesFix(this SpriteBatch spriteBatch, SpriteFont font, string text, Vector2 position, Color color)
+    {
+        spriteBatch.DrawStringSpacesFix(font, text, position, color, 0, Vector2.Zero, Vector2.One, SpriteEffects.None, 0);
     }
 }

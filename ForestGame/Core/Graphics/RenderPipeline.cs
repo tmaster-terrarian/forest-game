@@ -45,6 +45,8 @@ public static class RenderPipeline
     private static Effect _screenEffect;
     private static EffectParameter _screenScreenResolution;
 
+    private static Effect _vertsnapEffect;
+
     private static Texture2D? _cursorTex;
 
     public static bool CursorVisible { get; set; }
@@ -131,6 +133,8 @@ public static class RenderPipeline
 
         _matCapOnly = ContentLoader.Load<Effect>("fx/matcap")!;
 
+        _vertsnapEffect = ContentLoader.Load<Effect>("fx/vertsnap")!;
+
         OnWindowResize(Window.ClientBounds);
     }
 
@@ -153,6 +157,7 @@ public static class RenderPipeline
             0.01f, 25.0f
         );
 
+        GraphicsDevice.Reset();
         ResetGraphicsDevice();
         GraphicsDevice.SetRenderTarget(_rtSky);
 
@@ -164,6 +169,7 @@ public static class RenderPipeline
 
         _skyboxRenderer.Draw(Vector3.Zero, Quaternion.Identity);
 
+        GraphicsDevice.Reset();
         ResetGraphicsDevice();
         GraphicsDevice.SetRenderTarget(_rt);
         GraphicsDevice.Clear(Color.Transparent);
@@ -195,6 +201,8 @@ public static class RenderPipeline
 
         GraphicsUtil.DrawGrid(GraphicsDevice, 16, 1, Color.White * 0.1f, Matrix.CreateTranslation(new(-8, -8, 0)) * Matrix.CreateRotationX(MathHelper.PiOver2));
 
+        _vertsnapEffect.Parameters["ViewMatrix"]?.SetValue(ViewMatrix);
+        _vertsnapEffect.Parameters["ProjectionMatrix"]?.SetValue(ProjectionMatrix);
         GraphicsUtil.DrawText(
             SpriteBatch,
             "hi",
@@ -202,9 +210,12 @@ public static class RenderPipeline
                 Position = new(3, 0, 3),
                 Rotation = Quaternion.CreateFromAxisAngle(Vector3.UnitY, 0)
             },
-            Color.White
+            Color.White,
+            Vector2.UnitY,
+            _vertsnapEffect
         );
 
+        GraphicsDevice.Reset();
         ResetGraphicsDevice();
         GraphicsDevice.SetRenderTarget(_rtUi);
         GraphicsDevice.Clear(Color.Transparent);
@@ -253,6 +264,7 @@ public static class RenderPipeline
             SpriteBatch.End();
         }
 
+        GraphicsDevice.Reset();
         ResetGraphicsDevice();
         GraphicsDevice.BlendState = BlendState.AlphaBlend;
 
@@ -277,7 +289,6 @@ public static class RenderPipeline
 
     private static void ResetGraphicsDevice()
     {
-        GraphicsDevice.Reset();
         GraphicsDevice.SamplerStates[0] = SamplerState.PointClamp;
 
         GraphicsDevice.RasterizerState = new()
@@ -408,6 +419,8 @@ public static class RenderPipeline
                 pInverseWorldMatrix?.SetValue(Matrix.Invert(t));
             });
         }
+
+        ResetGraphicsDevice();
     }
 
     public static void OnWindowResize(Rectangle windowBounds)
@@ -422,6 +435,7 @@ public static class RenderPipeline
 
         _diffuse.Parameters["ScreenResolution"]?.SetValue(vertexSnapRes);
         _lit.Parameters["ScreenResolution"]?.SetValue(vertexSnapRes);
+        _vertsnapEffect.Parameters["ScreenResolution"]?.SetValue(vertexSnapRes);
     }
 
     private static void RebuildRt(out RenderTarget2D rt, Rectangle windowBounds)

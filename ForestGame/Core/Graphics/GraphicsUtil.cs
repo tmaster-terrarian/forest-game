@@ -67,13 +67,12 @@ public static class GraphicsUtil
         graphicsDevice.BlendState = BlendState.Opaque;
     }
 
-    public static void DrawText(SpriteBatch spriteBatch, string text, Matrix world, Color color, Effect? effect = null)
+    public static void DrawText(SpriteBatch spriteBatch, string text, Matrix world, Color color, Vector2 pivot, Effect? effect = null)
     {
         Matrix matrix = Matrix.Invert(Matrix.CreateWorld(Vector3.Zero, -Vector3.UnitZ, -Vector3.UnitY)) * world * RenderPipeline.ViewMatrix * RenderPipeline.ProjectionMatrix * Matrix.Invert(GetDefaultSpriteProjection());
         spriteBatch.Begin(samplerState: SamplerState.PointClamp, depthStencilState: DepthStencilState.DepthRead, rasterizerState: RasterizerState.CullNone, transformMatrix: effect is null ? matrix : null, effect: effect);
-        {
-            spriteBatch.DrawString(_font, text, new Vector2(0, -_font.MeasureString(text).Y), color, 0, Vector2.Zero, 1, SpriteEffects.None, 0);
-        }
+
+        spriteBatch.DrawString(_font, text, Vector2.Zero, color, 0, _font.MeasureString(text) * pivot, 1, SpriteEffects.None, 0);
 
         if(effect is not null)
         {

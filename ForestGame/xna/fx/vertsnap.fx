@@ -7,22 +7,11 @@
     #define PS_SHADERMODEL ps_4_0_level_9_1
 #endif
 
-float3 Posterize(float3 c, float levels)
-{
-    return floor(c * levels) / levels;
-}
-
-float3 Tonemap(float3 c)
-{
-    float lengthOver = max(length(c) - 1, 0) * 0.3;
-    return c + lengthOver;
-}
-
 matrix WorldMatrix;
 matrix ViewMatrix;
 matrix ProjectionMatrix;
 float2 ScreenResolution;
-Texture2D MainTex;
+Texture2D MainTex : register(t0);
 sampler2D MainTexSampler = sampler_state
 {
     Texture = <MainTex>;
