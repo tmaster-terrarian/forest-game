@@ -17,6 +17,9 @@ public static class Registry
         Create<ISystem>();
         Registries.ComponentSystems.Initialize();
 
+        Create<Renderer>();
+        Registries.Renderers.Initialize();
+
         Create<Stage>();
         Registries.Stages.Initialize();
     }
@@ -46,7 +49,7 @@ public static class Registry<T> where T : class
 {
     private static readonly Dictionary<string, T> _values = [];
 
-    private static T[] _registered;
+    private static T[] _registered = [];
 
     public static IReadOnlyList<T> Registered => _registered.AsReadOnly();
 

@@ -195,9 +195,9 @@ public static class RenderPipeline
         // _diffuse.Parameters["LightIntensity"]?.SetValue(1);
         // _cube.Draw(GraphicsDevice, Matrix.Identity, _diffuse);
 
-        DrawPass(_lit, EffectPass.Lit, RenderPass.World);
-        DrawPass(_diffuse, EffectPass.BasicDiffuse, RenderPass.World);
-        DrawPass(_matCapOnly, EffectPass.MatcapOnly, RenderPass.World);
+        DrawPass(ref _lit, EffectPass.Lit, RenderPass.World);
+        DrawPass(ref _diffuse, EffectPass.BasicDiffuse, RenderPass.World);
+        DrawPass(ref _matCapOnly, EffectPass.MatcapOnly, RenderPass.World);
 
         GraphicsUtil.DrawGrid(GraphicsDevice, 16, 1, Color.White * 0.1f, Matrix.CreateTranslation(new(-8, -8, 0)) * Matrix.CreateRotationX(MathHelper.PiOver2));
 
@@ -248,9 +248,9 @@ public static class RenderPipeline
             );
         }
 
-        DrawPass(_lit, EffectPass.Lit, RenderPass.Screen);
-        DrawPass(_diffuse, EffectPass.BasicDiffuse, RenderPass.Screen);
-        DrawPass(_matCapOnly, EffectPass.MatcapOnly, RenderPass.Screen);
+        DrawPass(ref _lit, EffectPass.Lit, RenderPass.Screen);
+        DrawPass(ref _diffuse, EffectPass.BasicDiffuse, RenderPass.Screen);
+        DrawPass(ref _matCapOnly, EffectPass.MatcapOnly, RenderPass.Screen);
 
         if(_cursorTex is not null && CursorVisible)
         {
@@ -324,58 +324,42 @@ public static class RenderPipeline
         SpriteBatch.End();
     }
 
-    private static void DrawPass(Effect effect, EffectPass pass, RenderPass renderPass)
+    private static void DrawPass(ref Effect effect, EffectPass pass, RenderPass renderPass)
     {
-        var pWorldMatrix = effect.Parameters["WorldMatrix"];
-        var pViewMatrix = effect.Parameters["ViewMatrix"];
-        var pProjectionMatrix = effect.Parameters["ProjectionMatrix"];
-        var pInverseWorldMatrix = effect.Parameters["InverseWorldMatrix"];
-        var pInverseViewMatrix = effect.Parameters["InverseViewMatrix"];
-        var pViewDir = effect.Parameters["ViewDir"];
-        var pWorldSpaceCameraPos = effect.Parameters["WorldSpaceCameraPos"];
-        var pScreenResolution = effect.Parameters["ScreenResolution"];
-        var pMainTex = effect.Parameters["MainTex"];
-        var pVertexColorIntensity = effect.Parameters["VertexColorIntensity"];
-        var pVertexColorBlendMode = effect.Parameters["VertexColorBlendMode"];
-        var pShininess = effect.Parameters["Shininess"];
-        var pMetallic = effect.Parameters["Metallic"];
-        var pMatcapTex = effect.Parameters["MatcapTex"];
-        var pMatcapIntensity = effect.Parameters["MatcapIntensity"];
-        var pMatcapPower = effect.Parameters["MatcapPower"];
-        var pMatcapBlendMode = effect.Parameters["MatcapBlendMode"];
+        EffectConfig effectConfig = new(effect);
 
-        var query =
+        var aspects =
             from a in Registry<Aspect>.Registered
             where a.EffectPass == pass && a.RenderPass == renderPass
             where a.CheckValid()
             select a;
 
-        foreach(var aspect in query)
+        foreach(var aspect in aspects)
         {
-            pViewMatrix?.SetValue(ViewMatrix);
-            pProjectionMatrix?.SetValue(ProjectionMatrix);
-            pInverseViewMatrix?.SetValue(Matrix.Invert(ViewMatrix));
-            pViewDir?.SetValue(Camera.Forward);
-            pWorldSpaceCameraPos?.SetValue(Camera.Transform.WorldPosition);
+            effectConfig.ViewMatrix?.SetValue(ViewMatrix);
+            effectConfig.ProjectionMatrix?.SetValue(ProjectionMatrix);
+            effectConfig.InverseViewMatrix?.SetValue(Matrix.Invert(ViewMatrix));
+            effectConfig.ViewDir?.SetValue(Camera.Forward);
+            effectConfig.WorldSpaceCameraPos?.SetValue(Camera.Transform.WorldPosition);
 
             Vector2 vertexSnapRes = Vector2.Floor(Window.ClientBounds.Size.ToVector2() / ResolutionScale / 2);
-            pScreenResolution?.SetValue(vertexSnapRes);
+            effectConfig.ScreenResolution?.SetValue(vertexSnapRes);
 
             if(aspect.Material.MainTexturePath is not null)
             {
                 if(!_textureCache.TryGetValue(aspect.Material.MainTexturePath, out var tex))
                 {
                     _texturesToLoad.Add(aspect.Material.MainTexturePath);
-                    pMainTex?.SetValue(WhiteTexture);
+                    effectConfig.MainTex?.SetValue(WhiteTexture);
                 }
                 else
-                    pMainTex?.SetValue(tex);
+                    effectConfig.MainTex?.SetValue(tex);
             }
             else
-                pMainTex?.SetValue(WhiteTexture);
+                effectConfig.MainTex?.SetValue(WhiteTexture);
 
-            pVertexColorIntensity?.SetValue(aspect.Material.VertexColorIntensity);
-            pVertexColorBlendMode?.SetValue((int)aspect.Material.VertexColorBlendMode);
+            effectConfig.VertexColorIntensity?.SetValue(aspect.Material.VertexColorIntensity);
+            effectConfig.VertexColorBlendMode?.SetValue((int)aspect.Material.VertexColorBlendMode);
 
             if(aspect.Material.MatcapOptions is not null)
             {
@@ -384,43 +368,74 @@ public static class RenderPipeline
                     if(!_matcapTextureCache.TryGetValue(aspect.Material.MatcapOptions.TexturePath, out var matcap))
                     {
                         _matcapTexturesToLoad.Add(aspect.Material.MatcapOptions.TexturePath);
-                        pMatcapTex?.SetValue(WhiteTexture);
+                        effectConfig.MatcapTex?.SetValue(WhiteTexture);
                     }
                     else
-                        pMatcapTex?.SetValue(matcap);
+                        effectConfig.MatcapTex?.SetValue(matcap);
                 }
                 else
-                    pMatcapTex?.SetValue(WhiteTexture);
+                    effectConfig.MatcapTex?.SetValue(WhiteTexture);
 
-                pMatcapIntensity?.SetValue(aspect.Material.MatcapOptions.Intensity);
-                pMatcapPower?.SetValue(aspect.Material.MatcapOptions.Power);
-                pMatcapBlendMode?.SetValue((int)aspect.Material.MatcapOptions.BlendMode);
+                effectConfig.MatcapIntensity?.SetValue(aspect.Material.MatcapOptions.Intensity);
+                effectConfig.MatcapPower?.SetValue(aspect.Material.MatcapOptions.Power);
+                effectConfig.MatcapBlendMode?.SetValue((int)aspect.Material.MatcapOptions.BlendMode);
             }
             else
             {
-                pMatcapTex?.SetValue(WhiteTexture);
-                pMatcapIntensity?.SetValue(0);
-                pMatcapBlendMode?.SetValue(0);
+                effectConfig.MatcapTex?.SetValue(WhiteTexture);
+                effectConfig.MatcapIntensity?.SetValue(0);
+                effectConfig.MatcapBlendMode?.SetValue(0);
             }
 
             if(aspect.Material.SurfaceOptions is not null)
             {
-                pShininess?.SetValue(aspect.Material.SurfaceOptions.Shininess);
-                pMetallic?.SetValue(aspect.Material.SurfaceOptions.Metallic);
+                effectConfig.Shininess?.SetValue(aspect.Material.SurfaceOptions.Shininess);
+                effectConfig.Metallic?.SetValue(aspect.Material.SurfaceOptions.Metallic);
             }
             else
             {
-                pShininess?.SetValue(0.5f);
-                pMetallic?.SetValue(0);
+                effectConfig.Shininess?.SetValue(0.5f);
+                effectConfig.Metallic?.SetValue(0);
             }
 
-            aspect.Draw(GraphicsDevice, effect, t => {
-                pWorldMatrix?.SetValue(t);
-                pInverseWorldMatrix?.SetValue(Matrix.Invert(t));
-            });
+            aspect.Draw(GraphicsDevice, effectConfig);
+
+            ResetGraphicsDevice();
         }
 
-        ResetGraphicsDevice();
+        var renderers =
+            from r in Registry<Renderer>.Registered
+            where r.Enabled && r.EffectPass == pass && r.RenderPass == renderPass
+            select r;
+
+        foreach(var renderer in renderers)
+        {
+            effectConfig.ViewMatrix?.SetValue(ViewMatrix);
+            effectConfig.ProjectionMatrix?.SetValue(ProjectionMatrix);
+            effectConfig.InverseViewMatrix?.SetValue(Matrix.Invert(ViewMatrix));
+            effectConfig.ViewDir?.SetValue(Camera.Forward);
+            effectConfig.WorldSpaceCameraPos?.SetValue(Camera.Transform.WorldPosition);
+
+            Vector2 vertexSnapRes = Vector2.Floor(Window.ClientBounds.Size.ToVector2() / ResolutionScale / 2);
+            effectConfig.ScreenResolution?.SetValue(vertexSnapRes);
+
+            if(renderer.MainTexturePath is not null)
+            {
+                if(!_textureCache.TryGetValue(renderer.MainTexturePath, out var tex))
+                {
+                    _texturesToLoad.Add(renderer.MainTexturePath);
+                    effectConfig.MainTex?.SetValue(WhiteTexture);
+                }
+                else
+                    effectConfig.MainTex?.SetValue(tex);
+            }
+            else
+                effectConfig.MainTex?.SetValue(WhiteTexture);
+
+            renderer.Draw(GraphicsDevice, effectConfig);
+
+            ResetGraphicsDevice();
+        }
     }
 
     public static void OnWindowResize(Rectangle windowBounds)

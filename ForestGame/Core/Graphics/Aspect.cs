@@ -1,3 +1,4 @@
+using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
 namespace ForestGame.Core.Graphics;
@@ -22,14 +23,13 @@ public abstract class Aspect
         _toDraw.Clear();
     }
 
-    public void Draw(GraphicsDevice graphicsDevice, Effect effect, Action<Transform> setWorldCallback)
+    public void Draw(GraphicsDevice graphicsDevice, EffectConfig effectConfig)
     {
         foreach(var transform in _toDraw)
         {
-            // the callback is important because there isnt a
-            // consistent or easy way to do that for any given effect
-            setWorldCallback(transform);
-            Draw(transform, graphicsDevice, effect);
+            effectConfig.WorldMatrix?.SetValue(transform);
+            effectConfig.InverseWorldMatrix?.SetValue(Matrix.Invert(transform));
+            Draw(transform, graphicsDevice, effectConfig.Effect);
         }
         Clear();
     }
