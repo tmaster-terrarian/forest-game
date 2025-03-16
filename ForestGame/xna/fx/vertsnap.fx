@@ -59,7 +59,9 @@ VertexShaderOutput MainVS(in VertexShaderInput input)
 
 float4 MainPS(VertexShaderOutput input) : COLOR
 {
-    return float4(Posterize(Tonemap(pow(input.Color.rgb, 2.2) * tex2D(MainTexSampler, input.UV).rgb), 100), 1);
+    float4 texSample = tex2D(MainTexSampler, input.UV);
+    clip(texSample.a - 0.3f);
+    return float4(pow(input.Color.rgb, 2.2) * texSample.rgb, 1);
 }
 
 technique BasicColorDrawing

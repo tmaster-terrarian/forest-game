@@ -8,6 +8,7 @@ public class Material
     public Matcap? MatcapOptions { get; set; }
     public Surface SurfaceOptions { get; set; } = new();
     public float VertexColorIntensity { get; set; } = 1;
+    public BlendModes VertexColorBlendMode { get; set; } = BlendModes.Multiply;
 
     public class Matcap
     {

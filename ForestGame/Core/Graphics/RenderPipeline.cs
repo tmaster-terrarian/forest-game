@@ -123,7 +123,6 @@ public static class RenderPipeline
 
         _diffuse = ContentLoader.Load<Effect>("fx/default")!;
         _diffuse.Parameters["MainTex"]?.SetValue(WhiteTexture);
-        _diffuse.Parameters["LightIntensity"]?.SetValue(1);
 
         _screenEffect = ContentLoader.Load<Effect>("fx/sprite/screen")!;
         _screenScreenResolution = _screenEffect.Parameters["ScreenResolution"];
@@ -148,22 +147,13 @@ public static class RenderPipeline
 
     public static void Draw()
     {
-        GraphicsDevice.SamplerStates[0] = SamplerState.PointClamp;
-
-        GraphicsDevice.RasterizerState = new()
-        {
-            CullMode = CullMode.CullClockwiseFace
-        };
-
-        GraphicsDevice.DepthStencilState = DepthStencilState.Default;
-        GraphicsDevice.BlendState = BlendState.Opaque;
-
         ProjectionMatrix = Matrix.CreatePerspectiveFieldOfView(
             MathHelper.ToRadians(95),
             GraphicsDevice.Viewport.AspectRatio,
             0.01f, 25.0f
         );
 
+        ResetGraphicsDevice();
         GraphicsDevice.SetRenderTarget(_rtSky);
 
         ViewMatrix = Matrix.CreateLookAt(
@@ -174,29 +164,30 @@ public static class RenderPipeline
 
         _skyboxRenderer.Draw(Vector3.Zero, Quaternion.Identity);
 
+        ResetGraphicsDevice();
+        GraphicsDevice.SetRenderTarget(_rt);
+        GraphicsDevice.Clear(Color.Transparent);
+
         ViewMatrix = Matrix.CreateLookAt(
             Camera.Transform.WorldPosition,
             Camera.Transform.WorldPosition + Camera.Transform.Matrix.Forward,
             Vector3.UnitY
         );
 
-        GraphicsDevice.SetRenderTarget(_rt);
-        GraphicsDevice.Clear(Color.Transparent);
-
         _cube.Transform.Rotation = Quaternion.CreateFromAxisAngle(
             Vector3.UnitY,
             Time.Elapsed / 30f * MathHelper.Pi
         );
 
-        _diffuse.Parameters["ViewMatrix"]?.SetValue(ViewMatrix);
-        _diffuse.Parameters["ProjectionMatrix"]?.SetValue(ProjectionMatrix);
         _lit.Parameters["ViewMatrix"]?.SetValue(ViewMatrix);
+        _lit.Parameters["InverseViewMatrix"]?.SetValue(Matrix.Invert(ViewMatrix));
         _lit.Parameters["ProjectionMatrix"]?.SetValue(ProjectionMatrix);
+        _diffuse.Parameters["ViewMatrix"]?.SetValue(ViewMatrix);
+        _diffuse.Parameters["InverseViewMatrix"]?.SetValue(Matrix.Invert(ViewMatrix));
+        _diffuse.Parameters["ProjectionMatrix"]?.SetValue(ProjectionMatrix);
 
-        _cube.Draw(GraphicsDevice, Matrix.Identity, _diffuse);
-
-        // _gltfCube.Transform.Rotation *= Quaternion.CreateFromAxisAngle(Vector3.UnitZ, 0.01f);
-        // _gltfCube.Draw(GraphicsDevice, Matrix.Identity, _testEffect);
+        // _diffuse.Parameters["LightIntensity"]?.SetValue(1);
+        // _cube.Draw(GraphicsDevice, Matrix.Identity, _diffuse);
 
         DrawPass(_lit, EffectPass.Lit, RenderPass.World);
         DrawPass(_diffuse, EffectPass.BasicDiffuse, RenderPass.World);
@@ -204,6 +195,17 @@ public static class RenderPipeline
 
         GraphicsUtil.DrawGrid(GraphicsDevice, 16, 1, Color.White * 0.1f, Matrix.CreateTranslation(new(-8, -8, 0)) * Matrix.CreateRotationX(MathHelper.PiOver2));
 
+        GraphicsUtil.DrawText(
+            SpriteBatch,
+            "hi",
+            new Transform {
+                Position = new(3, 0, 3),
+                Rotation = Quaternion.CreateFromAxisAngle(Vector3.UnitY, 0)
+            },
+            Color.White
+        );
+
+        ResetGraphicsDevice();
         GraphicsDevice.SetRenderTarget(_rtUi);
         GraphicsDevice.Clear(Color.Transparent);
 
@@ -251,7 +253,7 @@ public static class RenderPipeline
             SpriteBatch.End();
         }
 
-        GraphicsDevice.Reset();
+        ResetGraphicsDevice();
         GraphicsDevice.BlendState = BlendState.AlphaBlend;
 
         DrawRt(_rtSky);
@@ -271,6 +273,20 @@ public static class RenderPipeline
         // }
         // SpriteBatch.End();
         DrawRt(_rtUi);
+    }
+
+    private static void ResetGraphicsDevice()
+    {
+        GraphicsDevice.Reset();
+        GraphicsDevice.SamplerStates[0] = SamplerState.PointClamp;
+
+        GraphicsDevice.RasterizerState = new()
+        {
+            CullMode = CullMode.CullClockwiseFace
+        };
+
+        GraphicsDevice.DepthStencilState = DepthStencilState.Default;
+        GraphicsDevice.BlendState = BlendState.Opaque;
     }
 
     private static void DrawRt(RenderTarget2D rt)
@@ -309,6 +325,7 @@ public static class RenderPipeline
         var pScreenResolution = effect.Parameters["ScreenResolution"];
         var pMainTex = effect.Parameters["MainTex"];
         var pVertexColorIntensity = effect.Parameters["VertexColorIntensity"];
+        var pVertexColorBlendMode = effect.Parameters["VertexColorBlendMode"];
         var pShininess = effect.Parameters["Shininess"];
         var pMetallic = effect.Parameters["Metallic"];
         var pMatcapTex = effect.Parameters["MatcapTex"];
@@ -347,6 +364,7 @@ public static class RenderPipeline
                 pMainTex?.SetValue(WhiteTexture);
 
             pVertexColorIntensity?.SetValue(aspect.Material.VertexColorIntensity);
+            pVertexColorBlendMode?.SetValue((int)aspect.Material.VertexColorBlendMode);
 
             if(aspect.Material.MatcapOptions is not null)
             {

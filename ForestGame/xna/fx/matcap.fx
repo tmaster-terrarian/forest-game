@@ -39,6 +39,7 @@ float VertexColorIntensity;
 float MatcapIntensity;
 float MatcapPower;
 int MatcapBlendMode;
+int VertexColorBlendMode;
 float3 WorldSpaceCameraPos;
 float2 ScreenResolution;
 Texture2D MatcapTex;
@@ -134,7 +135,9 @@ float4 MainPS(VertexShaderOutput input) : COLOR
     float3 matcapAdjusted = pow(lerp(0, matcapColor, MatcapIntensity), MatcapPower);
 
     float3 vertColor = lerp(float3(1,1,1), input.Color.rgb, VertexColorIntensity);
-    float3 albedo = pow(vertColor, 2.2) * tex2D(MainTexSampler, input.UV).rgb;
+    float4 texSample = tex2D(MainTexSampler, input.UV);
+    float3 vertColorGamma = pow(vertColor, 2.2);
+    float3 albedo = lerp(vertColorGamma + texSample.rgb, vertColorGamma * texSample.rgb, VertexColorBlendMode);
 
     float3 lightDir = float3(-1, -1, -1);
 	float directionalLight = lightColor * max(0.1, smoothstep(-0.3, -0.1, dot(wn.xyz, -normalize(lightDir) * 2)));

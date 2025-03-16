@@ -24,7 +24,8 @@ matrix ProjectionMatrix;
 float2 ScreenResolution;
 float LightIntensity;
 float VertexColorIntensity;
-Texture2D MainTex;
+int VertexColorBlendMode;
+Texture2D MainTex : register(t0);
 sampler2D MainTexSampler = sampler_state
 {
     Texture = <MainTex>;
@@ -71,14 +72,17 @@ float4 MainPS(VertexShaderOutput input) : COLOR
     float3 ambient = lerp(ambientColor * 0.4, ambientColor, (wn.y + 1)/2);
 
     float3 vertColor = lerp(float3(1,1,1), input.Color.rgb, VertexColorIntensity);
-    float3 albedo = pow(vertColor, 2.2) * tex2D(MainTexSampler, input.UV).rgb;
+    float4 texSample = tex2D(MainTexSampler, input.UV);
+    clip(texSample.a - 0.3f);
+    float3 vertColorGamma = pow(vertColor, 2.2);
+    float3 albedo = lerp(vertColorGamma + texSample.rgb, vertColorGamma * texSample.rgb, VertexColorBlendMode);
 
     float3 lightDir = float3(-1, -1, -1);
 	float directionalLight = lightColor * max(0.1, smoothstep(-0.3, -0.1, dot(wn.xyz, -normalize(lightDir) * 2)));
 
 	float3 finalColor = albedo * lerp(1, directionalLight + ambient, LightIntensity);
 
-    return float4(Posterize(Tonemap(finalColor), 100), 1);
+    return float4(finalColor, 1);
 }
 
 technique BasicColorDrawing

@@ -23,6 +23,8 @@ public static class GraphicsUtil
 
         _vertSnapEffect.Parameters["ScreenResolution"]?.SetValue(vertexSnapRes);
         _vertSnapEffect.Parameters["MainTex"]?.SetValue(RenderPipeline.WhiteTexture);
+
+        _font = ContentLoader.Load<SpriteFont>("fonts/default")!;
     }
 
     public static void DrawGrid(GraphicsDevice graphicsDevice, int gridSize, float cellSize, Color color, Matrix world)
@@ -63,6 +65,28 @@ public static class GraphicsUtil
         }
 
         graphicsDevice.BlendState = BlendState.Opaque;
+    }
+
+    public static void DrawText(SpriteBatch spriteBatch, string text, Matrix world, Color color, Effect? effect = null)
+    {
+        Matrix matrix = Matrix.Invert(Matrix.CreateWorld(Vector3.Zero, -Vector3.UnitZ, -Vector3.UnitY)) * world * RenderPipeline.ViewMatrix * RenderPipeline.ProjectionMatrix * Matrix.Invert(GetDefaultSpriteProjection());
+        spriteBatch.Begin(samplerState: SamplerState.PointClamp, depthStencilState: DepthStencilState.DepthRead, rasterizerState: RasterizerState.CullNone, transformMatrix: effect is null ? matrix : null, effect: effect);
+        {
+            spriteBatch.DrawString(_font, text, new Vector2(0, -_font.MeasureString(text).Y), color, 0, Vector2.Zero, 1, SpriteEffects.None, 0);
+        }
+
+        if(effect is not null)
+        {
+            var fixWorld = Matrix.Invert(Matrix.CreateWorld(Vector3.Zero, -Vector3.UnitZ, -Vector3.UnitY)) * world;
+            effect.Parameters["WorldMatrix"]?.SetValue(fixWorld);
+            effect.Parameters["InverseWorldMatrix"]?.SetValue(Matrix.Invert(fixWorld));
+
+            effect.Parameters["VertexColorIntensity"]?.SetValue(1);
+            effect.Parameters["VertexColorBlendMode"]?.SetValue((int)Material.BlendModes.Additive);
+            effect.Parameters["LightIntensity"]?.SetValue(0);
+        }
+
+        spriteBatch.End();
     }
 
     public static void DrawQuad(GraphicsDevice graphicsDevice, Texture2D texture, Color color, Matrix worldMatrix, Effect effect, float width, float height, Vector2 pixelTopLeft, Vector2 pixelBottomRight)
@@ -205,5 +229,17 @@ public static class GraphicsUtil
         }
 
         graphicsDevice.BlendState = BlendState.Opaque;
+    }
+
+    public static Matrix GetDefaultSpriteProjection()
+    {
+        Matrix.CreateOrthographicOffCenter(0f, RenderPipeline.GraphicsDevice.Viewport.Width, RenderPipeline.GraphicsDevice.Viewport.Height, 0f, 0f, -1f, out var projection);
+        if (RenderPipeline.GraphicsDevice.UseHalfPixelOffset)
+        {
+            projection.M41 += -0.5f * projection.M11;
+            projection.M42 += -0.5f * projection.M22;
+        }
+
+        return projection;
     }
 }
