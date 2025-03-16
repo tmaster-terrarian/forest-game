@@ -193,8 +193,6 @@ public static class RenderPipeline
         _lit.Parameters["ViewMatrix"]?.SetValue(ViewMatrix);
         _lit.Parameters["ProjectionMatrix"]?.SetValue(ProjectionMatrix);
 
-        Camera.Draw(GraphicsDevice);
-
         _cube.Draw(GraphicsDevice, Matrix.Identity, _diffuse);
 
         // _gltfCube.Transform.Rotation *= Quaternion.CreateFromAxisAngle(Vector3.UnitZ, 0.01f);
