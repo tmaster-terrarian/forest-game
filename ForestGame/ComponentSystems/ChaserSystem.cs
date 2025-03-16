@@ -13,7 +13,7 @@ public class ChaserSystem : ISystem
         EcsManager.world.Query(
             new QueryDescription()
                 .WithAll<Chaser, Transform>()
-                .WithAny<Transform, Motor>(),
+                .WithAny<Motor>(),
             (Entity entity, ref Chaser chaser, ref Transform transform) =>
         {
             if (!chaser.Target.IsAlive()) return;
