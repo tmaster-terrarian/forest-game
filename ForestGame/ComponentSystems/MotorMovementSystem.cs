@@ -11,16 +11,14 @@ public class MotorMovementSystem : ISystem
     {
         EcsManager.world.Query(new QueryDescription().WithAll<Actor, Motor, Transform>(), (ref Actor actor, ref Motor motor, ref Transform transform) =>
         {
-            var planarVel = MathUtil.ProjectOnPlane(actor.Velocity, transform.Matrix.Up);
-            var verticalVel = MathUtil.Project(actor.Velocity, transform.Matrix.Up);
-
-            var targetVel = Vector3.Zero;
+            var vel = actor.Velocity;
+            var targetVelocity = vel;
             if (motor.MovementDirection != Vector3.Zero)
-                targetVel = Vector3.Normalize(motor.MovementDirection) * motor.MaxSpeed;
+                targetVelocity = Vector3.Normalize(motor.MovementDirection) * motor.MaxSpeed;
 
-            planarVel = MathUtil.ExpDecay(planarVel, targetVel, 12, Time.Delta);
+            vel = MathUtil.ExpDecay(vel, targetVelocity, 12, Time.Delta);
 
-            actor.Velocity = planarVel + verticalVel;
+            actor.Velocity = vel;
         });
     }
 }

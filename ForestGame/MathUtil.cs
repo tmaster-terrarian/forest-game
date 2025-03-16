@@ -39,6 +39,17 @@ public static class MathUtil
         return value;
     }
 
+    public static Vector3 Approach(Vector3 value, Vector3 target, float rate)
+    {
+        if (value == target)
+            return target;
+        Vector3 direction = Vector3.Normalize(target - value);
+        Vector3 moveAmount = direction * rate;
+        if (Vector3.DistanceSquared(value, value + moveAmount) > Vector3.DistanceSquared(value, target))
+            return target;
+        return value + moveAmount;
+    }
+
     public static float ApproachNotExceeding(float value, float target, float rate)
     {
         if(Math.Abs(value) < Math.Abs(target))

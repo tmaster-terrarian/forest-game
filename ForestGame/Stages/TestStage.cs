@@ -34,6 +34,21 @@ public class TestStage : Stage
 
         for(int i = 0; i < 30; i++)
         {
+            var entity = Registry<Prototype>.Get(Registries.Prototypes.Ufo).Construct().Entity;
+            var randomPos = MathUtil.RandomVector3(new Vector3(-100, 0, -100), new Vector3(100, 10, 100)) +
+                            Vector3.UnitY * 5;
+            entity.Set<Transform>(new() {
+                Position = randomPos,
+                Scale = MathUtil.SquashScale(MathUtil.RandomRange(0.8f, 1.5f)) * MathUtil.RandomRange(3f, 5f),
+                Rotation = Quaternion.CreateFromAxisAngle(Vector3.UnitY, MathUtil.RandomRange(-MathHelper.Pi, MathHelper.Pi))
+            });
+
+            // entity.Add<Components.Bouncy>(new(Random.Shared.NextSingle()));
+            // entity.Remove<Components.Bouncy>();
+        }
+
+        for(int i = 0; i < 30; i++)
+        {
             var entity = Registry<Prototype>.Get(Registries.Prototypes.StreetLamp).Construct().Entity;
             var randomPos = MathUtil.RandomInsideUnitSphere() * 80;
             randomPos.Y = MathF.Abs(randomPos.Y) * 0;

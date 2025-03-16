@@ -17,6 +17,9 @@ public static class ComponentSystems
     public const string WorldLooping = "world_looping";
     public const string Chaser = "chaser";
     public const string Billboard = "billboard";
+    public const string RandomPather = "random_pather";
+    public const string PatherMovement = "pather_movement";
+    public const string Friction = "friction";
 
     internal static void Initialize()
     {
@@ -25,9 +28,12 @@ public static class ComponentSystems
         Registry.Register<ISystem>(ColliderSync, new ColliderSyncSystem());
         Registry.Register<ISystem>(Player, new PlayerSystem());
         Registry.Register<ISystem>(Chaser, new ChaserSystem());
+        Registry.Register<ISystem>(RandomPather, new RandomPatherSystem());
+        Registry.Register<ISystem>(PatherMovement, new PatherMovementSystem());
         Registry.Register<ISystem>(MotorMovement, new MotorMovementSystem());
         Registry.Register<ISystem>(ActorSolidCollision, new ActorSolidCollisionSystem());
         Registry.Register<ISystem>(ActorDeCollision, new ActorDeCollisionSystem());
+        Registry.Register<ISystem>(Friction, new FrictionSystem());
         Registry.Register<ISystem>(Actor, new ActorSystem());
         Registry.Register<ISystem>(ModelGraphics, new ModelGraphicsSystem());
         Registry.Register<ISystem>(ManipulatorTarget, new ManipulatorTargetSystem());

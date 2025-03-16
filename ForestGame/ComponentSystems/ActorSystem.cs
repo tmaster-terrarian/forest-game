@@ -58,9 +58,13 @@ public class ActorSystem : ISystem
 
             actor.Collisions = [];
 
-            if (transform.Position.Y <= 0 && actor.Velocity.Y <= 0)
+            float checkBottom = transform.Position.Y;
+            if (entity.TryGet(out Collider collider))
+                checkBottom = collider.BoundingBox(transform.Scale).Min.Y;
+            float diffBottom = transform.Position.Y - checkBottom;
+            if (checkBottom <= 0 && actor.Velocity.Y <= 0)
             {
-                transform.Position = transform.Position with { Y = 0 };
+                transform.Position = transform.Position with { Y = diffBottom };
                 actor.Collisions = [..actor.Collisions, new CollisionInfo(Vector3.UnitY)];
             }
         });

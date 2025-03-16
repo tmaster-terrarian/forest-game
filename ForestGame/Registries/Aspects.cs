@@ -9,6 +9,7 @@ public static class Aspects
     public const string StreetLamp = "street_lamp";
     public const string BoundingBox = "bounding_box";
     public const string Icosphere = "sphere";
+    public const string Ufo = "ufo";
 
     public static void Initialize()
     {
@@ -60,6 +61,21 @@ public static class Aspects
             },
             EffectPass = RenderPipeline.EffectPass.MatcapOnly,
             RenderPass = RenderPipeline.RenderPass.World,
+        });
+
+        Registry.Register<Aspect>(Ufo, new ModelAspect() {
+            ModelPath = "models/ufo/ufo.glb",
+            Material = {
+                VertexColorIntensity = 1,
+                MatcapOptions = new() {
+                    TexturePath = "matcaps/Matcap_Metal_04.jpeg",
+                    Intensity = 1,
+                    Power = 2,
+                    BlendMode = Material.BlendModes.Multiply,
+                },
+            },
+            EffectPass = RenderPipeline.EffectPass.Lit,
+            RenderPass = RenderPipeline.RenderPass.World
         });
     }
 }
