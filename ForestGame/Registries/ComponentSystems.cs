@@ -16,9 +16,11 @@ public static class ComponentSystems
     public const string ColliderSync = "collider_sync";
     public const string WorldLooping = "world_looping";
     public const string Chaser = "chaser";
+    public const string Billboard = "billboard";
 
     internal static void Initialize()
     {
+        Registry.Register<ISystem>(Billboard, new BillboardSystem());
         Registry.Register<ISystem>(WorldLooping, new WorldLoopingSystem());
         Registry.Register<ISystem>(ColliderSync, new ColliderSyncSystem());
         Registry.Register<ISystem>(Player, new PlayerSystem());
