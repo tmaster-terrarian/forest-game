@@ -138,7 +138,9 @@ float4 MainPS(VertexShaderOutput input) : COLOR
     float3 lightDir = float3(-1, -1, -1);
 
     float3 vertColor = lerp(float3(1,1,1), input.Color.rgb, VertexColorIntensity);
-    float3 albedo = pow(vertColor, 2.2) * tex2D(MainTexSampler, input.UV).rgb;
+    float4 texSample = tex2D(MainTexSampler, input.UV);
+    clip(texSample.a - 0.3f);
+    float3 albedo = pow(vertColor, 2.2) * texSample.rgb;
 
     float fresnel = pow(saturate(dot(wn.xyz, viewDir)), 4) * 0.5;
     float3 directionalLight = lightColor * max(0.1, smoothstep(-0.3, -0.1, dot(wn.xyz, -normalize(lightDir) * 2)));
