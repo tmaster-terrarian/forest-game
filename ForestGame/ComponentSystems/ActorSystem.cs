@@ -14,7 +14,7 @@ public class ActorSystem : ISystem
         {
             if (actor.HasGravity)
             {
-                actor.Velocity += new Vector3(0, -9.81f, 0) * Time.Delta;
+                actor.Velocity += new Vector3(0, -9.81f * 2f, 0) * Time.Delta;
             }
 
             if (!entity.Has<Motor>())

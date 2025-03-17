@@ -10,36 +10,35 @@ namespace ForestGame.ComponentSystems;
 
 public class PlayerSystem : ISystem
 {
-    private Point _lastMousePos;
-
-    private float _sensitivity = 0.5f;
+    private const float Sensitivity = 0.5f;
 
     public void Update()
     {
         var camera = RenderPipeline.Camera;
         bool primaryPlayer = true;
 
-        EcsManager.world.Query(new QueryDescription().WithAll<PlayerControlled, Motor>(),
-            (Entity entity, ref PlayerControlled controller, ref Motor motor) =>
+        EcsManager.world.Query(new QueryDescription().WithAll<PlayerControlled, Motor, Actor>(),
+            (Entity entity, ref PlayerControlled controller, ref Motor motor, ref Actor actor) =>
             {
                 Vector3 inputDir = Vector3.Zero;
+                Point lastMousePos = controller.LastMousePos;
 
                 if(Global.GameWindowFocused)
                 {
                     if(primaryPlayer)
                     {
                         camera.Target = entity.Reference();
-                        if(!Input.InputDisabled && Input.MousePosition != _lastMousePos)
+                        if(!Input.InputDisabled && Input.MousePosition != lastMousePos)
                         {
-                            var difference = Input.MousePosition - _lastMousePos;
-                            motor.Yaw -= difference.X * (1f/144f) * _sensitivity;
-                            motor.Pitch -= difference.Y * (1f/144f) * _sensitivity;
+                            var difference = Input.MousePosition - lastMousePos;
+                            motor.Yaw -= difference.X * (1f/144f) * Sensitivity;
+                            motor.Pitch -= difference.Y * (1f/144f) * Sensitivity;
                             camera.Yaw = motor.Yaw;
                             camera.Pitch = motor.Pitch;
                             camera.Pitch = MathHelper.Clamp(camera.Pitch, -MathHelper.ToRadians(89.99f), MathHelper.ToRadians(89.99f));
                             camera.Transform.Rotation = Quaternion.CreateFromYawPitchRoll(camera.Yaw, camera.Pitch, 0);
-                            _lastMousePos = new(RenderPipeline.Window.ClientBounds.Width / 2, RenderPipeline.Window.ClientBounds.Height / 2);
-                            Mouse.SetPosition(_lastMousePos.X, _lastMousePos.Y);
+                            lastMousePos = new(RenderPipeline.Window.ClientBounds.Width / 2, RenderPipeline.Window.ClientBounds.Height / 2);
+                            Mouse.SetPosition(lastMousePos.X, lastMousePos.Y);
                         }
                     }
 
@@ -64,6 +63,8 @@ public class PlayerSystem : ISystem
                 // }
 
                 motor.MovementDirection = Vector3.Transform(inputDir, Quaternion.CreateFromYawPitchRoll(camera.Yaw, 0, 0));
+                if (!actor.IsGrounded) motor.MovementDirection = Vector3.Zero;a
+                controller.LastMousePos = lastMousePos;
 
                 primaryPlayer = false;
             }

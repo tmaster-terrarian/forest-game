@@ -12,7 +12,7 @@ public class FrictionSystem : ISystem
         EcsManager.world.Query(new QueryDescription().WithAll<Actor>(), (ref Actor actor) =>
         {
             // Air Friction
-            actor.Velocity = MathUtil.Approach(actor.Velocity, Vector3.Zero, 2f * Time.Delta);
+            actor.Velocity = MathUtil.ExpDecay(actor.Velocity, Vector3.Zero, 0.5f, Time.Delta);
 
             // Ground Checking
             actor.IsGrounded = false;
@@ -24,7 +24,7 @@ public class FrictionSystem : ISystem
             {
                 Vector3 planarVel = MathUtil.ProjectOnPlane(actor.Velocity, Vector3.UnitY);
                 Vector3 verticalVel = MathUtil.Project(actor.Velocity, Vector3.UnitY);
-                planarVel = MathUtil.Approach(planarVel, Vector3.Zero, 6f * Time.Delta);
+                planarVel = MathUtil.ExpDecay(planarVel, Vector3.Zero, 6f, Time.Delta);
                 actor.Velocity = planarVel + verticalVel;
             }
         });

@@ -58,6 +58,12 @@ internal class Game1 : Game
         if (Input.GetPressed(Buttons.Back) || Input.GetPressed(Keys.Escape))
             Exit();
 
+        if (Input.GetPressed(Keys.Tab))
+        {
+            Internals.Cleanup();
+            StageManager.Load(Registries.Stages.Test);
+        }
+
         Internals.Update();
 
         base.Update(gameTime);
