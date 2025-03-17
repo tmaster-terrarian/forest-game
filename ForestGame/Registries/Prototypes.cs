@@ -9,6 +9,7 @@ public static class Prototypes
     public const string Teapot = "teapot";
     public const string StreetLamp = "street_lamp";
     public const string Ufo = "ufo";
+    public const string Portal = "portal";
 
     public static void Initialize()
     {
@@ -52,6 +53,15 @@ public static class Prototypes
                 new Components.RandomPather { Range = new Vector3(5, 2, 5) },
                 new Components.Motor { MaxSpeed = 50f },
                 new Components.Pather(),
+            },
+        });
+
+        Registry.Register<Prototype>(Portal, new() {
+            Components = {
+                Transform.Identity,
+                new Components.Solid(),
+                new Collider(Vector3.Zero, new Vector3(6.37f, 6.16f, 0.62f), Vector3.UnitY * 3f),
+                new Components.AspectIdentity(Aspects.Portal),
             },
         });
     }

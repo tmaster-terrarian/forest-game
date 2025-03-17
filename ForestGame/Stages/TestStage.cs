@@ -58,6 +58,11 @@ public class TestStage : Stage
             });
         }
 
+        var portal = Registry<Prototype>.Get(Registries.Prototypes.Portal).Construct().Entity;
+        portal.Set<Transform>(new() {
+            Position = new Vector3(0, 0, 10),a
+        });
+
         // EcsManager.world.Create(
         //     new Solid(),
         //     new Collider(new(-3.5f, 0.5f, -3.5f), Vector3.One, Vector3.Zero)
