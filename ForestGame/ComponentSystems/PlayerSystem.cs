@@ -63,7 +63,7 @@ public class PlayerSystem : ISystem
                 // }
 
                 motor.MovementDirection = Vector3.Transform(inputDir, Quaternion.CreateFromYawPitchRoll(camera.Yaw, 0, 0));
-                if (!actor.IsGrounded) motor.MovementDirection = Vector3.Zero;a
+                if (!actor.IsGrounded) motor.MovementDirection = Vector3.Zero;
                 controller.LastMousePos = lastMousePos;
 
                 primaryPlayer = false;
