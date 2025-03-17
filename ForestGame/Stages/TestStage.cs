@@ -60,7 +60,7 @@ public class TestStage : Stage
 
         var portal = Registry<Prototype>.Get(Registries.Prototypes.Portal).Construct().Entity;
         portal.Set<Transform>(new() {
-            Position = new Vector3(0, 0, 10),a
+            Position = new Vector3(0, 0, 10),
         });
 
         // EcsManager.world.Create(
