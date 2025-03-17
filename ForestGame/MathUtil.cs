@@ -92,6 +92,15 @@ public static class MathUtil
         );
     }
 
+    public static bool WillOvershoot(Vector3 current, Vector3 target, Vector3 velocity)
+    {
+        if (current == target)
+            return true;
+        if (Vector3.DistanceSquared(current, current + velocity) > Vector3.DistanceSquared(current, target))
+            return true;
+        return false;
+    }
+
     public static float Sqr(float value)
     {
         return value*value;

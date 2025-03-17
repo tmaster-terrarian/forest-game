@@ -11,13 +11,14 @@ public class RandomPatherSystem : ISystem
     {
         EcsManager.world.Query(
             new QueryDescription()
-                .WithAll<RandomPather, Pather, Transform>(),
-            (ref RandomPather randomMovement, ref Pather pather, ref Transform transform) =>
+                .WithAll<RandomPather, Pather, Transform, Actor>(),
+            (ref RandomPather randomPather, ref Pather pather, ref Transform transform, ref Actor actor) =>
             {
                 if (pather.LastPathTime == 0)
                     SetFirstRandomTime(ref pather);
                 bool patherUpdateIntervalPassed = pather.LastPathTime < Time.Elapsed - pather.PathUpdateInterval;
-                bool patherAtDestination = Vector3.Distance(transform.WorldPosition, pather.TargetPosition) < 1f;
+                bool patherAtDestination =
+                    MathUtil.WillOvershoot(transform.WorldPosition, pather.TargetPosition, actor.Velocity);
                 if (!patherAtDestination && !patherUpdateIntervalPassed)
                 {
                     return;
@@ -30,7 +31,8 @@ public class RandomPatherSystem : ISystem
 
                 if (patherUpdateIntervalPassed || pather.ForcePathUpdateOnDestinationReached)
                 {
-                    pather.TargetPosition = transform.WorldPosition + MathUtil.RandomInsideUnitSphere() * 5;
+                    pather.TargetPosition = transform.WorldPosition +
+                                            MathUtil.RandomVector3(-randomPather.Range, randomPather.Range);
                     SetNewPatherTime(ref pather);
                     pather.IsPathing = true;
                 }

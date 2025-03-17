@@ -49,8 +49,8 @@ public static class Prototypes
                 new Components.Actor() { HasGravity = false },
                 new Collider(Vector3.Zero, new Vector3(1.14f, 0.4f, 1.14f), Vector3.UnitY * (0.07f)),
                 new Components.AspectIdentity(Aspects.Ufo),
-                new Components.RandomPather(),
-                new Components.Motor() { MaxSpeed = 2f },
+                new Components.RandomPather { Range = new Vector3(5, 2, 5) },
+                new Components.Motor { MaxSpeed = 50f },
                 new Components.Pather(),
             },
         });
