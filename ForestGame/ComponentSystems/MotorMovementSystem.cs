@@ -14,6 +14,11 @@ public class MotorMovementSystem : ISystem
             var targetVelocity = Vector3.Zero;
             if (motor.MovementDirection != Vector3.Zero)
                 targetVelocity = Vector3.Normalize(motor.MovementDirection) * motor.MaxSpeed;
+            bool hasGravity = actor.HasGravity;
+            if (hasGravity && !actor.IsGrounded)
+            {
+                targetVelocity *= 0.1f;
+            }
 
             actor.Velocity += targetVelocity * Time.Delta * 6f;
         });
