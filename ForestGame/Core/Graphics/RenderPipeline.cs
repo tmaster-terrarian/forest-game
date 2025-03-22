@@ -10,6 +10,7 @@ public static class RenderPipeline
         BasicDiffuse,
         Lit,
         MatcapOnly,
+        VertSnapOnly,
     }
     public enum RenderPass
     {
@@ -191,6 +192,8 @@ public static class RenderPipeline
         _diffuse.Parameters["ViewMatrix"]?.SetValue(ViewMatrix);
         _diffuse.Parameters["InverseViewMatrix"]?.SetValue(Matrix.Invert(ViewMatrix));
         _diffuse.Parameters["ProjectionMatrix"]?.SetValue(ProjectionMatrix);
+        _vertsnapEffect.Parameters["ViewMatrix"]?.SetValue(ViewMatrix);
+        _vertsnapEffect.Parameters["ProjectionMatrix"]?.SetValue(ProjectionMatrix);
 
         // _diffuse.Parameters["LightIntensity"]?.SetValue(1);
         // _cube.Draw(GraphicsDevice, Matrix.Identity, _diffuse);
@@ -198,11 +201,10 @@ public static class RenderPipeline
         DrawPass(ref _lit, EffectPass.Lit, RenderPass.World);
         DrawPass(ref _diffuse, EffectPass.BasicDiffuse, RenderPass.World);
         DrawPass(ref _matCapOnly, EffectPass.MatcapOnly, RenderPass.World);
+        DrawPass(ref _vertsnapEffect, EffectPass.VertSnapOnly, RenderPass.World);
 
         GraphicsUtil.DrawGrid(GraphicsDevice, 16, 1, Color.White * 0.1f, Matrix.CreateTranslation(new(-8, -8, 0)) * Matrix.CreateRotationX(MathHelper.PiOver2));
 
-        _vertsnapEffect.Parameters["ViewMatrix"]?.SetValue(ViewMatrix);
-        _vertsnapEffect.Parameters["ProjectionMatrix"]?.SetValue(ProjectionMatrix);
         GraphicsUtil.DrawText(
             SpriteBatch,
             "hi",
@@ -251,6 +253,7 @@ public static class RenderPipeline
         DrawPass(ref _lit, EffectPass.Lit, RenderPass.Screen);
         DrawPass(ref _diffuse, EffectPass.BasicDiffuse, RenderPass.Screen);
         DrawPass(ref _matCapOnly, EffectPass.MatcapOnly, RenderPass.Screen);
+        DrawPass(ref _vertsnapEffect, EffectPass.VertSnapOnly, RenderPass.Screen);
 
         if(_cursorTex is not null && CursorVisible)
         {
@@ -410,9 +413,11 @@ public static class RenderPipeline
 
         foreach(var renderer in renderers)
         {
+            effectConfig.WorldMatrix?.SetValue(Matrix.Identity);
             effectConfig.ViewMatrix?.SetValue(ViewMatrix);
             effectConfig.ProjectionMatrix?.SetValue(ProjectionMatrix);
             effectConfig.InverseViewMatrix?.SetValue(Matrix.Invert(ViewMatrix));
+            effectConfig.InverseWorldMatrix?.SetValue(Matrix.Invert(Matrix.Identity));
             effectConfig.ViewDir?.SetValue(Camera.Forward);
             effectConfig.WorldSpaceCameraPos?.SetValue(Camera.Transform.WorldPosition);
 

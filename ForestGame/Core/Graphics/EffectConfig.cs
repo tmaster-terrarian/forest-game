@@ -21,4 +21,5 @@ public readonly record struct EffectConfig(Effect Effect)
     public readonly EffectParameter? MatcapIntensity { get; }      = Effect?.Parameters["MatcapIntensity"];
     public readonly EffectParameter? MatcapPower { get; }          = Effect?.Parameters["MatcapPower"];
     public readonly EffectParameter? MatcapBlendMode { get; }      = Effect?.Parameters["MatcapBlendMode"];
+    public readonly EffectParameter? LightIntensity { get; }       = Effect?.Parameters["LightIntensity"];
 }

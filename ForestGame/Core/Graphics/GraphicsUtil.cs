@@ -158,7 +158,7 @@ public static class GraphicsUtil
 
     public static void DrawVector(GraphicsDevice graphicsDevice, Vector3 origin, Vector3 direction, Color color, float length)
     {
-        DrawVector(graphicsDevice, origin, direction, color, length);
+        DrawVector(graphicsDevice, origin, direction, color, color, length);
     }
 
     public static void DrawGizmo(GraphicsDevice graphicsDevice, Vector3 origin, Matrix world)
