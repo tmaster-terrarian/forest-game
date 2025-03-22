@@ -107,7 +107,7 @@ public static class RenderPipeline
             Transform = new()
             {
                 Position = new Vector3(0, 0, 0),
-                Rotation = Quaternion.CreateFromYawPitchRoll(0, -MathHelper.PiOver4, 0)
+                Rotation = Quaternion.CreateFromYawPitchRoll(0, 0, 0)
             }
         };
 

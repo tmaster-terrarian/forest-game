@@ -55,8 +55,8 @@ internal class Game1 : Game
         Input.RefreshGamePadState();
         Input.UpdateTypingInput(gameTime);
 
-        if (Input.GetPressed(Buttons.Back) || Input.GetPressed(Keys.Escape))
-            Exit();
+        // if (Input.GetPressed(Buttons.Back) || Input.GetPressed(Keys.Escape))
+        //     Exit();
 
         if (Input.GetPressed(Keys.Tab))
         {
@@ -73,6 +73,8 @@ internal class Game1 : Game
     {
         Internals.Draw();
         base.Draw(gameTime);
+
+        Internals.PostDraw();
     }
 
     protected override void EndRun()

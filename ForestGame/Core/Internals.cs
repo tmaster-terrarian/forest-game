@@ -1,4 +1,6 @@
 using ForestGame.Core.Graphics;
+using ForestGame.Core.UI;
+using Microsoft.Xna.Framework.Input;
 
 namespace ForestGame.Core;
 
@@ -6,6 +8,7 @@ public static class Internals
 {
     internal static Game1 _game;
     internal static bool _focusClicked = false;
+    internal static bool _focusClickedChanged = false;
 
     private static bool _exited = false;
 
@@ -14,6 +17,8 @@ public static class Internals
         ContentLoader.Initialize(_game.Content, _game.GraphicsDevice);
 
         RenderPipeline.Initialize(_game.Window, _game.GraphicsDevice);
+
+        ImGuiManager.Initialize(_game);
 
         Locale.Configure(new() {
             RelativeDataPath = "data/lang",
@@ -24,8 +29,6 @@ public static class Internals
         EcsManager.Start();
 
         Registry.Initialize();
-
-        // StageManager.Initialize();
     }
 
     internal static void LoadContent()
@@ -35,18 +38,33 @@ public static class Internals
 
     internal static void Update()
     {
-        _game.IsMouseVisible = !Global.GameWindowFocused;
+        _focusClickedChanged = false;
 
         if(!_focusClicked)
         {
             bool disabled = Input.InputDisabled;
             Input.InputDisabled = false;
-            _focusClicked = Input.GetAnyPressed(InputType.Mouse);
+            bool value = Input.GetAnyPressed(InputType.Mouse) || ImGuiManager.Layout.Visible;
+            _focusClickedChanged = _focusClicked != value;
+            _focusClicked = value;
             Input.InputDisabled = disabled;
         }
 
-        if(!_game.IsActive)
+        if(!_game.IsActive || (Input.GetPressed(Keys.Escape) && !ImGuiManager.Layout.Visible))
+        {
+            if(_focusClickedChanged)
+                _focusClickedChanged = false;
             _focusClicked = false;
+        }
+
+        if(Input.GetPressed(Keys.F3))
+        {
+            ImGuiManager.Layout.Visible = !ImGuiManager.Layout.Visible;
+            Global.LockMouse = !ImGuiManager.Layout.Visible;
+            // Global.PlayerCanMove = !ImGuiManager.Layout.Visible;
+        }
+
+        _game.IsMouseVisible = (!Global.GameWindowFocused ^ !Global.LockMouse) || ImGuiManager.Layout.Visible;
 
         EcsManager.Update();
 
@@ -60,6 +78,11 @@ public static class Internals
         EcsManager.GetDrawables(RenderPipeline.GraphicsDevice);
 
         RenderPipeline.Draw();
+    }
+
+    internal static void PostDraw()
+    {
+        ImGuiManager.Draw();
     }
 
     internal static void Cleanup()

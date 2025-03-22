@@ -22,32 +22,43 @@ public class PlayerSystem : ISystem
             {
                 Vector3 inputDir = Vector3.Zero;
                 Point lastMousePos = controller.LastMousePos;
+                Point currentMousePos = Input.MousePosition;
 
                 if(Global.GameWindowFocused)
                 {
                     if(primaryPlayer)
                     {
                         camera.Target = entity.Reference();
-                        if(!Input.InputDisabled && Input.MousePosition != lastMousePos)
+                        if(Global.LockMouse && ((currentMousePos != lastMousePos && !Input.InputDisabled) || Internals._focusClickedChanged))
                         {
-                            var difference = Input.MousePosition - lastMousePos;
+                            var difference = Internals._focusClickedChanged ? Point.Zero : currentMousePos - lastMousePos;
                             motor.Yaw -= difference.X * (1f/144f) * Sensitivity;
                             motor.Pitch -= difference.Y * (1f/144f) * Sensitivity;
+                            motor.Pitch = MathHelper.Clamp(motor.Pitch, -MathHelper.ToRadians(89.99f), MathHelper.ToRadians(89f));
                             camera.Yaw = motor.Yaw;
                             camera.Pitch = motor.Pitch;
-                            camera.Pitch = MathHelper.Clamp(camera.Pitch, -MathHelper.ToRadians(89.99f), MathHelper.ToRadians(89.99f));
                             camera.Transform.Rotation = Quaternion.CreateFromYawPitchRoll(camera.Yaw, camera.Pitch, 0);
-                            lastMousePos = new(RenderPipeline.Window.ClientBounds.Width / 2, RenderPipeline.Window.ClientBounds.Height / 2);
-                            Mouse.SetPosition(lastMousePos.X, lastMousePos.Y);
+                            currentMousePos = new(RenderPipeline.Window.ClientBounds.Width / 2, RenderPipeline.Window.ClientBounds.Height / 2);
+                            Mouse.SetPosition(currentMousePos.X, currentMousePos.Y);
                         }
                     }
 
-                    inputDir = new(
-                        (Input.GetDown(Keys.D) ? 1 : 0) - (Input.GetDown(Keys.A) ? 1 : 0),
-                        0,
-                        (Input.GetDown(Keys.S) ? 1 : 0) - (Input.GetDown(Keys.W) ? 1 : 0)
-                    );
+                    if(Global.PlayerCanMove)
+                    {
+                        inputDir = new(
+                            (Input.GetDown(Keys.D) ? 1 : 0) - (Input.GetDown(Keys.A) ? 1 : 0),
+                            0,
+                            (Input.GetDown(Keys.S) ? 1 : 0) - (Input.GetDown(Keys.W) ? 1 : 0)
+                        );
+                    }
                 }
+
+                if(Input.InputDisabled && !Internals._focusClickedChanged)
+                {
+                    currentMousePos = new(RenderPipeline.Window.ClientBounds.Width / 2, RenderPipeline.Window.ClientBounds.Height / 2);
+                }
+
+                controller.LastMousePos = currentMousePos;
 
                 // if(inputDir != Vector3.Zero)
                 // {
@@ -64,8 +75,8 @@ public class PlayerSystem : ISystem
 
                 motor.MovementDirection = Vector3.Transform(inputDir, Quaternion.CreateFromYawPitchRoll(camera.Yaw, 0, 0));
                 bool hasBouncy = entity.Has<Bouncy>();
-                if (!actor.IsGrounded && !hasBouncy) motor.MovementDirection = Vector3.Zero;
-                controller.LastMousePos = lastMousePos;
+                if (!actor.IsGrounded && !hasBouncy)
+                    motor.MovementDirection = Vector3.Zero;
 
                 primaryPlayer = false;
             }
