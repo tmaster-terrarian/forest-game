@@ -21,7 +21,7 @@ public static class ImGuiManager
 
     public static class Layout
     {
-        public static bool Visible { get; set; }
+        public static bool Visible => Global.Editor;
 
         public static class Panels
         {

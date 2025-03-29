@@ -8,7 +8,7 @@ using Microsoft.Xna.Framework.Input;
 
 namespace ForestGame.ComponentSystems;
 
-public class PlayerSystem : ISystem
+public class PlayerSystem : ISystem, ISystem.EditorUpdate
 {
     private const float Sensitivity = 0.5f;
 
@@ -32,14 +32,18 @@ public class PlayerSystem : ISystem
                         if(Global.LockMouse && ((currentMousePos != lastMousePos && !Input.InputDisabled) || Internals._focusClickedChanged))
                         {
                             var difference = Internals._focusClickedChanged ? Point.Zero : currentMousePos - lastMousePos;
-                            motor.Yaw -= difference.X * (1f/144f) * Sensitivity;
-                            motor.Pitch -= difference.Y * (1f/144f) * Sensitivity;
-                            motor.Pitch = MathHelper.Clamp(motor.Pitch, -MathHelper.ToRadians(89.99f), MathHelper.ToRadians(89f));
-                            camera.Yaw = motor.Yaw;
-                            camera.Pitch = motor.Pitch;
+                            camera.Yaw -= difference.X * (1f/144f) * Sensitivity;
+                            camera.Pitch -= difference.Y * (1f/144f) * Sensitivity;
+                            camera.Pitch = MathHelper.Clamp(camera.Pitch, -MathHelper.ToRadians(89.99f), MathHelper.ToRadians(89f));
                             camera.Transform.Rotation = Quaternion.CreateFromYawPitchRoll(camera.Yaw, camera.Pitch, 0);
                             currentMousePos = new(RenderPipeline.Window.ClientBounds.Width / 2, RenderPipeline.Window.ClientBounds.Height / 2);
                             Mouse.SetPosition(currentMousePos.X, currentMousePos.Y);
+
+                            if(!Global.Editor)
+                            {
+                                motor.Yaw = camera.Yaw;
+                                motor.Pitch = camera.Pitch;
+                            }
                         }
                     }
 
@@ -73,10 +77,13 @@ public class PlayerSystem : ISystem
                 //     _localVelocity.Z = MathUtil.Approach(_localVelocity.Z, 0, 0.08f * Time.Delta);
                 // }
 
-                motor.MovementDirection = Vector3.Transform(inputDir, Quaternion.CreateFromYawPitchRoll(camera.Yaw, 0, 0));
-                bool hasBouncy = entity.Has<Bouncy>();
-                if (!actor.IsGrounded && !hasBouncy)
-                    motor.MovementDirection = Vector3.Zero;
+                if(!Global.Editor)
+                {
+                    motor.MovementDirection = Vector3.Transform(inputDir, Quaternion.CreateFromYawPitchRoll(camera.Yaw, 0, 0));
+                    bool hasBouncy = entity.Has<Bouncy>();
+                    if (!actor.IsGrounded && !hasBouncy)
+                        motor.MovementDirection = Vector3.Zero;
+                }
 
                 primaryPlayer = false;
             }

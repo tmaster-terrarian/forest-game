@@ -7,7 +7,7 @@ using Vector3 = System.Numerics.Vector3;
 
 namespace ForestGame.ComponentSystems;
 
-public class BillboardSystem : ISystem
+public class BillboardSystem : ISystem, ISystem.EditorUpdate
 {
     public void Update()
     {

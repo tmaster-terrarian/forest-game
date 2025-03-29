@@ -17,6 +17,9 @@ public static class EcsManager
     {
         foreach(var system in Registry<ISystem>.Registered)
         {
+            if(Global.Editor && system is not ISystem.EditorUpdate)
+                continue;
+
             system.Update();
         }
     }
@@ -25,7 +28,7 @@ public static class EcsManager
     {
         foreach(var system in Registry<ISystem>.Registered)
         {
-            if(system is IDrawableSystem drawableSystem)
+            if(system is ISystem.Drawable drawableSystem)
                 drawableSystem.GetDrawables(graphicsDevice);
         }
     }

@@ -1,3 +1,4 @@
+using Arch.Core;
 using ForestGame.Core.Graphics;
 using ForestGame.Core.UI;
 using Microsoft.Xna.Framework.Input;
@@ -39,32 +40,43 @@ public static class Internals
     internal static void Update()
     {
         _focusClickedChanged = false;
+        Global.EditorOpened = false;
+        Global.EditorClosed = false;
 
         if(!_focusClicked)
         {
             bool disabled = Input.InputDisabled;
             Input.InputDisabled = false;
-            bool value = Input.GetAnyPressed(InputType.Mouse) || ImGuiManager.Layout.Visible;
+            bool value = Input.GetAnyPressed(InputType.Mouse) || Global.Editor;
             _focusClickedChanged = _focusClicked != value;
             _focusClicked = value;
             Input.InputDisabled = disabled;
         }
 
-        if(!_game.IsActive || (Input.GetPressed(Keys.Escape) && !ImGuiManager.Layout.Visible))
+        if(!_game.IsActive || (Input.GetPressed(Keys.Escape) && !Global.Editor))
         {
             if(_focusClickedChanged)
                 _focusClickedChanged = false;
             _focusClicked = false;
         }
 
-        if(Input.GetPressed(Keys.F3))
+        if(Global.Editor)
         {
-            ImGuiManager.Layout.Visible = !ImGuiManager.Layout.Visible;
-            Global.LockMouse = !ImGuiManager.Layout.Visible;
-            // Global.PlayerCanMove = !ImGuiManager.Layout.Visible;
+            Global.LockMouse = Input.GetDown(MouseButtons.MiddleButton);
         }
 
-        _game.IsMouseVisible = (!Global.GameWindowFocused ^ !Global.LockMouse) || ImGuiManager.Layout.Visible;
+        if(Input.GetPressed(Keys.F3))
+        {
+            Global.Editor = !Global.Editor;
+            Global.LockMouse = !Global.Editor;
+
+            if(Global.Editor)
+                Global.EditorOpened = true;
+            else
+                Global.EditorClosed = true;
+        }
+
+        _game.IsMouseVisible = (!Global.GameWindowFocused ^ !Global.LockMouse) || (Global.Editor && !Global.LockMouse);
 
         EcsManager.Update();
 

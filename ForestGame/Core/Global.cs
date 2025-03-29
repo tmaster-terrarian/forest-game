@@ -11,4 +11,9 @@ public static class Global
     public static bool LockMouse { get; internal set; } = true;
 
     public static bool PlayerCanMove { get; internal set; } = true;
+
+    public static bool Editor { get; internal set; } = false;
+
+    public static bool EditorOpened { get; internal set; } = false;
+    public static bool EditorClosed { get; internal set; } = false;
 }

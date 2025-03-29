@@ -22,13 +22,8 @@ public class Camera
     public float Yaw { get; set; }
     public float Pitch { get; set; }
 
-    private float[][] floats = [
-        [0.0f, 0.3f, 0.7f, 0.7f, 0.3f],
-        [0.3f, 0.7f, 0.9f, 0.9f, 0.7f],
-        [0.7f, 0.9f, 1.0f, 1.0f, 0.9f],
-        [0.3f, 0.7f, 0.9f, 1.0f, 0.9f],
-        [0.0f, 0.3f, 0.7f, 0.9f, 0.7f]
-    ];
+    private Transform _freeCamTransform = Transform.Identity;
+    private Vector3 _freeCamVelocity;
 
     public void Update()
     {
@@ -52,6 +47,9 @@ public class Camera
         //     0
         // );
 
+        if(Global.Editor)
+            FreeCam();
+
         if(!Target.IsAlive())
             return;
 
@@ -72,5 +70,44 @@ public class Camera
         // Transform.Position = Transform.Position with { Y = 1.3f + height };
 
         Transform.Position = Transform.Position with { Y = 1.3f };
+    }
+
+    private void FreeCam()
+    {
+        if(Global.EditorOpened)
+        {
+            if(Target.IsAlive() && Target.Entity.TryGet<Transform>(out var transform))
+                _freeCamTransform.Position = transform.WorldPosition;
+        }
+
+        Target = EntityReference.Null;
+
+        Vector3 targetVel = Vector3.Zero;
+
+        Vector3 planar = new(
+            (Input.GetDown(Keys.D) ? 1 : 0) - (Input.GetDown(Keys.A) ? 1 : 0),
+            0,
+            (Input.GetDown(Keys.S) ? 1 : 0) - (Input.GetDown(Keys.W) ? 1 : 0)
+        );
+
+        if(planar != Vector3.Zero)
+        {
+            planar.Normalize();
+            planar = Vector3.Transform(planar, Quaternion.CreateFromYawPitchRoll(Yaw, 0, 0));
+            targetVel = planar;
+        }
+
+        Vector3 vertical = new(0, (Input.GetDown(Keys.Space) ? 1 : 0) - (Input.GetDown(Keys.LeftShift) ? 1 : 0), 0);
+        targetVel += vertical;
+
+        _freeCamVelocity = MathUtil.Approach(
+            _freeCamVelocity,
+            !Global.LockMouse ? Vector3.Zero : targetVel,
+            3 * Time.UnscaledDelta
+        );
+
+        _freeCamTransform.Position += _freeCamVelocity * 4 * Time.UnscaledDelta;
+
+        Transform.Parent = _freeCamTransform;
     }
 }
